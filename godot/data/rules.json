@@ -1,0 +1,159 @@
+{
+  "_note": "Constants from index.html (the frozen design reference). Build-stat formulas and shop rules live in game/run.gd.",
+  "arena": {
+    "w": 8192,
+    "h": 8192
+  },
+  "waves": {
+    "last": 20,
+    "len": {
+      "1": 30,
+      "2": 35,
+      "3": 40,
+      "4": 45,
+      "5": 50,
+      "6": 55
+    },
+    "len_default": 60
+  },
+  "shop": {
+    "offers": 4,
+    "tier_names": [
+      "",
+      "COMMON",
+      "RARE",
+      "EPIC",
+      "LEGENDARY"
+    ],
+    "_tier_weight": "t1 = 100; t2 = 8 + 6*wave; t3 = max(0, (wave-3)*5); t4 = max(0, (wave-6)*2.5)",
+    "t1": 100,
+    "t2_base": 8,
+    "t2_per_wave": 6,
+    "t3_from": 3,
+    "t3_per_wave": 5,
+    "t4_from": 6,
+    "t4_per_wave": 2.5,
+    "_price": "round(cost * (1 + 0.14*(wave-1)))",
+    "price_growth": 0.14,
+    "_reroll": "starts at 1 + ceil(0.8*wave); each reroll adds ceil(wave/2)",
+    "reroll_base": 1,
+    "reroll_wave": 0.8
+  },
+  "player": {
+    "r": 11,
+    "inv": 0.4,
+    "armor_k": 15,
+    "starting_hp": 30
+  },
+  "economy": {
+    "income_multiplier": 1.0,
+    "kill_scrap_falloff": 0.3,
+    "_kill_scrap_falloff": "scrap per cop kill x 1/(1 + falloff*(wave-1)); wave 10 pays 27%, wave 20 pays 15% per kill",
+    "drop_chance": 0.65,
+    "_drop_chance": "Brotato-style loot roll: a downed cop drops scrap with this chance (bosses always drop; civilians' cash and crates are separate). Modules add/subtract via the dropPct stat (clamped 5-100%). Each drop is worth 1/drop_chance, so income at the base chance matches the always-drop economy.",
+    "_note": "1.0 = the prototype's economy (every kill drop and cash pile pays in full). The heist campaign used 0.15 because heists paid big lump sums."
+  },
+  "parts": {
+    "_note": "Shop offers that swap the MAIN gun's ammo or frame. t = shop tier (same weights as items), c = base price (wave-scaled like items). A slot becomes a part offer with probability `chance` (at most one per shop). Swapping trades in a bought part for the sell refund; a starting part is worth nothing.",
+    "chance": 0.25,
+    "ammo": {
+      "laser": {
+        "t": 1,
+        "c": 16
+      },
+      "bullet": {
+        "t": 1,
+        "c": 18
+      },
+      "razor": {
+        "t": 2,
+        "c": 28
+      },
+      "hook": {
+        "t": 2,
+        "c": 34
+      }
+    },
+    "frames": {
+      "pistol": {
+        "t": 1,
+        "c": 14
+      },
+      "blunder": {
+        "t": 1,
+        "c": 22
+      },
+      "rifle": {
+        "t": 1,
+        "c": 20
+      },
+      "repeater": {
+        "t": 2,
+        "c": 30
+      }
+    }
+  },
+  "unlocks": [
+    {"part":"item", "id":"seeker_rack", "min_wave":5, "need":{"pickup_boss":"viper"}},
+    {"part":"item", "id":"zigzag", "min_wave":5, "need":{"pickup_boss":"viper", "rare":true}},
+    {"part":"item", "id":"iron_slam", "min_wave":5, "need":{"pickup_boss":"ironclad", "rare":true}},
+    {"part":"item", "id":"boots", "min_wave":5, "need":{"pickup_boss":"ironclad"}},
+    {"part":"item", "id":"disint", "min_wave":5, "need":{"case":true}},
+    {"part":"item", "id":"zero", "min_wave":5, "need":{"case":true}},
+    {"part":"item", "id":"moon", "min_wave":5, "need":{"case":true}},
+    {
+      "part": "ammo",
+      "id": "bullet",
+      "need": {
+        "reach_wave": 4
+      }
+    },
+    {
+      "part": "frame",
+      "id": "blunder",
+      "need": {
+        "boss": 5
+      }
+    },
+    {
+      "part": "frame",
+      "id": "rifle",
+      "need": {
+        "reach_wave": 8
+      }
+    },
+    {
+      "part": "ammo",
+      "id": "razor",
+      "need": {
+        "boss": 10
+      }
+    },
+    {
+      "part": "frame",
+      "id": "repeater",
+      "need": {
+        "boss": 15
+      }
+    },
+    {
+      "part": "ammo",
+      "id": "hook",
+      "need": {
+        "reach_wave": 12
+      }
+    },
+    {
+      "part": "item",
+      "id": "lens",
+      "need": {
+        "reach_wave": 5
+      }
+    }
+  ],
+  "_unlocks": "Persistent unlocks (game/unlocks.gd, saved to user://unlocks.json). part ammo/frame = alternative starting parts (Laser and Ray Pistol have no rule, so they are always available); part item = a shop module that only appears once unlocked. reach_wave = start that wave in any run; boss = defeat the boss of that wave.",
+  "enemies": {
+    "chaser_speed_cap": 0.92,
+    "_chaser_speed_cap": "Ground melee cops (not bosses, drones or civilians) are capped at this fraction of the villain's BASE speed (210 -> 193), after wave/tier/jitter scaling. Without it a K9 rolled up to ~300 and could never be shaken off."
+  }
+}

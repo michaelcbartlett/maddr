@@ -1,0 +1,6 @@
+[
+ {"id":"laser","name":"Laser","noun":"Laser","col":"#ff4a4a","desc":"Fast red bolts","add":{"dmg":8}},
+ {"id":"bullet","name":"Bullets","noun":"Slug","col":"#ffd76a","desc":"Fast, hard-hitting slugs.","add":{"dmg":10}},
+ {"id":"razor","name":"Razor Blades","noun":"Razor","col":"#dfe6ec","desc":"Spinning blades. Pierce 2, wall ricochets and light bleeding.","add":{"dmg":7,"pierce":2,"bleed":0.6}},
+ {"id":"hook","name":"Shock Grapple","noun":"Grapple","col":"#7df9ff","desc":"Wall grapple · electrified chain","add":{"dmg":9}}
+]

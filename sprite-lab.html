@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mad Villain: Sprite Lab</title>
+<style>
+  :root{--bg:#121818;--panel:#1b2424;--line:#2c3a3a;--txt:#d8e4e0;--dim:#8aa09a;--acc:#b4ff3c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.4 Consolas,ui-monospace,monospace}
+  header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  h1{font-size:16px;margin:0;color:var(--acc);letter-spacing:.08em}
+  label{color:var(--dim)} select,input[type=range]{vertical-align:middle}
+  select,button{background:#0e1414;color:var(--txt);border:1px solid var(--line);padding:4px 8px;font:inherit;border-radius:3px}
+  button{cursor:pointer} button:hover{border-color:var(--acc)} button.on{border-color:var(--acc);color:var(--acc)}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:0}
+  section{padding:12px 16px;border-bottom:1px solid var(--line)}
+  aside{border-left:1px solid var(--line);padding:12px 14px;max-height:100vh;overflow:auto;position:sticky;top:0}
+  #big{width:100%;height:auto;background:#0b0f10;image-rendering:pixelated;cursor:crosshair;display:block;max-width:100%;border:1px solid var(--line)}
+  .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin:6px 0}
+  .cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .cell span{color:var(--dim);font-size:11px}
+  .cell canvas{image-rendering:pixelated;background:#0b0f10;border:1px solid var(--line)}
+  table{border-collapse:collapse} td{padding:3px 6px;vertical-align:middle} td.h{color:var(--dim);font-size:11px;text-align:center}
+  .items label{display:flex;gap:6px;align-items:center;color:var(--txt);padding:1px 0}
+  .items .t{color:var(--dim);font-size:11px;margin:8px 0 2px}
+  .hint{color:var(--dim);font-size:12px} #status{color:var(--acc)}
+  .ctrl{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+</style></head>
+<body>
+<header>
+  <h1>MAD VILLAIN · SPRITE LAB</h1>
+  <span class="ctrl">
+    <label>Ammo <select id="ammo"></select></label>
+    <label>Frame <select id="frame"></select></label>
+    <label>Anim <select id="anim"><option>idle</option><option value="walk8">walk (8f)</option><option value="walk">walk (6f, current game)</option><option>blink</option><option>static</option></select></label>
+    <label><input type="checkbox" id="armed"> Off-hand weapon</label>
+    <label>Off ammo <select id="ammo2"></select></label><label>Off frame <select id="frame2"></select></label>
+  </span>
+  <span class="ctrl">
+    <label>Light height <input id="lz" type="range" min="4" max="120" value="48"></label>
+    <label>Ambient <input id="amb" type="range" min="0" max="100" value="22"></label>
+    <label>Normal strength <input id="nstr" type="range" min="25" max="300" value="100"></label>
+    <label>Light <select id="lcol"><option value="#fff2dc">warm</option><option value="#ffffff">white</option><option value="#9fdcff">cold</option><option value="#7dff3a">toxic</option><option value="#ff4a4a">alarm</option></select></label>
+    <button id="flat">Flat (no normals)</button>
+    <label>Weapon FX <select id="fx"><option value="none">none</option><option value="flash">muzzle flash</option><option value="beam">laser beam</option></select></label>
+    <label>Elbow bend <select id="bend"></select></label>
+  </span>
+  <span class="ctrl">
+    <button id="dl">Download sheets</button>
+    <button id="save">Save to export/</button>
+    <span id="status"></span>
+  </span>
+</header>
+<main>
+  <div>
+    <section>
+      <div class="hint">Move the mouse over the preview to move the point light. Left: albedo · right: lit with normal map. Body and weapon are composited (weapon arm in front).</div>
+      <canvas id="big" width="897" height="214"></canvas>
+    </section>
+    <section>
+      <div class="hint">Live game view (drawVillainAt, with overlays). State buttons below; anchors = named attach points for modular gear.</div>
+      <div class="row"><canvas id="live" width="897" height="250" style="width:100%;height:auto;background:#1a2424;image-rendering:pixelated;border:1px solid var(--line)"></canvas></div>
+      <div class="row"><span class="hint">State:</span><button data-st="idle" class="on">idle</button><button data-st="walk">walk</button><button data-st="fire">fire</button><button data-st="hurt">hurt</button><button data-st="zap">tazed (x-ray)</button>
+        <label><input type="checkbox" id="anch" checked> show anchors</label><label><input type="checkbox" id="sweep" checked> sweep aim</label></div>
+    </section>
+    <section>
+      <div class="hint">Every body pose: albedo / height / normal / lit (same light as above). 0–5 walk (6f), 6–9 idle, 10 blink, 11–18 walk (8f).</div>
+      <div style="overflow-x:auto"><table id="grid"></table></div>
+    </section>
+    <section>
+      <div class="hint">Weapon + gun arm canvas (pivot = far shoulder).</div>
+      <div class="row" id="wrow"></div>
+    </section>
+  </div>
+  <aside>
+    <div class="row"><button id="all">All items</button><button id="none">Bare</button><button id="rnd">Random</button></div>
+    <div class="items" id="items"></div>
+  </aside>
+</main>
+<script src="villain.js"></script>
+<script>
+// ---------- load the game's real data (AMMO, FRAMES, ITEMS, build/recompute, sprite helpers) from index.html ----------
+const STUB=`
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const AMMO=[{id:'laser',name:'Laser',col:'#ff4a4a',apply:S=>{}},{id:'bullet',name:'Bullets',col:'#ffd76a',apply:S=>{}},{id:'razor',name:'Razor Blades',col:'#dfe6ec',apply:S=>{}}];
+const FRAMES=[{id:'pistol',name:'Ray Pistol',apply:S=>{S.width=10}},{id:'blunder',name:'Blunderbuss',apply:S=>{S.width=16;S.shots+=2}},{id:'rifle',name:'Long Rifle',apply:S=>{S.width=8}},{id:'repeater',name:'Auto-Repeater',apply:S=>{S.width=8}}];
+const ITEMS=[{id:'scope',t:1,name:'Targeting Scope',apply:S=>S.rangeAdd+=60,wv:{s:'top',w:6}},{id:'coat',t:1,name:'Lead-Lined Coat',apply:S=>{}},{id:'goggles',t:2,name:'Blast Goggles',apply:S=>{}},
+ {id:'fins',t:1,name:'Cooling Fins',apply:S=>{},wv:{s:'wrap',w:2}},{id:'cell',t:1,name:'Power Cell',apply:S=>{},wv:{s:'bot',w:4}}];
+['isotope','hamster','battery','brain'].forEach(c=>ITEMS.push({id:'core_'+c,t:2,name:c+' core',apply:S=>{}}));
+const ITEM={};ITEMS.forEach(i=>ITEM[i.id]=i);
+function wornCore(){for(let i=build.items.length-1;i>=0;i--)if(build.items[i].startsWith('core_'))return build.items[i].slice(5);return null;}
+let build={ammo:0,frame:0,core:0,items:[],name:''};let S,D,CNT={};
+function baseStats(){return{rangeAdd:0,width:10,widthPct:0,shots:1,guns:[]};}
+function recompute(){S=baseStats();CNT={};AMMO[build.ammo].apply(S);FRAMES[build.frame].apply(S);S.guns.unshift(AMMO[build.ammo].id);
+ for(const id of build.items){ITEM[id].apply(S);CNT[id]=(CNT[id]||0)+1;}D={width:S.width*(1+S.widthPct),shots:Math.min(9,S.shots)};villainCache=null;weaponCache=null;}
+function mkCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function outlined(src,col='#0b0f10',t=2){const c=mkCanvas(src.width+2*t,src.height+2*t),g=c.getContext('2d');
+  const sil=mkCanvas(src.width,src.height),sg=sil.getContext('2d');sg.drawImage(src,0,0);sg.globalCompositeOperation='source-in';sg.fillStyle=col;sg.fillRect(0,0,sil.width,sil.height);
+  for(const[dx,dy]of[[0,t],[2*t,t],[t,0],[t,2*t]])g.drawImage(sil,dx,dy);g.drawImage(src,t,t);return c;}
+function tint(src,col,a){const c=mkCanvas(src.width,src.height),g=c.getContext('2d');g.drawImage(src,0,0);g.globalCompositeOperation='source-atop';g.globalAlpha=a;g.fillStyle=col;g.fillRect(0,0,c.width,c.height);return c;}
+`;
+let dataSource='stub';
+async function loadGameData(){
+  let code=STUB;
+  try{const t=await (await fetch('index.html',{cache:'no-store'})).text();
+    const cut=(a,b)=>{const i=t.indexOf(a),j=t.indexOf(b,i+1);return i>=0&&j>i?t.slice(i,j):null;};
+    const clampLine=(t.match(/^const clamp=.*$/m)||[])[0];
+    const data=cut('// =============== DATA: STARTING PARTS','// =============== SPRITE HELPERS');
+    const helpers=cut('// =============== SPRITE HELPERS','// =============== ENEMY SPRITES');
+    if(clampLine&&data&&helpers&&/const ITEMS=/.test(data)){code=clampLine+'\n'+data+'\n'+helpers;dataSource='index.html';}
+  }catch(e){}
+  const s=document.createElement('script');s.textContent=code+'\n;window.__labData=true;';document.head.appendChild(s);
+  if(!window.__labData){const s2=document.createElement('script');s2.textContent=STUB+'\n;window.__labData=true;';document.head.appendChild(s2);dataSource='stub (index.html data failed to evaluate)';}
+}
+
+// ---------- lighting ----------
+const $=id=>document.getElementById(id);
+const L={armed:false,bend:WBEND0,x:90,y:20,z:48,amb:.25,col:[1,.95,.86],flat:false,nstr:1};
+function hex2rgb(h){const c=parseInt(h.slice(1),16);return[(c>>16)/255,(c>>8&255)/255,(c&255)/255];}
+function px(c){return c.getContext('2d').getImageData(0,0,c.width,c.height).data;}
+// all lights in "light space" (preview composite coords): the mouse light + optional weapon FX lights
+// (in Godot: PointLight2D on the muzzle for the flash; a row of PointLight2Ds or one stretched light texture along the beam)
+let FX={mode:'none',muzzle:{x:0,y:0},col:[1,.3,.3],flick:1};
+function lights(){const a=[{x:L.x,y:L.y,z:L.z,col:L.col,k:1.6,r:200}];
+  const m=FX.muzzle,c=FX.col;
+  if(FX.mode==='flash')a.push({x:m.x+4,y:m.y,z:10,col:c,k:2.6*FX.flick,r:40});
+  if(FX.mode==='beam'){for(let i=0;i<8;i++)a.push({x:m.x+4+i*22,y:m.y,z:7,col:c,k:.9*FX.flick,r:28});a.push({x:m.x+3,y:m.y,z:9,col:[1,1,1],k:1.2*FX.flick,r:22});}
+  return a;}
+// shade albedo with point lights (Lambert + a little Blinn specular). ox,oy = where this image sits in light space
+function lit(alb,nrm,hgt,ox,oy){const w=alb.width,h=alb.height,out=mkCanvas(w,h),g=out.getContext('2d'),im=g.createImageData(w,h),o=im.data;
+  const A=px(alb),N=px(nrm),H=px(hgt),LS=lights();
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=(y*w+x)*4;if(!A[i+3])continue;
+    let nx=0,ny=0,nz=1;if(!L.flat&&N[i+3]){nx=N[i]/127.5-1;ny=-(N[i+1]/127.5-1);nz=N[i+2]/127.5-1;}   // green-up -> screen y-down
+    const hz=H[i]/255*HMAX;let r=L.amb,gg=L.amb,b=L.amb,sr=0,sg=0,sb=0;
+    for(const l of LS){let lx=l.x-(x+ox+.5),ly=l.y-(y+oy+.5),lz=l.z-hz;const d=Math.hypot(lx,ly,lz)||1;lx/=d;ly/=d;lz/=d;
+      const df=Math.max(0,nx*lx+ny*ly+nz*lz),att=1/(1+(d/l.r)**2),k=df*att*l.k;
+      const hl=Math.hypot(lx,ly,lz+1),sp=Math.pow(Math.max(0,(nx*lx+ny*ly+nz*(lz+1))/hl),24)*att*.35*Math.min(1.5,l.k);
+      r+=k*l.col[0];gg+=k*l.col[1];b+=k*l.col[2];sr+=sp*l.col[0];sg+=sp*l.col[1];sb+=sp*l.col[2];}
+    o[i]=Math.min(255,A[i]*r+255*sr);o[i+1]=Math.min(255,A[i+1]*gg+255*sg);o[i+2]=Math.min(255,A[i+2]*b+255*sb);o[i+3]=A[i+3];}
+  g.putImageData(im,0,0);return out;}
+function setNormalStrength(){ // regenerate normal maps at the chosen strength
+  for(const f of getVillainFrames().concat(getVillainFrames(true))){mapsOf(f);f.maps.normal=normalCanvas(f.depth,L.nstr);}
+  for(const w of Object.values(getWeapon().offs||{})){mapsOf(w);w.maps.normal=normalCanvas(w.depth,L.nstr);}
+  for(const b of WBENDS){const w=getWeaponBent(b);mapsOf(w);w.maps.normal=normalCanvas(w.depth,L.nstr);}}
+
+// ---------- composite preview (body + aimed-straight weapon) ----------
+const BX=20,BY=40,CW=262,CH=112,SC=1.7;   // body top-left inside the composite (native px); panels drawn at SC x
+function offSpec(){return{ammo:+$('ammo2').value,frame:+$('frame2').value,items:[]};}
+function composite(fr){const w=getWeaponBent(L.bend),mk=()=>mkCanvas(CW,CH);
+  const out={a:mk(),h:mk(),n:mk()},fm=mapsOf(fr),wm=mapsOf(w),ow=L.armed?getOffWeapon(offSpec(),L.bend):null,om=ow&&mapsOf(ow);
+  const wx=BX+VG.sx+fr.lean-WG.px,wy=BY+VG.sy+fr.bob-WG.py;   // main weapon canvas pivot sits on the far shoulder
+  const ox=BX+VG.ox+fr.lean-WG.px,oy=BY+VG.oy+fr.bob-WG.py;   // off-hand weapon pivot sits on the near shoulder (behind torso)
+  FX.muzzle={x:wx+WG.px+1+w.muz,y:wy+WG.py+1};FX.col=hex2rgb(AMMO[build.ammo].col);
+  for(const[key,b,ww,oo]of[['a',fr.img,w.cv,ow&&ow.cv],['h',fm.height,wm.height,om&&om.height],['n',fm.normal,wm.normal,om&&om.normal]]){const g=out[key].getContext('2d');if(oo)g.drawImage(oo,ox,oy);g.drawImage(b,BX,BY);g.drawImage(ww,wx,wy);}
+  return out;}
+let animT=0,last=performance.now();
+function poseFor(mode,t){if(mode==='walk')return Math.floor(t*8)%6;if(mode==='walk8')return WALK8[Math.floor(t*10.7)%8];if(mode==='static')return 6;if(mode==='blink')return 10;return(t%3.4)<.13?10:6+Math.floor(t*2.2)%4;}
+function drawBig(){const c=$('big'),g=c.getContext('2d');g.imageSmoothingEnabled=false;g.fillStyle='#0b0f10';g.fillRect(0,0,c.width,c.height);
+  const mode=$('anim').value,fr=getVillainFrames(L.armed)[poseFor(mode,animT)],comp=composite(fr);
+  const s=SC,PX=Math.round(CW*s)+6;g.drawImage(comp.a,0,0,CW*s,CH*s);
+  FX.flick=.75+Math.random()*.5;const l=lit(comp.a,comp.n,comp.h,0,0);g.drawImage(l,PX,0,CW*s,CH*s);
+  // the flash / beam sprites themselves are emissive: drawn additive and unlit on top
+  if(FX.mode!=='none'){const m=FX.muzzle,col=AMMO[build.ammo].col;g.save();g.beginPath();g.rect(PX,0,CW*s,CH*s);g.clip();g.translate(PX,0);g.scale(s,s);g.globalCompositeOperation='lighter';
+    if(FX.mode==='flash'){g.fillStyle=col;g.fillRect(m.x,m.y-2,5,5);g.fillRect(m.x+1,m.y-5,2,11);g.fillStyle='#fff';g.fillRect(m.x+5,m.y-1,5,3);g.fillRect(m.x-1,m.y-1,3,3);}
+    else{g.globalAlpha=.35;g.fillStyle=col;g.fillRect(m.x,m.y-3,CW,7);g.globalAlpha=1;g.fillRect(m.x,m.y-1,CW,3);g.fillStyle='#fff';g.fillRect(m.x,m.y,CW,1);}
+    g.restore();}
+  g.fillStyle='rgba(255,240,200,.9)';g.beginPath();g.arc(PX+L.x*s,L.y*s,4,0,7);g.fill();      // light marker
+  g.fillStyle='#8aa09a';g.font='12px Consolas';g.fillText('albedo   (data: '+dataSource+')',6,CH*s+16);g.fillText('lit: normal map + height, light z='+L.z+'px',PX+6,CH*s+16);}
+function cell(label,c,s){const d=document.createElement('div');d.className='cell';const k=mkCanvas(c.width*s,c.height*s),g=k.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(c,0,0,k.width,k.height);d.appendChild(k);const sp=document.createElement('span');sp.textContent=label;d.appendChild(sp);return d;}
+function drawGrid(){const t=$('grid');t.innerHTML='';const fr=getVillainFrames();
+  // one row per map type, one column per pose (scrolls sideways)
+  const rows={albedo:[],height:[],normal:[],lit:[]};
+  fr.forEach(f=>{const m=mapsOf(f);rows.albedo.push(f.img);rows.height.push(m.height);rows.normal.push(m.normal);rows.lit.push(lit(f.img,m.normal,m.height,BX,BY));});
+  const lab=i=>i<6?' walk6':i<10?' idle':i===10?' blink':' walk8';
+  const hr=document.createElement('tr');hr.innerHTML='<td></td>'+fr.map((f,i)=>`<td class="h">#${i}${lab(i)}</td>`).join('');t.appendChild(hr);
+  for(const k in rows){const tr=document.createElement('tr');tr.innerHTML=`<td class="h">${k}</td>`;for(const c of rows[k]){const td=document.createElement('td');td.appendChild(cell('',c,2));tr.appendChild(td);}t.appendChild(tr);}
+  const w=getWeaponBent(L.bend),wm=mapsOf(w),wr=$('wrow');wr.innerHTML='';const fr6=fr[6],wx=BX+VG.sx+fr6.lean-WG.px,wy=BY+VG.sy+fr6.bob-WG.py;
+  wr.appendChild(cell('weapon albedo',w.cv,2));wr.appendChild(cell('height',wm.height,2));wr.appendChild(cell('normal',wm.normal,2));wr.appendChild(cell('lit',lit(w.cv,wm.normal,wm.height,wx,wy),2));}
+let LIVE='idle';
+function drawLive(){const c=$('live'),g=c.getContext('2d');g.imageSmoothingEnabled=false;g.fillStyle='#1a2424';g.fillRect(0,0,c.width,c.height);
+  g.fillStyle='#223030';for(let x=0;x<c.width;x+=24)g.fillRect(x,0,1,c.height);for(let y=0;y<c.height;y+=24)g.fillRect(0,y,c.width,1);
+  const t=animT,k=3,x=170,y=150,st=LIVE,mv=st==='walk',fire=st==='fire'||(st==='idle'&&(t%3.5)>2.7),ph=(t*12)%1;
+  const pose=mv?WALK8[Math.floor(t*10.7)%8]:((t%3.4)<.13?10:6+Math.floor(t*2.2)%4);
+  const aim=$('sweep').checked?-.35+Math.sin(t*.9)*.75:-.06;
+  const o={k,pose,aim,moving:mv,firing:fire,recoil:fire?1-ph:0,flash:fire&&ph<.35?1:0,white:st==='hurt',zap:st==='zap',t};
+  if(L.armed)o.off={spec:offSpec(),aim:aim*.6+.25,firing:fire,recoil:fire?1-((ph+.5)%1):0,flash:fire&&((ph+.5)%1)<.35?1:0};
+  g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x-16*k,y+15*k,32*k,4*k);
+  drawVillainAt(g,x,y,o);
+  // second copy facing left, to check mirroring
+  const o2=Object.assign({},o,{face:-1,aim:Math.PI-aim});if(o.off)o2.off=Object.assign({},o.off,{aim:Math.PI-o.off.aim});drawVillainAt(g,c.width-150,y,o2);
+  if($('anch').checked){g.font='10px Consolas';const names=Object.keys(getVillainFrames(L.armed)[pose].anchors).concat(['gun.shoulder','gun.elbow','gun.grip','gun.railTop','gun.railBottom','gun.muzzle'],L.armed?['off.elbow','off.grip','off.muzzle']:[]);
+    for(const n of names){const q=villainAnchor(n,x,y,o);if(!q)continue;g.fillStyle=n.startsWith('gun.')?'#ffd23c':n.startsWith('off.')?'#ff8fb0':'#7dff3a';g.fillRect(Math.round(q.x)-2,Math.round(q.y)-2,4,4);
+      g.fillStyle='rgba(220,240,230,.8)';g.fillText(n,Math.round(q.x)+4,Math.round(q.y)-3);}}}
+let gridDirty=true,gridTimer=0;
+function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;animT+=dt;drawBig();drawLive();
+  if(gridDirty&&now-gridTimer>120){gridDirty=false;gridTimer=now;drawGrid();}requestAnimationFrame(loop);}
+
+// ---------- UI ----------
+function rebuild(){recompute();setNormalStrength();gridDirty=true;}
+function buildUI(){
+  AMMO.forEach((a,i)=>$('ammo').add(new Option(a.name,i)));FRAMES.forEach((f,i)=>$('frame').add(new Option(f.name,i)));
+  $('ammo').onchange=e=>{build.ammo=+e.target.value;rebuild();};$('frame').onchange=e=>{build.frame=+e.target.value;rebuild();};
+  const box=$('items');let tier=-1;
+  for(const it of ITEMS){if(it.t!==tier&&!it.id.startsWith('core_')){tier=it.t;box.insertAdjacentHTML('beforeend',`<div class="t">TIER ${tier}</div>`);}
+    if(it.id==='core_isotope')box.insertAdjacentHTML('beforeend',`<div class="t">POWER CORES (newest is worn)</div>`);
+    const lb=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';cb.dataset.id=it.id;cb.onchange=syncItems;
+    lb.appendChild(cb);lb.append(it.name+(it.wv?'  ['+it.wv.s+']':''));box.appendChild(lb);}
+  $('all').onclick=()=>{for(const cb of box.querySelectorAll('input'))cb.checked=!cb.dataset.id.startsWith('core_')||cb.dataset.id==='core_isotope';syncItems();};
+  $('none').onclick=()=>{for(const cb of box.querySelectorAll('input'))cb.checked=false;syncItems();};
+  $('rnd').onclick=()=>{let core=false;for(const cb of box.querySelectorAll('input')){const isC=cb.dataset.id.startsWith('core_');cb.checked=Math.random()<(isC?(core?0:.3):.25);if(isC&&cb.checked)core=true;}syncItems();};
+  $('big').onmousemove=e=>{const r=e.target.getBoundingClientRect(),sx=e.target.width/r.width,x=(e.clientX-r.left)*sx,y=(e.clientY-r.top)*sx;const PX=Math.round(CW*SC)+6;L.x=(x>=PX?x-PX:x)/SC;L.y=y/SC;gridDirty=true;};
+  $('lz').oninput=e=>{L.z=+e.target.value;gridDirty=true;};$('amb').oninput=e=>{L.amb=e.target.value/100;gridDirty=true;};
+  $('nstr').oninput=e=>{L.nstr=e.target.value/100;setNormalStrength();gridDirty=true;};
+  $('lcol').onchange=e=>{L.col=hex2rgb(e.target.value);gridDirty=true;};L.col=hex2rgb($('lcol').value);
+  $('fx').onchange=e=>{FX.mode=e.target.value;gridDirty=true;};
+  WBENDS.forEach(b=>$('bend').add(new Option((b>0?'+':'')+b+(b===WBEND0?' (level aim)':b===WBENDS[WBENDS.length-1]?' (aim up)':b===WBENDS[0]?' (aim down)':''),b)));$('bend').value=WBEND0;$('bend').onchange=e=>{L.bend=+e.target.value;gridDirty=true;};
+  $('flat').onclick=e=>{L.flat=!L.flat;e.target.classList.toggle('on',L.flat);gridDirty=true;};
+  $('save').onclick=saveToExport;
+  AMMO.forEach((a,i)=>$('ammo2').add(new Option(a.name,i)));FRAMES.forEach((f,i)=>$('frame2').add(new Option(f.name,i)));$('ammo2').value=1;$('frame2').value=0;
+  $('armed').onchange=e=>{L.armed=e.target.checked;gridDirty=true;};$('ammo2').onchange=$('frame2').onchange=()=>{gridDirty=true;};
+  for(const b of document.querySelectorAll('[data-st]'))b.onclick=()=>{LIVE=b.dataset.st;for(const x of document.querySelectorAll('[data-st]'))x.classList.toggle('on',x===b);};
+}
+function syncItems(){build.items=[...$('items').querySelectorAll('input:checked')].map(cb=>cb.dataset.id);rebuild();}
+
+// ---------- export ----------
+function toBlob(c){return new Promise(r=>c.toBlob(r,'image/png'));}
+function filesSync(){const vs=villainSheets(),va=villainSheets(true),ws=weaponSheets(),wo=weaponSheets(true),meta=spriteMeta();meta.normalStrength=L.nstr;
+  const out=[];for(const[pre,sh]of[['villain',vs],['villain_armed',va],['weapon',ws],['weapon_off',wo]])for(const m of['albedo','height','normal'])out.push([pre+'_'+m+'.png',sh[m]]);
+  out.push(['sprites.json',JSON.stringify(meta,null,2)]);return out;}
+let _files=[];
+async function prepFiles(){_files=[];for(const[name,v]of filesSync())_files.push({name,blob:typeof v==='string'?new Blob([v],{type:'application/json'}):await toBlob(v)});return _files;}
+function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);}
+async function saveToExport(){const st=$('status');st.textContent='saving…';
+  try{await prepFiles();for(const f of _files){const r=await fetch('http://localhost:8140/'+f.name,{method:'POST',body:f.blob});if(!r.ok)throw new Error(f.name+': '+r.status);}
+    st.textContent='saved '+_files.length+' files to export/';}
+  catch(e){st.textContent='save server not running (python export/save_server.py), or '+e.message;}}
+
+(async()=>{await loadGameData();build.items=[];recompute();buildUI();
+  $('dl').onclick=async()=>{await prepFiles();for(const f of _files)download(f.name,f.blob);};
+  setNormalStrength();requestAnimationFrame(loop);})();
+</script>
+</body></html>

@@ -1,0 +1,7 @@
+.local/
+godot/.godot/
+godot/test-results/
+godot/build/
+.claude/settings.local.json
+*.tmp
+Thumbs.db
