@@ -208,6 +208,14 @@ func part_name(k: String) -> String:
 		if d.id == bits[1]: return d.name
 	return k
 
+## Scrap a pickup of value v would pay right now (same multipliers as gain_scrap, without banking it).
+func scrap_value(v: float) -> float:
+	return v * float(RULES.get("economy",{}).get("income_multiplier",0.15)) * (1.0 + S.scrapPct) * payout_mult()
+
+## Loot left on the floor when a wave ends pays this fraction (rules.json economy.leftover_rate).
+func leftover_rate() -> float:
+	return clampf(float(RULES.get("economy",{}).get("leftover_rate", 1.0)), 0.0, 1.0)
+
 func gain_scrap(v: float) -> int:
 	scrap_f += v * float(RULES.get("economy",{}).get("income_multiplier",0.15)) * (1.0 + S.scrapPct) * payout_mult()
 	var n := floori(scrap_f); scrap_f -= n; scrap += n; total_scrap += n

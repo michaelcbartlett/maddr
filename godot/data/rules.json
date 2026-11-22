@@ -50,6 +50,8 @@
     "kill_scrap_falloff": 0.3,
     "_kill_scrap_falloff": "scrap per cop kill x 1/(1 + falloff*(wave-1)); wave 10 pays 27%, wave 20 pays 15% per kill",
     "drop_chance": 0.65,
+    "leftover_rate": 0.5,
+    "_leftover_rate": "Scrap, cash and unbroken crates still lying around when a wave ends pay only this fraction (the rest is seized as evidence), so grabbing loot mid-fight is worth the risk. Blueprints are never seized.",
     "_drop_chance": "Brotato-style loot roll: a downed cop drops scrap with this chance (bosses always drop; civilians' cash and crates are separate). Modules add/subtract via the dropPct stat (clamped 5-100%). Each drop is worth 1/drop_chance, so income at the base chance matches the always-drop economy.",
     "_note": "1.0 = the prototype's economy (every kill drop and cash pile pays in full). The heist campaign used 0.15 because heists paid big lump sums."
   },

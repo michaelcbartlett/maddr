@@ -46,6 +46,7 @@ Invoke-GodotCheck 'combat-rules' @('--headless', '--script', 'res://game/tests/c
 Invoke-GodotCheck 'melee' @('--headless', '--script', 'res://game/tests/melee_test.gd')
 Invoke-GodotCheck 'shrink-ray' @('--headless', '--script', 'res://game/tests/shrink_test.gd')
 Invoke-GodotCheck 'freeze-ray' @('--headless', '--script', 'res://game/tests/freeze_test.gd')
+Invoke-GodotCheck 'loot' @('--headless', '--script', 'res://game/tests/loot_test.gd')
 if ($Screenshots) {
     Invoke-GodotCheck 'rival-scientist' @('--rendering-method', 'gl_compatibility', '--script', 'res://game/tests/rival_scientist_test.gd', '--', '--screenshots')
 } else {

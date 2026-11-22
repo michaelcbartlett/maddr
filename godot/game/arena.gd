@@ -215,6 +215,20 @@ func end_wave() -> void:
 		if not e.dead: poof(e.x, e.y, Color("#88aabb"), 10); e.dead = true
 	ebul.clear(); markers.clear(); projs.clear(); mines.clear(); novas.clear(); boss = null; grapple.reset(); boss_move = {}
 	Sfx.play("clear1"); get_tree().create_timer(0.11).timeout.connect(Sfx.play.bind("clear2"))
+	_seize_leftovers()
+
+## Whatever loot is still lying around when the wave ends only pays Run.leftover_rate(): the rest is "seized as
+## evidence". Values are scaled down here, so the end-of-wave vacuum and the timeout payout both pay the reduced amount.
+func _seize_leftovers() -> void:
+	var rate := Run.leftover_rate()
+	if rate >= 1.0: return
+	var seized := 0.0
+	for p in pickups:
+		if p.has("blueprint") or p.v <= 0.0: continue
+		seized += Run.scrap_value(p.v * (1.0 - rate)); p.v *= rate
+	for c in crates:
+		seized += Run.scrap_value(c.v * (1.0 - rate)); c.v *= rate
+	if seized >= 1.0: add_num(P.x, P.y - 70, "EVIDENCE SEIZED -%d" % roundi(seized), Color("#ff7a5a"), true)
 
 func is_playing() -> bool: return state in ["play","clear"]
 
