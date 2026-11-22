@@ -1,6 +1,7 @@
 extends Node
 ## Autoload "Sfx": the prototype's synth blips (index.html snd()), pre-rendered to AudioStreamWAV.
 ## play(name) — same frequency / duration / wave / volume / slide as the browser calls. Keyed sounds are throttled to 55 ms.
+## "noise" is sample-and-hold white noise re-drawn at the sliding frequency (swishes, whip cracks, throws).
 
 const RATE := 22050
 # name: [freq, dur, wave, vol, slide, throttle]
@@ -18,6 +19,13 @@ const P := {
 	"clear2": [784, .2, "square", .05, 0.0, false], "buy1": [880, .08, "square", .05, 0.0, false], "buy2": [1320, .1, "square", .04, 0.0, false],
 	"ui": [500, .03, "square", .02, 0.0, true], "select": [440, .1, "square", .04, 0.0, false], "reroll": [600, .06, "square", .04, 0.0, false],
 	"win": [660, .5, "saw", .06, 2.0, false], "lose": [200, .5, "saw", .06, .3, false], "siren": [700, .5, "tri", .04, 1.4, false],
+	# bionic-arm melee: one swing per weapon, plus a body thud when it connects
+	"punch": [140, .09, "square", .04, .5, true], "stab": [1700, .07, "tri", .03, .45, true],
+	"slash": [2600, .16, "noise", .05, .25, true], "whip": [3400, .09, "noise", .06, .12, true], "thud": [95, .07, "square", .035, .6, true],
+	"melt": [70, .5, "sine", .065, .25, false],         # radiation meltdown
+	"throw": [700, .12, "noise", .03, .4, false],      # grenade toss
+	"capshot": [1400, .18, "saw", .04, .3, true],      # Patience Capacitor charged laser
+	"logo": [110, .35, "saw", .08, .5, false], "logo2": [1760, .25, "tri", .05, .6, false],   # AngryRatGames name sting
 }
 
 var _streams := {}
@@ -36,16 +44,21 @@ func _render(d: Array) -> AudioStreamWAV:
 	var n := int(RATE * dur)
 	var data := PackedByteArray(); data.resize(n * 2)
 	var ph := 0.0
+	var rng := RandomNumberGenerator.new(); rng.seed = int(f0 * 1000.0 + dur * 7919.0)
+	var held := 0.0
 	for i in n:
 		var t := float(i) / RATE
 		var k := clampf(t / d[1], 0.0, 1.0)
 		var f := f0 * (pow(maxf(20.0 / f0, slide), k) if slide > 0.0 else 1.0)   # exponential ramp, like the WebAudio call
+		var wrapped := ph + f / RATE >= 1.0
 		ph = fmod(ph + f / RATE, 1.0)
+		if wave == "noise" and (wrapped or i == 0): held = rng.randf_range(-1.0, 1.0)
 		var s := 0.0
 		match wave:
 			"square": s = 1.0 if ph < 0.5 else -1.0
 			"saw": s = ph * 2.0 - 1.0
 			"tri": s = 1.0 - 4.0 * absf(ph - 0.5)
+			"noise": s = held
 			_: s = sin(ph * TAU)
 		var env := vol * pow(0.0001 / vol, k) if k < 1.0 else 0.0     # exponential decay to silence
 		var v := clampi(int(s * env * 6.0 * 32767.0), -32767, 32767)

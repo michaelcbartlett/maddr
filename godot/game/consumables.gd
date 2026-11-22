@@ -68,7 +68,7 @@ func activate(a) -> bool:
 		"grenade":
 			a.P.disguise_t = 0.0
 			grenades.append({"position":center, "velocity":Vector2.from_angle(a.P.aim) * 560.0, "t":0.85})
-			a.snd("pick")
+			a.snd("throw")
 		"teleport":
 			pads.append(center); pads_armed = false
 			a.add_num(center.x, center.y-52, "Y / Q: SECOND PAD", Color("#b48bff"), false); a.snd("blink")

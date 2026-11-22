@@ -346,7 +346,7 @@ func irradiate(e: Enemy, dose: int) -> void:
 	e.rad_s = mini(RAD_MAX, e.rad_s + dose); e.rad_t = 6.0
 	if e.rad_s < RAD_MAX: return
 	e.rad_s = 0; e.rad_t = 0.0
-	poof(e.x, e.y, Color("#b6ff3a"), 14, 110); snd("zap")
+	poof(e.x, e.y, Color("#b6ff3a"), 14, 110); snd("melt")
 	for o in live_foes():
 		if o != e and not o.civ and Vector2(o.x - e.x, o.y - e.y).length_squared() < 70.0 * 70.0: irradiate(o, RAD_MAX / 3)
 	hit(e, (20.0 + Run.D.dmg * 2.0) * Run.S.radMul, {"col": Color("#b6ff3a"), "element": "radiation"})
@@ -468,6 +468,7 @@ func fire_gun(type: String, ang: float, mul: float, ox: float, oy: float, sus, b
 	var charge := 0.0
 	if type == "laser" and Run.CNT.get("capacitor",0)>0 and (sus == null or sus.tick):
 		charge = laser_charge_ratio(source)
+		if charge >= 0.5: snd("capshot")
 		laser_charge[source] = 0.0   # spend once per volley, so all split nozzles get the same bonus
 		dmg *= 1.0 + CAPACITOR_BONUS * charge
 	if sus != null: dmg *= (0.1 / D.cd) * (1.15 + 0.15 * (S.sustain - 1))   # per 0.1 s tick
@@ -703,7 +704,8 @@ func _melee_strike(spec: Dictionary, origin: Vector2) -> void:
 		blaster_fx.impact(point,-direction,color)
 	if spec.get("kind","")!="":
 		utility_fields.append({"kind":"slash","weapon":spec.kind,"position":origin,"radius":reach,"aim":P.melee_aim,"arc":maxf(float(spec.arc),0.12),"time":0.18,"life":0.18,"col":color})
-	if not victims.is_empty(): snd("pick"); Controls.rumble(0.2,0.1,50)
+	snd({"knife":"stab","katana":"slash","whip":"whip"}.get(spec.get("kind",""),"punch"))
+	if not victims.is_empty(): snd("thud"); Controls.rumble(0.2,0.1,50)
 
 ## Swing trail: a crescent for blades, a crackling line for the whip.
 func _draw_slash(g: Node2D, field: Dictionary, fade: float) -> void:

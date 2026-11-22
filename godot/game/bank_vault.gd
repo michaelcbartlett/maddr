@@ -44,7 +44,7 @@ func drop_key(a, at: Vector2) -> void:
 	if holder != null: holder.has_key = false
 	holder = null; key_pos = at
 	a.add_num(at.x, at.y - 40, "🔑 VAULT KEY!", Color("#ffd23c"), true)
-	a.banner_txt = "THE KEY! GRAB IT!"; a.banner_t = 1.6; a.snd("gotkey")
+	a.banner_txt = "THE KEY! GRAB IT!"; a.banner_t = 1.6; a.snd("key")
 
 func open(a) -> void:
 	opened = true; has_key = false

@@ -49,7 +49,7 @@ func win(a) -> void:
 	a.banner_txt = "VAULT CRACKED!"; a.banner_t = 2.4
 	message = ("🔓 %s UNLOCKED · INSTALLED" if unlocked else "%s INSTALLED") % item_name
 	message_t = 4.0
-	a.snd("crate"); a.shake = 10.0
+	a.snd("vault"); a.shake = 10.0
 
 ## The wave timer ran out before the vault was reached (Arena._update_play, after end_wave()).
 func timeout(a) -> void:

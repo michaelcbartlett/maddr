@@ -16,6 +16,7 @@ const FADE := 0.45
 
 var _t := 0.0
 var _done := false
+var _stung := false
 var _atlas := AtlasTexture.new()
 var _picture := TextureRect.new()
 var _name := Label.new()
@@ -57,6 +58,7 @@ func _process(dt: float) -> void:
 	_show_frame(frame)
 	var name_t := _t - NAME_FROM / FPS
 	if name_t > 0.0:
+		if not _stung: _stung = true; Sfx.play("logo"); Sfx.play("logo2")
 		var k := clampf(name_t / 0.25, 0.0, 1.0)
 		_name.modulate.a = k
 		_name.scale = Vector2.ONE * (1.0 + 0.35 * (1.0 - k) * (1.0 - k)) * (1.0 + 0.06 * sin(clampf(name_t / 0.4, 0.0, 1.0) * PI))
