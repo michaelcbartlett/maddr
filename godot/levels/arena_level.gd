@@ -14,13 +14,16 @@ const THEMES := {
 	"police":  {"name":"POLICE HQ","ambient":Color(0.70,0.74,0.80),"wall":Color("#2c3c5c"),"trim":Color("#4f7fd8"),"lamp":Color("#e8f4ff"),"floor":"tile","prop":"desk"},
 	"museum":  {"name":"MUSEUM","ambient":Color(0.52,0.50,0.56),"wall":Color("#5a2a2a"),"trim":Color("#c9a227"),"lamp":Color("#fff0c8"),"floor":"parquet","prop":"case"},
 	"harbour": {"name":"HARBOUR","ambient":Color(0.74,0.60,0.54),"wall":Color("#2a4a5a"),"trim":Color("#e8e0c8"),"lamp":Color("#ffb070"),"floor":"planks","prop":"container"},
+	"train":   {"name":"TRAIN HEIST","ambient":Color(0.66,0.62,0.58),"wall":Color("#5a1e22"),"trim":Color("#c9a227"),"lamp":Color("#ffe0a8"),"floor":"train","prop":"desk"},   # heist wave only (not in ORDER)
 	"spyhq":   {"name":"SPY HQ","ambient":Color(0.40,0.42,0.56),"wall":Color("#14181f"),"trim":Color("#3ae0ff"),"lamp":Color("#5af0ff"),"floor":"grid","prop":"server"},
 }
 const ORDER := ["street","bank","rooftop","police","museum","harbour","spyhq"]
 ## Prop slots keep the centre (spawn) and the edges clear, like Brotato's open arena.
 const SOLID_SLOTS := [Vector2(330,260),Vector2(1270,260),Vector2(330,840),Vector2(1270,840),Vector2(800,200),Vector2(800,900)]
 const LAMP_SLOTS := [Vector2(150,150),Vector2(1450,150),Vector2(150,950),Vector2(1450,950),Vector2(560,550),Vector2(1040,550)]
-const ROAD_LAMP_SLOTS := [Vector2(150,150),Vector2(1450,150),Vector2(150,950),Vector2(1450,950),Vector2(400,550),Vector2(1200,550),Vector2(800,330),Vector2(800,770)]
+## Lamp bases belong on the concrete perimeter sidewalks, clear of both traffic lanes.
+const ROAD_LAMP_SLOTS := [Vector2(330,70),Vector2(AW-330,70),Vector2(330,AH-50),Vector2(AW-330,AH-50),Vector2(50,330),Vector2(AW-50,330),Vector2(50,AH-330),Vector2(AW-50,AH-330)]
+const STREET_SIDEWALKS := [Rect2i(16,16,AW-32,56),Rect2i(16,AH-72,AW-32,56),Rect2i(16,16,56,AH-32),Rect2i(AW-72,16,56,AH-32)]
 ## footprint (the solid rect) and visual height of each prop kind; props are drawn in 3/4 view by PropView
 const PROP_SIZE := {"car":Vector2(120,56),"pillar":Vector2(56,56),"ac_unit":Vector2(76,54),"desk":Vector2(100,46),"case":Vector2(58,58),"container":Vector2(172,62),"server":Vector2(46,96)}
 const PROP_H := {"car":20.0,"pillar":88.0,"ac_unit":30.0,"desk":22.0,"case":46.0,"container":52.0,"server":72.0}
@@ -36,6 +39,7 @@ const PROP_DAMAGE := {
 const FLOOR_IDS := ["street","marble","gravel","tile","parquet","planks","grid"]
 const PropView = preload("res://levels/prop_view.gd")
 const FLOOR_SHADER = preload("res://levels/floor.gdshader")
+const TrainLevel = preload("res://levels/train_level.gd")
 
 var theme_id := "street"
 var theme: Dictionary = THEMES.street
@@ -46,6 +50,8 @@ var prop_parent: Node          # the arena's y-sorted actor layer (props sort wi
 var prop_nodes: Array = []     # PropView nodes: solid props + street lamp posts
 var decor: Array = []          # floor details baked into the floor that the ambient layer animates ({pos, kind})
 var navigation = Navigation.new()
+var size := Vector2(AW, AH)    # world size of the current theme (the train heist is longer than the arena)
+var spawn := Levels.SPAWN       # where the villain starts the wave
 var _floors := {}
 var _floor_sprite: Sprite2D
 
@@ -60,17 +66,24 @@ func build(id: String) -> void:
 	theme_id = id if THEMES.has(id) else "street"; theme = THEMES[theme_id]
 	if _floor_sprite == null: _ready()
 	decor.clear()
-	if not _floors.has(theme_id): _floors[theme_id] = {"tex": ImageTexture.create_from_image(_make_floor(theme_id)), "decor": decor.duplicate()}
+	size = TrainLevel.size() if theme_id == "train" else Vector2(AW, AH)
+	spawn = TrainLevel.spawn() if theme_id == "train" else Levels.SPAWN
+	if not _floors.has(theme_id): _floors[theme_id] = {"tex": ImageTexture.create_from_image(TrainLevel.make_floor() if theme_id == "train" else _make_floor(theme_id)), "decor": decor.duplicate()}
 	_floor_sprite.texture = _floors[theme_id].tex; decor = _floors[theme_id].decor.duplicate()
 	walls.clear(); props.clear(); lamps.clear()
 	for n in prop_nodes: n.queue_free()
 	prop_nodes.clear()
-	var size: Vector2 = PROP_SIZE[theme.prop]
+	if theme_id == "train":
+		TrainLevel.build(self)
+		navigation.configure(walls, size)
+		_update_floor_material(); queue_redraw()
+		return
+	var prop_size: Vector2 = PROP_SIZE[theme.prop]
 	var rng := RandomNumberGenerator.new(); rng.seed = hash(theme_id)
 	for i in SOLID_SLOTS.size():
 		var c: Vector2 = SOLID_SLOTS[i]
-		var s := size
-		if i >= 4 and theme.prop in ["container", "car"]: s = Vector2(size.y, size.x)   # the north/south pair is turned
+		var s := prop_size
+		if i >= 4 and theme.prop in ["container", "car"]: s = Vector2(prop_size.y, prop_size.x)   # the north/south pair is turned
 		var rect := Rect2(c - s / 2.0, s)
 		var p := {"rect": rect, "kind": theme.prop, "color": _prop_color(rng), "h": PROP_H[theme.prop], "flip": rng.randf() < 0.5,
 			"police": theme.prop == "car" and i in [1, 4], "variant": i}
@@ -83,7 +96,7 @@ func build(id: String) -> void:
 	for p in (ROAD_LAMP_SLOTS if theme_id == "street" else LAMP_SLOTS):
 		lamps.append(p)
 		if theme.floor in ["street", "planks"]: _spawn_prop({"rect": Rect2(p - Vector2(1, 1), Vector2(2, 2)), "kind": "lamp_post", "color": Color.WHITE, "variant": prop_nodes.size()})
-	navigation.configure(walls, Vector2(AW, AH))
+	navigation.configure(walls, size)
 	_update_floor_material()
 	queue_redraw()
 
@@ -94,7 +107,7 @@ func break_prop(p: Dictionary) -> void:
 	p.broken = true; p.hp = 0.0; p.h = 0.0
 	for wall in walls:
 		if wall.get("prop_index", -1) == props.find(p): wall.open = true
-	navigation.configure(walls, Vector2(AW, AH))
+	navigation.configure(walls, size)
 	_update_floor_material()
 
 func _spawn_prop(p: Dictionary) -> void:
@@ -105,7 +118,7 @@ func _spawn_prop(p: Dictionary) -> void:
 func _update_floor_material() -> void:
 	var m: ShaderMaterial = _floor_sprite.material
 	m.set_shader_parameter("theme_id", FLOOR_IDS.find(theme.floor))
-	m.set_shader_parameter("world_size", Vector2(AW, AH))
+	m.set_shader_parameter("world_size", size)
 	var rects: Array = []; var hs: Array = []
 	for i in 8:
 		var r: Rect2 = props[i].rect if i < props.size() else Rect2(-999, -999, 1, 1)
@@ -147,7 +160,7 @@ func _make_floor(id: String) -> Image:
 				g.fill_rect(Rect2i(AW / 2 + i, AH / 2 - 130, 10, 34), cw); g.fill_rect(Rect2i(AW / 2 + i, AH / 2 + 96, 10, 34), cw)
 				g.fill_rect(Rect2i(AW / 2 - 130, AH / 2 + i, 34, 10), cw); g.fill_rect(Rect2i(AW / 2 + 96, AH / 2 + i, 34, 10), cw)
 			# sidewalks along the walls: concrete slabs with a kerb
-			for side in [Rect2i(16, 16, AW - 32, 56), Rect2i(16, AH - 72, AW - 32, 56), Rect2i(16, 16, 56, AH - 32), Rect2i(AW - 72, 16, 56, AH - 32)]:
+			for side in STREET_SIDEWALKS:
 				g.fill_rect(side, Color("#4a5052"))
 				for y in range(side.position.y, side.end.y, 28):
 					for x in range(side.position.x, side.end.x, 28):

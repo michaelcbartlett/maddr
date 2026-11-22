@@ -20,7 +20,7 @@ var ranged := false
 var fly := false
 var civ := false
 var bank := false
-var has_key := false
+var has_key := false      # Bank Lobby robbery: this customer carries the vault key (game/bank_vault.gd)
 var civ_kind := ""
 var rich := 1.0
 var juke := 0.0
@@ -53,6 +53,8 @@ var poison_gen := 0
 var bleed_s := 0
 var bleed_t := 0.0
 var sick_t := 0.0
+var rad_s := 0
+var rad_t := 0.0
 var dot := 0.0
 var bomb_t := 0.0
 var bomb_dmg := 0.0
@@ -102,6 +104,13 @@ var action_t := 0.0
 var action_cd := 1.8
 var burst_left := 0
 var shield_flash := 0.0
+var gadget_targets: Array[Vector2] = []
+var attack_cycle := 0
+var summoner_id := 0
+## Per-enemy approach angle: chasers fan out around the villain instead of queueing behind each other.
+var flank := 0.0
+## Own generator for flank angles and cosmetic dust, so seeded gameplay rolls stay reproducible.
+static var _feel_rng := RandomNumberGenerator.new()
 
 func setup(arena: Node, t: String, px: float, py: float) -> void:
 	A = arena; type = t; x = px; y = py; position = Vector2(x, y)
@@ -124,6 +133,7 @@ func setup(arena: Node, t: String, px: float, py: float) -> void:
 	behavior = T.get("behavior", ""); vehicle = T.get("vehicle", 0) == 1
 	aim_dir = Vector2(A.P.x - x, A.P.y - y).normalized(); action_dir = aim_dir
 	action_cd = randf_range(1.3, 2.4)
+	flank = _feel_rng.randf_range(-0.6, 0.6)
 	if type == "undercover" and randf() < 0.5: spr = "undercover_hood"
 	shoot_cd = randf_range(1, 2.5); walk = randf() * 10.0
 	if T.get("civ", 0):
@@ -134,6 +144,7 @@ func setup(arena: Node, t: String, px: float, py: float) -> void:
 		hero = B.id; spr = "hero_" + hero; hero_name = B.name
 		if hero == "paragon": fly = true
 		if hero == "surge": spd *= 1.3
+		if hero == "vex": spd *= float(B.get("speed",1.0)); ranged = true; action_cd = 1.8
 		if hero == "ironclad":
 			spd *= float(B.get("speed", 1.0)); charge_t = 1.25; charge_windup = 0.5; slam_cd = 2.4
 
@@ -155,7 +166,7 @@ func tick(dt: float) -> void:
 		if randf() < dt * 4.0: A.part(x + randf_range(-6, 6), y, 0, 30, 0.4, Color("#e8f040"), 3)
 	if damage_taken("poison") <= 0.0: poison_s = 0; poison_t = 0.0
 	if poison_t > 0.0:
-		poison_t -= dt; dps += S.poison * poison_s; dcol = Color("#5aff5a")
+		poison_t -= dt; dps += S.poison * S.poisonMul * poison_s; dcol = Color("#5aff5a")
 		if randf() < dt * 4.0: A.part(x + randf_range(-8, 8), y - r, 0, -25, 0.6, Color("#5aff5a"), 3)
 	else: poison_s = 0
 	if (burn_t > 0.0 and S.burnSpread > 0.0) or (poison_t > 0.0 and S.poisonSpread > 0.0): _spread(dt, S)
@@ -163,6 +174,10 @@ func tick(dt: float) -> void:
 		bleed_t -= dt; dps += S.bleed * bleed_s; dcol = Color("#ff3040")
 		if randf() < dt * 5.0: A.part(x + randf_range(-5, 5), y, 0, 40, 0.35, Color("#c01828"), 3)
 	else: bleed_s = 0
+	if rad_t > 0.0:
+		rad_t -= dt; dps += S.rad * S.radMul * rad_s; dcol = Color("#b6ff3a")
+		if randf() < dt * 3.0: A.part(x + randf_range(-7, 7), y - r, 0, -20, 0.5, Color("#b6ff3a"), 2)
+	else: rad_s = 0
 	if sick_t > 0.0:
 		sick_t -= dt; dps += 3.0 * (1.0 + Run.wave * 0.1); dcol = Color("#b0e040")
 		if randf() < dt * 0.8:
@@ -189,6 +204,9 @@ func tick(dt: float) -> void:
 	if A.P.disguise_t > 0.0:
 		# Search the last area without acquiring, firing at, or charging the disguised villain.
 		Tactics.distracted(self, dt)
+		return
+	if behavior in ["vex_sentry","vex_mine"]:
+		preload("res://game/rival_scientist.gd").gadget_tick(self,dt)
 		return
 	var sp := spd * (0.55 if slow_t > 0.0 else 1.0) * (0.7 if sick_t > 0.0 else 1.0)
 	var P = A.P
@@ -228,14 +246,55 @@ func tick(dt: float) -> void:
 			A.snd("ebul")
 	elif tgt_ally != null or navigating or pd > r + P.r:
 		# chase, but stop at the villain's edge instead of stacking on its centre
-		var step := sp * dt
+		var step := sp * dt * _gait(pd)
+		if action_phase == "swing": step *= SWING_SLOW
 		if tgt_ally == null and not navigating: step = minf(step, maxf(0.0, pd - (r + P.r) * 0.85))
-		_move(dx / d * step, dy / d * step)
+		var heading := Vector2(dx / d, dy / d)
+		if tgt_ally == null and not navigating:
+			# fan out at range, close in straight; drones weave so they are harder to track
+			heading = heading.rotated(flank * clampf((pd - 110.0) / 220.0, 0.0, 1.0))
+			if type == "drone": heading = (heading + heading.orthogonal() * sin(walk * 0.55 + flank * 9.0) * 0.55).normalized()
+		_move(heading.x * step, heading.y * step)
 	face = 1 if dx >= 0 else -1
-	if tgt_ally == null and pd < r + P.r and atk_cd <= 0.0 and not boss:
+	if tgt_ally == null and not boss and SWING.has(type):
+		_swing(dt, pd)
+	elif tgt_ally == null and pd < r + P.r and atk_cd <= 0.0 and not boss:
 		atk_cd = 1.0; A.hurt_player(dmg)
 		# the bite knocks the biter back a step, so a contact attacker doesn't sit glued to you
 		var kd := maxf(0.0001, pd); _move(-(P.x - x) / kd * BITE_KNOCKBACK, -(P.y - y) / kd * BITE_KNOCKBACK)
+
+## Baton cops and riot police telegraph their hit: a short wind-up (raised baton / shield drawn back),
+## then the blow lands only if the villain is still in reach. K9s and drones keep their instant bite.
+## windup s, extra reach px, lunge px/s during the wind-up.
+const SWING := {"cop": [0.26, 12.0, 0.0], "riot": [0.42, 16.0, 150.0]}
+const SWING_SLOW := 0.35
+## Called by EnemyView (dynamically, so the view never compiles this script ahead of the Run autoload).
+func swings() -> bool: return SWING.has(type)
+func _swing(dt: float, pd: float) -> void:
+	var P = A.P
+	var spec: Array = SWING[type]
+	var reach: float = r + P.r + spec[1]
+	if action_phase == "swing":
+		action_t -= dt
+		if spec[2] > 0.0 and pd > r + P.r * 0.8:   # riot shield charge: step into the bash
+			var kd := maxf(0.0001, pd); _move((P.x - x) / kd * spec[2] * dt, (P.y - y) / kd * spec[2] * dt)
+		if action_t <= 0.0:
+			action_phase = ""; atk_cd = 1.0
+			if Vector2(P.x - x, P.y - y).length() < reach + 4.0:
+				A.hurt_player(dmg)
+				var kd2 := maxf(0.0001, pd); _move(-(P.x - x) / kd2 * BITE_KNOCKBACK * 0.6, -(P.y - y) / kd2 * BITE_KNOCKBACK * 0.6)
+				if type == "riot": A.shake = maxf(A.shake, 3.0)
+	elif pd < reach and atk_cd <= 0.0:
+		action_phase = "swing"; action_t = spec[0]
+		if type == "riot": A.poof(x, y + 12, Color("#a89878"), 5, 60, 3)   # boots dig in for the shield charge
+
+## K9s gallop: speed surges and eases with each bound (same average pace).
+func _gait(pd: float) -> float:
+	if type == "k9":
+		if _feel_rng.randf() < 0.04 and pd > 60.0: A.part(x - face * 6, y + 8, -face * 25.0, -12.0, 0.3, Color("#a89878"), 2)   # paw dust
+		return 0.94 + 0.12 * sin(walk * 0.75)   # peaks stay under the chaser speed cap
+	if type == "drone" and pd < 170.0 and pd > 50.0: return 1.3   # swoop in for the hit
+	return 1.0
 
 ## Fire and poison spread (like Sickness): each second, a burning / poisoned cop has a S.burnSpread /
 ## S.poisonSpread chance (stat, can exceed 1 = several catches a second) to pass it to one cop within SPREAD_R.
@@ -289,6 +348,7 @@ func _civ_ai(dt: float) -> void:
 func _ally_ai(dt: float) -> void:
 	var S: Dictionary = Run.S
 	ally_t -= dt; tgt_t -= dt
+	if action_phase == "swing": action_phase = ""
 	if tgt_t <= 0.0 or tgt == null or tgt.dead or tgt.ally: tgt_t = 0.3; tgt = A.nearest_foe(x, y)
 	var t := tgt
 	if t != null:
@@ -309,6 +369,8 @@ func _boss_ai(dt: float, dx: float, dy: float, d: float, sp: float) -> void:
 	var P = A.P
 	var AW: float = A.AW; var AH: float = A.AH
 	match hero:
+		"vex":
+			preload("res://game/rival_scientist.gd").tick(self,dt,sp)
 		"ironclad":   # armored bruiser: charge + leaping ground slam
 			var rage := hp < max_hp * 0.5
 			charge_windup = 0.4 if rage else 0.5

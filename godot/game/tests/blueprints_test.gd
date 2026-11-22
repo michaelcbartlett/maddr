@@ -52,7 +52,7 @@ func _run() -> void:
 	_start(5, "street")
 	_check(not run.item_available(run.ITEM.boots), "Rocket Boots aren't in the fresh shop pool")
 	var boss = a.make_enemy("boss", a.P.x + 220, a.P.y); a.kill(boss)
-	var blueprints: Array = a.pickups.filter(func(p): return p.has("blueprint"))
+	var blueprints: Array = a.pickups.filter(func(p): return p.get("blueprint", "") == "boots")
 	_check(blueprints.size() == 1 and blueprints[0].blueprint == "boots", "Captain Ironclad drops the boots blueprint")
 	_check(not run.unlocks.is_unlocked("item", "boots"), "the kill itself does not unlock the boots")
 	a.end_wave()
@@ -64,7 +64,7 @@ func _run() -> void:
 	_check(run.unlocks.is_unlocked("item", "boots") and run.item_available(run.ITEM.boots), "walking onto the pickup unlocks future shops")
 	_check(not run.CNT.has("boots"), "unlocking does not equip a free pair")
 	a.pickups.clear(); a.kill(a.make_enemy("boss", a.P.x + 200, a.P.y))
-	_check(not a.pickups.any(func(pickup): return pickup.has("blueprint")), "unlocked boots do not drop duplicate blueprints")
+	_check(not a.pickups.any(func(pickup): return pickup.get("blueprint", "") == "boots"), "unlocked boots do not drop duplicate blueprints")
 	run.new_run()
 	_check(not run.item_available(run.ITEM.boots), "future runs still wait until wave 5 for the boots shop pool")
 	run.wave = 5
@@ -124,10 +124,13 @@ func _run() -> void:
 	_check(not run.item_available(run.ITEM.tesla_helmet), "helmet is a single installed upgrade")
 	var art = Art.new(); art.configure(["tesla_helmet"], "laser", "pistol")
 	_check(art.body_frame(0, false).anims.size() >= 3, "helmet art includes animated electrode glows")
-	# Roads have actual lamp props in both axes, keeping the central crossing clear.
+	# Every visible street lamp base sits wholly on the rendered concrete sidewalks.
 	_start(1, "street")
-	for pos in [Vector2(400,550), Vector2(1200,550), Vector2(800,330), Vector2(800,770)]:
-		_check(a.arena_level.lamps.has(pos) and a.arena_level.prop_nodes.any(func(n): return n.kind == "lamp_post" and n.position == pos + Vector2(0, 1)), "road-center lamp %s has a physical visible post" % pos)
+	_check(a.arena_level.lamps.size() == 8, "street keeps eight sidewalk lamps")
+	for pos in a.arena_level.lamps:
+		var base := Rect2(pos - Vector2(5,5), Vector2(10,6))
+		_check(a.arena_level.STREET_SIDEWALKS.any(func(side): return Rect2(side).encloses(base)), "lamp %s has its whole base on concrete" % pos)
+		_check(a.arena_level.prop_nodes.any(func(n): return n.kind == "lamp_post" and n.position == pos + Vector2(0, 1)), "sidewalk lamp %s has a visible post" % pos)
 	if OS.get_cmdline_user_args().has("--screenshots"):
 		await _screenshots()
 	scene.queue_free(); await process_frame; await process_frame
@@ -154,9 +157,14 @@ func _screenshots() -> void:
 	scene._enter_lab()
 	await process_frame; await process_frame; await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://test-results/blueprints-lab.png")
-	_start(1, "street"); a.banner_t = 0; a.siren_t = 0; a.P.inv = 0; a.wave_t = 30; a.cam.position = Vector2(800, 550); a._sync(0); scene._show("play")
+	_start(1, "street"); a.banner_t = 0; a.siren_t = 0; a.P.inv = 0; a.wave_t = 30; a._sync(0); scene._show("play")
+	var combat_zoom: Vector2 = a.cam.zoom
+	var capture_size: Vector2 = a.get_viewport_rect().size
+	a.cam.zoom = Vector2.ONE * minf(capture_size.x / float(Levels.AW), capture_size.y / float(Levels.AH)) * 0.96
+	a.cam.position = Vector2(Levels.AW, Levels.AH) * 0.5; a.cam.reset_smoothing()
 	await process_frame; await process_frame; await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://test-results/road-lamps.png")
+	a.cam.zoom = combat_zoom
 	run.wave = 6; run.gen_offers(); scene.shop_s.refresh(); scene._show("shop")
 	await process_frame; await process_frame; await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://test-results/concise-shop.png")

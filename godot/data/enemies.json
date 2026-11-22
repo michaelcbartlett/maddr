@@ -1,6 +1,6 @@
 {
  "types":{
-  "cop":{"hp":5,"spd":100,"dmg":5,"r":11,"scrap":1,"spr":"cop"},
+  "cop":{"hp":5,"spd":108,"dmg":5,"r":11,"scrap":1,"spr":"cop"},
   "k9":{"hp":4,"spd":185,"dmg":3,"r":9,"scrap":1,"spr":"dog"},
   "det":{"hp":8,"spd":88,"dmg":5,"r":11,"scrap":2,"spr":"det","ranged":1},
   "riot":{"hp":30,"spd":66,"dmg":9,"r":15,"scrap":3,"spr":"riot","heavy":1},
@@ -12,6 +12,8 @@
   "robodog":{"hp":16,"spd":170,"dmg":6,"r":12,"scrap":3,"spr":"robodog","behavior":"pounce","damage_taken":{"poison":0.0,"lightning":2.0}},
   "guard":{"hp":25,"spd":82,"dmg":5,"r":12,"scrap":3,"spr":"guard","ranged":1,"behavior":"rifle","burst":4,"range":330,"shot_speed":280,"cooldown":3.4},
   "tank":{"hp":135,"spd":43,"dmg":13,"r":104,"scrap":14,"spr":"tank","heavy":1,"vehicle":1,"behavior":"cannon","muzzle":184,"themes":["street","harbour"],"max_alive":1,"group_size":1,"damage_taken":{"poison":0.0,"physical":0.8,"lightning":1.5}},
+  "vex_sentry":{"hp":6,"spd":0,"dmg":3,"r":12,"scrap":2,"spr":"vex_sentry","heavy":1,"ranged":1,"behavior":"vex_sentry","damage_taken":{"poison":0.0,"lightning":2.0}},
+  "vex_mine":{"hp":3,"spd":0,"dmg":5,"r":10,"scrap":1,"spr":"vex_mine","heavy":1,"behavior":"vex_mine","damage_taken":{"poison":0.0,"lightning":2.0}},
   "boss":{"hp":220,"spd":85,"dmg":14,"r":24,"scrap":0,"spr":"hero_ironclad","heavy":1,"boss":1},
   "civ":{"hp":5,"spd":200,"dmg":0,"r":10,"scrap":0,"spr":"civ_suit","civ":1}
  },
@@ -20,6 +22,7 @@
   "10":{"id":"surge","hp":0.75,"name":"STATIC SURGE","power":"Teleports · hurls lightning"},
   "12":{"id":"viper","hp":0.55,"name":"VELVET VIPER","power":"Homing missiles · zigzag rush"},
   "15":{"id":"glacia","hp":0.8,"name":"GLACIA","power":"Ice shards · freezing nova"},
+  "18":{"id":"vex","hp":0.65,"speed":1.1,"name":"DR. VIOLET VEX","power":"Twin laser blasters · sentries · shock mines"},
   "20":{"id":"paragon","hp":1.3,"name":"OMEGA PARAGON","power":"Flight · eye lasers · calls backup"}
  },
  "_spawn_table":"[type, base weight, first wave, extra weight per wave]",

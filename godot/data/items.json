@@ -1,4 +1,5 @@
 [
+  {"id":"capacitor","t":2,"c":32,"ic":"🔋","name":"Patience Capacitor","desc":"Release fire to charge · 1.5s for 2.5× next laser damage","look":"Copper capacitor with three amber charge windows on the gun","wv":{"s":"top","w":5}},
   {"id":"tesla_helmet", "t":2, "c":28, "ic":"⚡", "name":"Electrode Helmet", "desc":"3 lightning damage · 3 targets · 110 radius · 1.5s cooldown", "look":"Silver wire cage helmet with copper electrodes and blue sparks"},
   {
     "id": "bionic_arm",
@@ -6,7 +7,7 @@
     "c": 18,
     "ic": "🦾",
     "name": "Bionic Arm",
-    "desc": "Auto melee",
+    "desc": "Auto melee · opens secondary equipment offers",
     "look": "A metal arm with a glowing fist"
   },
   {
@@ -47,7 +48,7 @@
     "c": 14,
     "ic": "🔎",
     "name": "Telescoping Monocle",
-    "desc": "Aim guide",
+    "desc": "Aim guide. Buy a second for an upgraded crosshair.",
     "look": "A stacked spyglass eyepiece that extends from your eye as you aim",
     "set": {
       "aimGuide": 1
@@ -763,6 +764,32 @@
     "look": "Red proximity detonator on the bionic arm"
   },
   {"id":"seeker_rack","t":2,"c":48,"ic":"🚀","name":"Triple Seeker Rack","arm":"seeker_rack","desc":"3 homing rockets at nearby foes · 5s cooldown","look":"Three pink-tipped rocket tubes on the bionic forearm"},
+  {"id":"knife","t":2,"c":36,"ic":"🔪","name":"Switchblade","arm":"knife","melee":{"reach":48,"arc":0.6,"swing":0.16,"cd":0.34,"dmg":6,"scale":0.3,"knock":40,"targets":1},"desc":"Auto stab · 48 reach · 0.34s cooldown · triggers on-hit effects","look":"A flick-out switchblade clipped to the bionic fist"},
+  {"id":"whip","t":2,"c":44,"ic":"〰","name":"Shock Whip","arm":"whip","melee":{"reach":150,"arc":0.3,"swing":0.4,"cd":1.4,"dmg":11,"scale":0.4,"knock":0,"targets":99,"stun":0.5},"desc":"Auto lash · 150 reach · hits the whole line, stuns 0.5s · 1.4s cooldown","look":"A coiled electrified whip hanging from the bionic fist"},
+  {"id":"katana","t":3,"c":62,"ic":"🗡","name":"Mad Katana","arm":"katana","melee":{"reach":84,"arc":2.4,"swing":0.3,"cd":0.95,"dmg":20,"scale":0.7,"knock":90,"targets":99},"desc":"Auto slash · 84 reach · hits every foe in a wide arc · 0.95s cooldown","look":"A long glowing katana gripped in the bionic fist"},
+  {"id":"servos","t":1,"c":14,"ic":"⚙","name":"Overclocked Servos","needs_arm":1,"desc":"+20% melee attack speed","look":"Whirring servo rings on the bionic elbow","add":{"meleeSpd":0.2}},
+  {"id":"extender","t":1,"c":14,"ic":"📏","name":"Telescoping Forearm","needs_arm":1,"desc":"+20% melee reach","look":"A sliding piston section in the bionic forearm","add":{"meleeReach":0.2}},
+  {"id":"knuckles","t":1,"c":14,"ic":"👊","name":"Brass Knuckle Plating","needs_arm":1,"desc":"+25% melee damage","look":"Riveted brass plates over the bionic knuckles","add":{"meleeDmg":0.25}},
+  {"id":"berserker","t":3,"c":58,"ic":"🌀","name":"Berserker Gyro","needs_arm":1,"desc":"+40% melee attack speed · +20% melee damage · +10% move speed","look":"A spinning red gyroscope bolted to the bionic shoulder","add":{"meleeSpd":0.4,"meleeDmg":0.2,"speedPct":0.1}},
+  {"id":"bellows","t":1,"c":14,"ic":"🌬","name":"Oxygen Bellows","desc":"+30% burn damage","look":"A leather bellows pumping air into the gun","add":{"burnMul":0.3}},
+  {"id":"venom","t":1,"c":14,"ic":"🐍","name":"Concentrated Venom","desc":"+30% poison damage","look":"A dripping green venom gland on the barrel","add":{"poisonMul":0.3}},
+  {"id":"windings","t":1,"c":14,"ic":"🧲","name":"Copper Windings","desc":"+25% lightning damage (chain, helmet, grapple)","look":"Tight copper coil windings around the barrel","add":{"lightningMul":0.25}},
+  {"id":"uranium","t":2,"c":34,"ic":"☢","name":"Uranium Slugs","desc":"Shots irradiate cops: dose stacks to 12 (+0.5/sec each). Full dose melts down and irradiates nearby cops","look":"Glowing green slugs in a lead-lined hopper","add":{"rad":0.5}},
+  {"id":"geiger","t":1,"c":14,"ic":"📟","name":"Geiger Amplifier","desc":"+30% radiation damage","look":"A clicking Geiger counter strapped to the stock","add":{"radMul":0.3}},
+  {"id":"payraise","t":1,"c":14,"ic":"💵","name":"Henchman Pay Raise","desc":"+30% minion damage","look":"A wad of cash tucked in the coat pocket","add":{"minionMul":0.3}},
+  {"id":"kit_disguise","t":1,"c":30,"ic":"🥸","name":"Disguise Kit","consumable":"disguise","desc":"Supply · 3 disguises (Y / Q): lose pursuit for 4s. Unlocks refills","look":"A fake moustache and tourist hat"},
+  {"id":"kit_grenade","t":1,"c":24,"ic":"💣","name":"Grenade Satchel","consumable":"grenade","desc":"Supply · 3 grenades (Y / Q): thrown along your aim. Unlocks refills","look":"A canvas satchel of grenades"},
+  {"id":"kit_teleport","t":1,"c":38,"ic":"🌀","name":"Teleport Pads","consumable":"teleport","desc":"Supply · 3 teleport pairs (Y / Q): place two pads, step in for one trip. Unlocks refills","look":"A pair of glowing purple floor pads"},
+  {"id":"vault_plating","t":2,"c":30,"ic":"🛡","name":"Vault Door Plating","bank":1,"desc":"+4 armor · +10 max HP","look":"Riveted steel slabs cut from a vault door","add":{"armor":4,"maxHp":10}},
+  {"id":"money_counter","t":2,"c":34,"ic":"💸","name":"Money Counter Motor","bank":2,"desc":"+20% fire rate · +10% scrap","look":"A whirring bank-note counter feeding the breech","add":{"atkSpd":0.2,"scrapPct":0.1}},
+  {"id":"dye_pack","t":3,"c":58,"ic":"🎨","name":"Exploding Dye Pack","bank":3,"desc":"+10% explode chance · +15% damage","look":"A red dye pack taped under the barrel","add":{"explode":0.1,"dmgPct":0.15}},
+  {"id":"tumbler_scope","t":3,"c":62,"ic":"🔐","name":"Tumbler Lockpick Scope","bank":4,"desc":"+2 pierce · +15% crit chance","look":"A safecracker tumbler dial mounted as a sight","add":{"pierce":2,"crit":0.15}},
+  {"id":"gold_reserve","t":4,"c":115,"ic":"🏦","name":"Federal Gold Reserve","bank":5,"desc":"+40% damage · +30% scrap · +20 max HP","look":"Gold bars stacked along the stock","add":{"dmgPct":0.4,"scrapPct":0.3,"maxHp":20}},
   {"id":"zigzag","t":3,"c":62,"ic":"⚡","name":"Viper Zigzag","action":"zigzag","desc":"B / Shift: three damaging dashes · 7s cooldown","look":"Pink speed coils at the ankles"},
-  {"id":"iron_slam","t":3,"c":68,"ic":"💥","name":"Ironclad Leap","action":"iron_slam","desc":"B / Shift: leap and ground slam · 10s cooldown","look":"Gold impact pistons on the boots"}
+  {"id":"iron_slam","t":3,"c":68,"ic":"💥","name":"Ironclad Leap","action":"iron_slam","desc":"B / Shift: leap and ground slam · 10s cooldown","look":"Gold impact pistons on the boots"},
+  {"id":"bullion","t":2,"c":30,"ic":"🥇","name":"Gold Bullion Ballast","heist":1,"desc":"+2 armor · +15% scrap","look":"A stolen gold bar strapped under the barrel","add":{"armor":2,"scrapPct":0.15},"wv":{"s":"bot","w":5}},
+  {"id":"rail_spike","t":2,"c":32,"ic":"🔩","name":"Rail Spike Bayonet","heist":2,"desc":"+1 pierce · +3 base damage","look":"An iron rail spike lashed under the muzzle","add":{"pierce":1,"dmg":3},"wv":{"s":"bot","w":6}},
+  {"id":"steam_piston","t":3,"c":58,"ic":"♨","name":"Steam Piston Rings","heist":3,"desc":"+25% fire rate · +10% move speed","look":"Brass piston rings on the barrel that puff steam","add":{"atkSpd":0.25,"speedPct":0.1},"wv":{"s":"wrap","w":3}},
+  {"id":"firebox","t":3,"c":64,"ic":"🚂","name":"Locomotive Firebox","heist":4,"desc":"Shots ignite cops (+4 burn/sec) · +15% damage","look":"A glowing coal firebox under the gun","add":{"burn":4,"dmgPct":0.15},"wv":{"s":"bot","w":5}},
+  {"id":"headlamp","t":4,"c":110,"ic":"🔦","name":"Express Headlamp","heist":5,"desc":"+90 range · +12% crit · +25% damage","look":"A huge brass locomotive headlamp on top of the gun","add":{"rangeAdd":90,"crit":0.12,"dmgPct":0.25},"wv":{"s":"top","w":6}}
 ]

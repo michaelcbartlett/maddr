@@ -3,7 +3,8 @@ extends Node
 ## Pause on Start / Esc.
 ## Port of index.html FLOW (show/newRun/startWave/openShop/gameOver).
 ## Test hooks (after `--`): --autoplay N  plays N seconds with a scripted pad-less bot and quits;
-##                           --shot file.png  saves a screenshot at the end;  --wave W  start at wave W.
+##                           --shot file.png  saves a screenshot at the end;  --wave W  start at wave W
+##                           (add --heist to make it the train heist).
 
 var state := "title"
 var arena: Arena
@@ -18,7 +19,6 @@ var pause_s: Control
 var over_s: Control
 var over_title: Label
 var over_text: Label
-var pad_l: Label
 
 # test hooks
 var _auto := -1.0
@@ -26,7 +26,7 @@ var _shot := ""
 var _t := 0.0
 
 func _ready() -> void:
-	get_window().title = "Mad Villain"
+	get_window().title = "The Diabolical Doctor"
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	arena = Arena.new(); arena.process_mode = Node.PROCESS_MODE_PAUSABLE; add_child(arena)
 	arena.cleared.connect(_on_cleared); arena.died.connect(func(): _game_over(false))
@@ -39,7 +39,6 @@ func _ready() -> void:
 	design_s = preload("res://ui/design_screen.gd").new(); design_s.begin.connect(_open_difficulty); fit.add_child(design_s)
 	shop_s = preload("res://ui/shop_screen.gd").new(); shop_s.next_wave.connect(_start_wave); fit.add_child(shop_s)
 	difficulty_s = preload("res://ui/difficulty_screen.gd").new(); fit.add_child(difficulty_s); difficulty_s.chosen.connect(func(_l): _start_wave())
-	Controls.pad_changed.connect(func(t): pad_l.text = t; pad_l.visible = not t.is_empty())
 	var args := OS.get_cmdline_user_args()
 	var i := args.find("--autoplay"); if i >= 0: _auto = float(args[i + 1])
 	i = args.find("--shot"); if i >= 0: _shot = args[i + 1]
@@ -47,6 +46,7 @@ func _ready() -> void:
 	i = args.find("--wave")
 	if i >= 0:
 		Run.new_run(); Run.wave = int(args[i + 1])
+		if args.has("--heist"): Run.heist_wave = Run.wave   # play this wave as the train heist
 		var j := args.find("--items")
 		if j >= 0:
 			for id in (args[j + 1] as String).split(","): Run.build.items.append(id)
@@ -74,9 +74,7 @@ func is_playing() -> bool: return state == "play"
 func _build_title() -> void:
 	var s := UiKit.screen(700); title_s = s[0]; fit.add_child(title_s); var vb: VBoxContainer = s[1]
 	var pv := VillainPreview.new(3.0, Vector2(0, 220)); pv.aim_base = -0.25; vb.add_child(pv)
-	vb.add_child(UiKit.title("MAD VILLAIN"))
-	pad_l = UiKit.label(Controls.joy_status(), 13, UiKit.NEON, HORIZONTAL_ALIGNMENT_CENTER); vb.add_child(pad_l)
-	pad_l.visible = not pad_l.text.is_empty()
+	vb.add_child(UiKit.title("THE DIABOLICAL DOCTOR", 44))
 	var b := UiKit.button("Enter the Lab", _enter_lab); b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER; vb.add_child(b)
 	title_s.set_meta("focus", b)
 
@@ -142,6 +140,8 @@ func _game_over(win: bool) -> void:
 	over_title.add_theme_color_override("font_color", UiKit.NEON if win else UiKit.BAD)
 	if win: over_text.text = "You survived all 20 waves on %s.\nThe city is yours.\n%d cops defeated · %d scrap looted" % [Run.difficulty_name(), Run.kills, Run.total_scrap]
 	else: over_text.text = "Arrested on wave %d (%s).\n%d cops defeated · %d scrap looted · %d modules" % [Run.wave, Run.difficulty_name(), Run.kills, Run.total_scrap, Run.build.items.size()]
+	over_text.text += "\n" + Run.display_name()
+	if not win and Run.unlocks.best_wave > 0: over_text.text += "  ·  furthest: wave %d" % Run.unlocks.best_wave
 	if not Run.unlocks.fresh.is_empty():
 		over_text.text += "\n\n🔓 %s" % ", ".join(Run.unlocks.fresh.map(Run.part_name))
 	if Run.unlocks.fresh_difficulty > 0:
@@ -174,7 +174,7 @@ func _process(dt: float) -> void:
 func _bot(_dt: float) -> void:
 	# a dumb bot: circle the arena centre, aim at the nearest cop, hold fire (via the input actions)
 	var P := arena.P
-	var c := Levels.SPAWN + Vector2(cos(_t * 0.7), sin(_t * 0.7)) * 220
+	var c: Vector2 = arena.arena_level.spawn + Vector2(cos(_t * 0.7), sin(_t * 0.7)) * 220
 	var mv := (c - Vector2(P.x, P.y)).limit_length(60) / 60.0
 	_axis("move_right", maxf(0, mv.x)); _axis("move_left", maxf(0, -mv.x)); _axis("move_down", maxf(0, mv.y)); _axis("move_up", maxf(0, -mv.y))
 	var e := arena.nearest_foe(P.x, P.y)

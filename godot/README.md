@@ -1,12 +1,25 @@
-# Mad Villain — native Godot port
+# The Diabolical Doctor — native Godot port
 
 Open `project.godot` in **Godot 4.7** and press **F5**. The main scene is `game/main.tscn`.
 The game runs entirely in Godot: no browser, JavaScript runtime, sprite exporter, or local server is needed.
 
-Mad Villain is a Brotato-style arena game. You build a doomsday weapon, then survive 20 waves of police in a
+The Diabolical Doctor is a Brotato-style arena game. You build a doomsday weapon, then survive 20 waves of police in a
 single 1,600×1,100 arena (`levels/arena_level.gd`). Waves are back to back: 30 s, then +5 s a wave up to 60 s. The
-supply depot opens between waves. Hero bosses arrive on waves 5, 10, 15 and 20 (Captain Ironclad, Static
-Surge, Glacia, Omega Paragon). Surviving wave 20 wins the run.
+supply depot opens between waves. Bosses arrive on waves 5, 10, 12, 15, 18 and 20 (Captain Ironclad, Static
+Surge, Velvet Viper, Glacia, Dr. Violet Vex, Omega Paragon). Surviving wave 20 wins the run.
+
+**Dr. Violet Vex**, wave 18, is a competing evil scientist with long violet hair, laboratory goggles,
+a white coat and twin cyan/magenta laser blasters. She alternates committed, warned volleys with
+destructible laser sentries and timed shock mines. Laser aim locks before firing; moving out of the
+warning dodges the volley. She pauses to attack and recovers afterwards. Below half health she fires
+four pairs instead of three and can place a third mine. At most two sentries and five mines can remain
+active. Shooting her gadgets removes them; defeating her shuts down the rest and her remaining lasers.
+Disguise cancels her current attack, and freeze/time-stop pause it. Tests: `game/tests/rival_scientist_test.gd`.
+
+**Telescoping Monocle II.** Buying the Monocle twice upgrades its close aim guide into a crosshair.
+With a controller it sits at the main gun's full current range, measured from its muzzle; range upgrades
+move it outward. With mouse aim it follows the actual cursor. The second copy is labelled II in the shop,
+and no third copy is offered. Selling a copy returns it to level I; selling both removes the guide.
 
 **Reinforcements and consumables.** Plainclothes New York cops in jeans and white trainers arrive from
 wave 2, charging police interceptors from 4, rifle SWAT from 6, SWAT carrying both ballistic shields and
@@ -46,11 +59,72 @@ leaves glass shards and spills three collectible gems worth 4 scrap each before 
 per museum can contain an uncollected Disintegration Lens, Absolute Zero Core or Moon Laser Uplink blueprint.
 Collecting it permanently opens that module's shop pool from wave 5 onward; discovering it alone does not.
 
+**Train heist.** One wave per run, picked at random from waves 7, 8 or 9 (`data/rules.json` `heist.waves`; never a
+boss wave), swaps the arena for a long armoured train (`levels/train_level.gd`). The villain boards at the caboose
+and fights east through seven connected cars (caboose, passenger, dining, mail, freight, first class, vault car).
+Each car is a room with destructible seats, mail racks, freight containers or safes, joined by narrow gangway
+doors. Cops board the villain's car and the two cars ahead (`game/train_heist.gd`), and the camera follows along
+the train. The normal wave timer runs. Stepping onto the striped vault strongroom at the front of the vault car
+before the timer ends cracks the vault: the wave ends at once ("VAULT CRACKED!"). The HUD shows a car-by-car
+progress bar, the current car and the reward. If the timer runs out first, the train gets away: the wave still
+counts as survived, but there is no reward.
+
+Each difficulty has its own heist reward (`heist.rewards`). The first vault on that difficulty permanently unlocks
+the module for shops, saved like the blueprints. Every successful heist also installs a free copy for the rest
+of the run. All five are drawn on the gun:
+
+| Difficulty | Reward | Effect | On the gun |
+|---|---|---|---|
+| Petty Crook | Gold Bullion Ballast | +2 armor, +15% scrap | gold bar under the barrel |
+| Nuisance | Rail Spike Bayonet | +1 pierce, +3 base damage | iron rail spike under the muzzle |
+| Menace | Steam Piston Rings | +25% fire rate, +10% move speed | brass rings on the barrel, puffing steam |
+| Supervillain | Locomotive Firebox | +4 burn/sec, +15% damage | glowing coal firebox under the gun |
+| Arch-Nemesis | Express Headlamp | +90 range, +12% crit, +25% damage | big brass headlamp on top |
+
+To play the heist directly: `--wave 8 --heist` (after `--`).
+
+**Velvet Viper and boss rewards.** Wave 12 adds Velvet Viper, an adult heroine in a plum bodysuit,
+patterned stockings, mask and shoulder missile pods. Her pink seekers track across the arena and over
+props for up to 24 seconds; any bolt, bullet, razor, beam, grapple or player explosion can destroy them.
+There are at most six live seekers. She warns for 0.55 seconds before rushing along a fixed three-leg
+zigzag, stops on props and recovers for 0.85 seconds. Below half HP she moves faster and fires larger salvos.
+Defeating her clears the remaining seekers and drops the **Triple Seeker Rack** blueprint. Collecting it
+permanently adds the Rare secondary launcher (48 base scrap) to shops from wave 5 onward. It uses the
+Bionic Arm slot and fires three rockets at the nearest hostile foes within 500 units every five seconds,
+spreading targets when possible and reacquiring if one dies. Rockets collide with props and explode.
+
+Viper also has a **20%** chance to drop the **Viper Zigzag** blueprint; Ironclad has the same chance to
+drop **Ironclad Leap**, alongside his usual Rocket Boots blueprint. Collected rare blueprints add Epic
+shop abilities (62 / 68 base scrap). These use a separate **B / Shift action slot**, leaving the secondary
+weapon equipped: zigzag makes three damaging dashes on a seven-second cooldown; leap travels up to
+245 units and lands in a 115-unit ground slam on a ten-second cooldown. Movement input sets their
+direction, otherwise aim does. Props stop both. The newest bought action equips B; selling it restores
+the previous owned action. Collecting blueprints unlocks shop availability, not free equipment. Uncollected
+blueprints carry to the next wave, and unlocked blueprints do not drop again.
+Interaction tests and optional capture: `game/tests/viper_test.gd`.
+
 **Electrode Helmet:** a Rare, 28-scrap wire-cage helmet with copper electrodes, blue glows and normal-mapped
 metal. Every 1.5 seconds it automatically deals 3 damage to up to 3 enemies within 110 units of the player;
 chain jumps must be within 80 units and cannot cross walls. It ignores civilians and allies and takes one
-purchase, with no weapon slot required. The street theme also has lamp posts along both road centers,
-spaced away from the central crossing.
+purchase, with no weapon slot required. Street lamp bases sit on the concrete perimeter sidewalks,
+leaving the traffic lanes and central crossing clear.
+
+**Patience Capacitor:** a Rare, 32-scrap laser module available whenever a laser is equipped, with one
+purchase per run. Release that laser's trigger to store charge: 0.75 seconds gives 1.75× damage, and
+1.5 seconds caps at 2.5×. Its next shot spends the charge; holding fire never refills it. Every nozzle
+in a split volley receives the same bonus. Bolts, piercing beams, extra laser barrels and rear lasers
+are supported, with independent charge per gun. Sustained beams spend it on the opening damage tick.
+Non-laser shots gain no bonus. Copper charge windows and a HUD meter show the stored power; charged
+shots turn amber-white. Charge resets each wave. Checks: `game/tests/capacitor_test.gd`.
+
+**Combat readability.** The HUD flashes a red screen border on every hit and pulses it (with the HP bar)
+below 30% health. Edge arrows point at off-screen threats: gold for the boss, orange for vehicles, and
+flickering for anything winding up an attack (car charges, tank shells, boss charges and lasers). Enemy
+shots have a dark outline, a white core and a short trail showing their heading. Gunmen paint a red laser
+sight on the villain about half a second before firing. Baton cops (0.26 s) and riot police (0.42 s, with a
+shield step) wind up visibly before a blow and miss if the villain steps out of reach; K9s and drones still
+bite instantly. Chasers fan out at range instead of queueing, K9s gallop, and drones weave. The game-over
+screen also shows the weapon's name and the furthest wave reached.
 
 Weapon stats always show **Pierce**, including `0` for no extra penetrations, numeric upgrades and `∞`
 for unlimited laser beams. The Laser row now simply says `bolt` or `beam`.
@@ -116,7 +190,7 @@ sold while a Sustained Beam is installed. The other ammo (Bullets, Razor Blades,
   Any difficulty counts. Wave progress is recorded when a wave starts (`main._start_wave`) and bosses when they die
   (`arena.gd`). A new unlock shows in the boss banner and on the game-over screen. The Lab shows locked parts
   greyed out with lock icons. Progress is
-  saved to `user://unlocks.json` (`{"version", "best_wave", "bosses", "unlocked"}`). A missing or damaged file
+  saved to `user://unlocks.json` (`{"version", "best_wave", "bosses", "unlocked", "highest_difficulty", "heists"}`). A missing or damaged file
   starts a fresh profile. Test processes (`--script`, `--autoplay`, `--wave`) keep progress in memory and never
   write the player's save.
 
@@ -195,7 +269,7 @@ Lasers use a continuous capsule-masked shader with rounded ends. Chain upgrades 
 burning adds a warm red-orange halo and local lighting, with frost/toxic/mind-control accents as equipped.
 Defeat headlines rotate between BUSTED!, FOILED AGAIN!, CURSES!, and MEDDLING COPPERS!
 
-The viewport is 960×540; the initial window is 1280×720. The game window is titled **Mad Villain**.
+The viewport is 960×540; the initial window is 1280×720. The game window is titled **The Diabolical Doctor**.
 
 ## Tuning notes
 
@@ -373,7 +447,11 @@ From PowerShell, run `./check.ps1`. It finds Godot on PATH, through `GODOT_PATH`
   shop gating, the K9 speed cap on Arch-Nemesis wave 20, chasers not stacking on you, bite knockback, and
   point-blank hits on a dog at or around the villain's centre (bolt and beam). With the point-blank rule turned off, the K9 checks fail. Unlock tests (`game/tests/unlocks_test.gd`) cover the save round trip, damaged or missing saves, the
   unlock rules and hooks (wave start, boss kill), the Lab's locked/unlocked cards, and picking an unlocked start.
-- Arena tests (`game/tests/arena_test.gd`) cover the single arena, wave lengths, all seven themes, the
+- Train heist tests (`game/tests/heist_test.gd`) cover the heist wave schedule, the train arena and camera
+  limits, the connected cars (a navigation route from the caboose to the vault), boarding spawns, walking car by
+  car to the vault, failing on timeout, one unlock per difficulty (all five, never twice), the save round trip,
+  and each reward changing the gun sprite.
+- Arena tests (`game/tests/arena_test.gd`) cover the single arena, wave lengths, all seven themes plus the train, the
   difficulty picker and multipliers, bosses on 5/10/15/20, scrap/cash/crate pickups and the magnet, and the
   Bionic Arm slot. Selling tests (`game/tests/sell_test.gd`) cover refunds, arm-slot consistency and the
   two-press controller flow.
@@ -400,10 +478,10 @@ headless mode can run logic checks without screenshots.
 ## Export
 
 The Windows Desktop preset includes JSON data and excludes tests. Install the matching Godot export
-templates to export `build/MadVillain.exe` from the editor. A resource pack can be built without templates:
+templates to export `build/TheDiabolicalDoctor.exe` from the editor. A resource pack can be built without templates:
 
 ```powershell
-& $env:GODOT_PATH --headless --path . --export-pack "Windows Desktop" build/MadVillain.pck
+& $env:GODOT_PATH --headless --path . --export-pack "Windows Desktop" build/TheDiabolicalDoctor.pck
 ```
 
 The resource pack has also been smoke-tested independently of the source directory.

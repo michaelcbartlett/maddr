@@ -17,6 +17,9 @@ var unlocked: Array = []       # part keys, e.g. "ammo:bullet", "frame:rifle"
 var fresh: Array = []          # keys unlocked during the current run (cleared by begin_run)
 var rules: Array = []          # [{part, id, need: {reach_wave|boss: n}}]
 var highest_difficulty := 1
+var heists: Array = []         # difficulty levels (1..5) on which the train heist's vault was reached
+var banks: Array = []          # difficulty levels (1..5) on which the bank vault was opened
+var difficulty_names: Array = []   # set by Run (for requirement text)
 var fresh_difficulty := 0
 
 func _init(unlock_rules: Array = [], test_mode := false) -> void:
@@ -41,6 +44,14 @@ func requirement(part: String, id: String) -> String:
 	if r.need.has("pickup_boss"):
 		var boss_name: String = {"ironclad":"Captain Ironclad", "viper":"Velvet Viper"}.get(r.need.pickup_boss,r.need.pickup_boss)
 		return "Collect %s's %sblueprint" % [boss_name,"rare " if r.need.get("rare",false) else ""]
+	if r.need.has("heist"):
+		var level := int(r.need.heist)
+		var tier: String = difficulty_names[level - 1] if level - 1 < difficulty_names.size() else "difficulty %d" % level
+		return "Reach the vault car in the train heist on %s" % tier
+	if r.need.has("bank"):
+		var level := int(r.need.bank)
+		var tier: String = difficulty_names[level - 1] if level - 1 < difficulty_names.size() else "difficulty %d" % level
+		return "Open the bank vault on %s" % tier
 	if r.need.has("case"): return "Collect a blueprint from a shattered jewel case (wave 5+)"
 	if r.need.has("boss"): return "Defeat the wave-%d boss" % int(r.need.boss)
 	return "Reach wave %d" % int(r.need.reach_wave)
@@ -56,6 +67,41 @@ func note_difficulty_wave(level: int, wave: int) -> bool:
 	if not save(): highest_difficulty = level; return false
 	fresh_difficulty = highest_difficulty
 	return true
+
+## Train heist (game/train_heist.gd): reaching the vault car on a difficulty unlocks that difficulty's reward(s)
+## once. Returns the newly unlocked keys (empty when already earned or the save can't be written).
+func note_heist(level: int) -> Array:
+	var got: Array = []
+	for r in rules:
+		var k := key(r.part, r.id)
+		if int(r.need.get("heist", 0)) == level and not unlocked.has(k): got.append(k)
+	var first := not heists.has(level)
+	if first: heists.append(level)
+	if got.is_empty() and not first: return []
+	unlocked.append_array(got)
+	if not save():
+		for k in got: unlocked.erase(k)
+		if first: heists.erase(level)
+		return []
+	fresh.append_array(got)
+	return got
+
+## Bank robbery (game/bank_vault.gd): opening the vault on a difficulty unlocks that difficulty's bank reward once.
+func note_bank(level: int) -> Array:
+	var got: Array = []
+	for r in rules:
+		var k := key(r.part, r.id)
+		if int(r.need.get("bank", 0)) == level and not unlocked.has(k): got.append(k)
+	var first := not banks.has(level)
+	if first: banks.append(level)
+	if got.is_empty() and not first: return []
+	unlocked.append_array(got)
+	if not save():
+		for k in got: unlocked.erase(k)
+		if first: banks.erase(level)
+		return []
+	fresh.append_array(got)
+	return got
 
 ## Physical blueprints unlock only on collection, never from the boss/wave hooks.
 func collect_blueprint(id: String) -> bool:
@@ -92,7 +138,7 @@ func _evaluate() -> Array:
 	return got
 
 func reset() -> void:
-	best_wave = 0; bosses = []; unlocked = []; fresh = []
+	best_wave = 0; bosses = []; unlocked = []; fresh = []; heists = []; banks = []
 	highest_difficulty = 1
 	fresh_difficulty = 0
 	save()
@@ -101,12 +147,12 @@ func save() -> bool:
 	if not persist: return true
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null: push_warning("unlocks: can't write " + path); return false
-	f.store_string(JSON.stringify({"version": VERSION, "best_wave": best_wave, "bosses": bosses, "unlocked": unlocked, "highest_difficulty":highest_difficulty}, "  "))
+	f.store_string(JSON.stringify({"version": VERSION, "best_wave": best_wave, "bosses": bosses, "unlocked": unlocked, "highest_difficulty":highest_difficulty, "heists": heists, "banks": banks}, "  "))
 	f.flush()
 	return f.get_error() == OK
 
 func load_save() -> void:
-	best_wave = 0; bosses = []; unlocked = []; fresh = []
+	best_wave = 0; bosses = []; unlocked = []; fresh = []; heists = []; banks = []
 	highest_difficulty = 1; fresh_difficulty = 0
 	if not FileAccess.file_exists(path): return
 	var j := JSON.new()   # (JSON.parse_string would log an engine error for a damaged file)
@@ -116,5 +162,9 @@ func load_save() -> void:
 	highest_difficulty = clampi(int(v.get("highest_difficulty", 1)), 1, 5)
 	best_wave = int(v.get("best_wave", 0))
 	for b in v.get("bosses", []): bosses.append(int(b))
+	for h in v.get("heists", []):
+		if not heists.has(int(h)): heists.append(int(h))
+	for b in v.get("banks", []):
+		if not banks.has(int(b)): banks.append(int(b))
 	for k in v.get("unlocked", []):
 		if k is String and not unlocked.has(k): unlocked.append(k)

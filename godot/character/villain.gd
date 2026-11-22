@@ -24,6 +24,8 @@ var flash := 0.0
 var recoil2 := 0.0
 var flash2 := 0.0
 var gun_flashes: Array = []
+var capacitor_charge := 0.0
+var capacitor_charge_off := 0.0
 var melee_extension := 0.0
 var melee_aim := 1.2
 var arm_mode := "fist"
@@ -116,6 +118,12 @@ func set_items(p_items: Array, p_ammo: String = "laser", p_frame: String = "pist
 		_build_cache[key] = renderer; _build_order.append(key)
 		while _build_order.size() > CACHE_LIMIT: _build_cache.erase(_build_order.pop_front())
 	art = _build_cache[key]
+	if armed and items.has("capacitor"):
+		var rear_context: Dictionary = art.weapon_context(off_spec)
+		if art.AMMO[rear_context.ammo].id == "laser":
+			var rear_items: Array = off_spec.get("items",[]).duplicate()
+			if not rear_items.has("capacitor"): rear_items.append("capacitor")
+			off_spec.items = rear_items
 	muzzle_light.color = AMMO_COL.get(ammo,Color.WHITE)
 	if armed:
 		var context: Dictionary = art.weapon_context(off_spec)
@@ -134,6 +142,8 @@ func set_state(state: Dictionary) -> void:
 			"recoil2": recoil2 = float(state[key])
 			"flash2": flash2 = float(state[key])
 			"gun_flashes": gun_flashes = state[key].duplicate()
+			"capacitor_charge": capacitor_charge = float(state[key])
+			"capacitor_charge_off": capacitor_charge_off = float(state[key])
 			"time": t = float(state[key]); _external_clock = true
 			"melee_extension": melee_extension = float(state[key])
 			"melee_aim": melee_aim = float(state[key])
@@ -286,7 +296,7 @@ func _draw_rear_fx() -> void:
 			p.R(foot.x-1,foot.y+1,3,length,"#ff7a20"); p.R(foot.x,foot.y+1,1,length+1,"#ffd23c")
 
 func _effect_state(off: bool = false) -> Dictionary:
-	return {"moving":moving,"firing":firing2 if off else firing,"recoil":recoil2 if off else recoil,"flash":flash2 if off else flash,"hook_out":hook_out and not off}
+	return {"moving":moving,"firing":firing2 if off else firing,"recoil":recoil2 if off else recoil,"flash":flash2 if off else flash,"hook_out":hook_out and not off,"capacitor_charge":capacitor_charge_off if off else capacitor_charge}
 func _draw_body_fx() -> void:
 	if _body_frame.is_empty(): return
 	var p = Pen.new(body_fx,-BODY_ORIGIN.x,-BODY_ORIGIN.y)
@@ -333,6 +343,33 @@ func _draw_off_fx() -> void:
 		elif arm_mode=="seeker_rack":
 			for i in 3:
 				p.R(fist.x-5,-7+i*5,13,4,"#394258"); p.R(fist.x-4,-6+i*5,10,1,"#b8c6d8"); p.R(fist.x+7,-6+i*5,3,2,"#ff70b8")
+		elif arm_mode in MELEE_WEAPONS: _draw_melee_weapon(p,fist)
+
+const MELEE_WEAPONS := ["knife","katana","whip"]
+## Blades are held past the bionic fist; the whip uncoils to its full 150px reach mid-swing.
+func _draw_melee_weapon(p, fist: Vector2) -> void:
+	var x := fist.x+7
+	match arm_mode:
+		"knife":
+			p.R(x-1,-2,3,5,"#3b2a22")
+			p.line(x+2,0,x+15,-1,"#9aa6b2",3); p.line(x+2,-1,x+15,-1,"#f4f8fb",1); p.P(x+16,-1,"#ffffff")
+		"katana":
+			p.R(x-1,-4,2,9,"#d4a640"); p.R(x-6,-1,5,3,"#2a1830")
+			p.line(x+1,0,x+40,-3,"#b8c4d2",3); p.line(x+1,-1,x+40,-4,"#f4f8ff",1)
+			p.line(x+6,1,x+38,-2,"#ff5ad0",1); p.P(x+41,-4,"#ffffff")
+		"whip":
+			p.R(x-2,-2,4,5,"#5a3a24")
+			if melee_extension<=0.0:
+				p.ring(x+1,7,4,"#7a4a2a"); p.ring(x+1,7,2,"#7df9ff")
+			else:
+				var length := (150.0-fist.x-7.0)*melee_extension
+				var last := Vector2(x+2,0)
+				for i in range(1,11):
+					var u := i/10.0
+					var point := Vector2(x+2+length*u,sin(u*TAU*1.5+t*30.0)*5.0*u)
+					p.line(last.x,last.y,point.x,point.y,"#6a4026",3); p.line(last.x,last.y,point.x,point.y,"#7df9ff",1)
+					last = point
+				p.P(last.x,last.y,"#ffffff")
 
 func _flash_light() -> PointLight2D:
 	var light = PointLight2D.new(); light.texture = _light_tex(); light.texture_scale = 0.35

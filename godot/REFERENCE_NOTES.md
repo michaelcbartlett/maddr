@@ -1,7 +1,7 @@
 # Reference notes: Brotato Danger-5 clip (2026-11-22)
 
 Notes taken from a 3-minute recording of a Brotato run (waves 1–4, Danger 5), used as a feel reference.
-These are observations, not a spec. Mad Villain keeps its own art, names and systems.
+These are observations, not a spec. The Diabolical Doctor keeps its own art, names and systems.
 
 ## Pacing and feel
 - Waves are short at first: about 20 s, 25 s, 30 s, 35 s. A big countdown sits top-centre under "WAVE N".
@@ -25,7 +25,7 @@ These are observations, not a spec. Mad Villain keeps its own art, names and sys
   rarity colour) and green/red stat lines. Under each card are a big price button, a Lock toggle and a Ban
   button.
 - **Shop:** a permanent **Stats** panel on the right (Primary/Secondary tabs) lists every stat, with changed
-  values coloured green or red. Mad Villain's shop has no stat sheet, so this is the biggest gap.
+  values coloured green or red. The Diabolical Doctor's shop has no stat sheet, so this is the biggest gap.
 - **Shop:** owned Items and Weapons (n/6) sit in grids at the bottom, and "Go (Wave N)" is at bottom-right
   with the next enemy types previewed above it.
 - **Level-up and found-item screens** reuse the card layout: Take / Recycle (+currency) / Ban.

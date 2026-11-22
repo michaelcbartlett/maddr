@@ -103,8 +103,11 @@ func _run() -> void:
 	var seen := {}
 	for w in range(1, 21):
 		run.wave = w; arena.start_wave(); seen[arena.level] = true
-		_check(not arena.in_wall(Levels.SPAWN.x, Levels.SPAWN.y, 40), "spawn is clear in %s" % arena.level)
-		_check(arena.walls.size() > 0 and arena.arena_level.props.size() == arena.walls.size(), "%s has solid props" % arena.level)
+		var spawn: Vector2 = arena.arena_level.spawn
+		_check(not arena.in_wall(spawn.x, spawn.y, 40) and Vector2(arena.P.x, arena.P.y) == spawn, "spawn is clear in %s" % arena.level)
+		# the train heist adds its car walls and couplings on top of one wall per prop
+		var structural: int = 0 if arena.level != "train" else arena.walls.filter(func(wall): return not wall.has("prop_index")).size()
+		_check(arena.walls.size() > 0 and arena.arena_level.props.size() == arena.walls.size() - structural, "%s has solid props" % arena.level)
 		_check(arena.wave_t == minf(60.0, 25.0 + 5.0 * w), "wave %d length (30 s, +5 s a wave, 60 s cap)" % w)
 		if run.boss_for(w) != null:
 			arena.P.inv = 1000.0
@@ -112,7 +115,7 @@ func _run() -> void:
 			_check(arena.boss != null and arena.boss.hero == run.boss_for(w).id, "wave %d brings %s" % [w, run.boss_for(w).name])
 		if capture and w <= 7:
 			arena.P.x = 560; arena.P.y = 420; await _shot("arena-theme-" + arena.level)
-	_check(seen.size() == 7, "all seven themes appear in a run")
+	_check(seen.size() == 8 and seen.has("train"), "all seven themes and the train heist appear in a run")
 	run.wave = 20; arena.state = "done"; scene._on_cleared()
 	_check(scene.state == "over" and scene.over_title.text == "CITY CONQUERED!", "surviving wave 20 wins")
 	print("ARENA TESTS: %d checks, %d failures" % [checks, failures])

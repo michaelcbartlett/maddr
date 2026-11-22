@@ -2,6 +2,8 @@ extends RefCounted
 ## Street and military reinforcements. All movement still goes through arena wall collision.
 
 static func distracted(e, dt: float) -> void:
+	if e.hero == "vex": preload("res://game/rival_scientist.gd").cancel(e)
+	if e.action_phase == "swing": e.action_phase = ""
 	if e.action_phase in ["windup","rush","zigzag"]: e.action_phase = "recover"; e.action_t = 1.0
 	e.burst_left = 0; e.shoot_cd = maxf(e.shoot_cd, 0.8)
 	e.charging = 0.0; e.slam = null; e.air = 0.0; e.laser = null
@@ -135,8 +137,29 @@ static func shield_multiplier(e, options: Dictionary) -> float:
 		return 1.0 - block
 	return 1.0
 
+## Gunmen paint a thin laser sight on the villain just before they fire (detective shot, rifle burst).
+const SIGHT_T := 0.45
+static func _sight(e) -> void:
+	if e.A == null or e.A.P == null or not e.ranged or e.vehicle: return
+	var ready: bool
+	if e.behavior == "rifle": ready = e.burst_left <= 0 and e.shoot_cd < SIGHT_T
+	else: ready = e.behavior == "" and e.shoot_cd < SIGHT_T
+	if not ready: return
+	var to := Vector2(e.A.P.x - e.x, e.A.P.y - e.y)
+	var reach := float(Run.ET[e.type].get("range", 380)) + (85.0 if e.behavior == "rifle" else 0.0)
+	if to.length() > reach or to.x * e.face < 0.0: return
+	var k := clampf(1.0 - maxf(0.0, e.shoot_cd) / SIGHT_T, 0.0, 1.0)
+	var from := EnemyView.muzzle_local(e)
+	var end := to + Vector2(0, -14)
+	var col := Color("#ff3a3a", 0.18 + 0.5 * k)
+	e.draw_line(from, end, col, 1.0)
+	e.draw_circle(end, 1.5 + 1.5 * k, col)
+
 static func draw_warning(e) -> void:
 	if e.ally or e.frozen_t > 0.0 or e.time_lock > 0.0: return
+	if e.hero == "vex" or e.behavior in ["vex_sentry","vex_mine"]:
+		preload("res://game/rival_scientist.gd").draw_warning(e)
+		return
 	if e.type == "swat_shield":
 		var a: float = e.aim_dir.angle()
 		e.draw_arc(Vector2.ZERO, e.r + 5.0, a - 1.1, a + 1.1, 16, Color("#c5f5ff") if e.shield_flash > 0.0 else Color("#60bcd1", 0.55), 2.0)
@@ -147,6 +170,7 @@ static func draw_warning(e) -> void:
 			e.draw_line(previous,end,Color("#ff70b8",0.55),3.0)
 			e.draw_circle(end,6.0,Color("#ffb2d8",0.65)); previous = end
 		return
+	_sight(e)
 	if e.action_phase != "windup": return
 	var col := Color("#ffb044", 0.65)
 	var start := Vector2.ZERO

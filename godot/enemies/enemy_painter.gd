@@ -20,11 +20,12 @@ const CELLS = {
 }
 
 ## Which states each family bakes, and how many frames each state has.
-const HUMAN_STATES = {"idle": 2, "walk": 6, "attack": 3, "hurt": 1, "death": 4, "frozen": 1, "stunned": 1}
-const CIV_STATES = {"idle": 2, "walk": 6, "panic": 6, "hurt": 1, "death": 4, "frozen": 1, "stunned": 1}
+const HUMAN_STATES = {"idle": 4, "walk": 8, "attack": 3, "hurt": 1, "death": 4, "frozen": 1, "stunned": 1}
+const CIV_STATES = {"idle": 4, "walk": 8, "panic": 8, "hurt": 1, "death": 4, "frozen": 1, "stunned": 1}
 const DOG_STATES = {"idle": 2, "walk": 6, "attack": 3, "hurt": 1, "death": 4, "frozen": 1, "stunned": 1}
 const DRONE_STATES = {"idle": 4, "walk": 4, "attack": 2, "hurt": 1, "death": 4, "frozen": 1, "stunned": 2}
 const HERO_STATES = {
+	"vex": {"idle":2,"walk":6,"hurt":1,"death":4,"frozen":1,"stunned":1,"attack":3,"aim":2,"deploy":2},
 	"ironclad": {"idle": 2, "walk": 6, "hurt": 1, "death": 4, "frozen": 1, "stunned": 1, "windup": 2, "charge": 2, "air": 1, "slam": 1},
 	"surge": {"idle": 2, "walk": 6, "hurt": 1, "death": 4, "frozen": 1, "stunned": 1, "blink": 3, "cast": 2},
 	"viper": {"idle":2, "walk":6, "hurt":1, "death":4, "frozen":1, "stunned":1, "windup":2, "charge":2, "cast":2},
@@ -34,44 +35,50 @@ const HERO_STATES = {
 
 ## Sprite keys (Enemy.spr values) -> family + spec.
 const KINDS = ["cop", "swat", "det", "riot", "dog", "drone", "civ_suit", "civ_tourist", "civ_granny", "civ_jogger",
-	"hero_ironclad", "hero_surge", "hero_glacia", "hero_paragon", "hero_viper",
+	"hero_ironclad", "hero_surge", "hero_glacia", "hero_paragon", "hero_viper", "hero_vex", "vex_sentry", "vex_mine",
 	"undercover", "undercover_hood", "swat_shield", "guard", "interceptor", "robodog", "tank"]
 
 static func family(kind: String) -> String:
 	if kind.begins_with("hero_"): return "hero"
 	if kind == "dog" or kind == "robodog": return "dog"
 	if kind == "interceptor" or kind == "tank": return "vehicle"
-	if kind == "drone": return "drone"
+	if kind in ["drone","vex_sentry","vex_mine"]: return "drone"
 	return "human"
 
 static func states(kind: String) -> Dictionary:
-	if kind.begins_with("hero_"): return HERO_STATES[kind.substr(5)]
+	if kind.begins_with("hero_"):
+		var result: Dictionary = HERO_STATES[kind.substr(5)].duplicate()
+		if kind != "hero_paragon": result.idle = 4; result.walk = 8
+		return result
 	if kind.begins_with("civ_"): return CIV_STATES
 	if kind == "dog" or kind == "robodog" or family(kind) == "vehicle": return DOG_STATES
-	if kind == "drone": return DRONE_STATES
+	if kind in ["drone","vex_sentry","vex_mine"]: return DRONE_STATES
 	return HUMAN_STATES
 
 # ---------------------------------------------------------------- palettes / specs
 const SKIN = {"a": "#e8a878", "b": "#c58a5e", "c": "#f0c8a8", "d": "#8a5a3c", "e": "#e0a070"}
 const SPECS = {
+	"hero_vex": {"skin":"#e8b696","hair":"#582d62","hair_style":"long","hat":"","top":"#e4e9e6","sleeve":"#d4dfdc",
+		"pants":"#40334f","shin":"#40334f","shoes":"#253545","belt":"#685077","badge":"#6bf5ef","prop":"dual_blaster","torso":"labcoat","hands":"#695078",
+		"build":{"hr":9,"tw":21,"th":23,"leg":24,"arm":19,"aw":5,"lw":6,"fist":4}},
 	"undercover": {"skin":"#c58a5e", "hair":"#201a18", "hair_style":"short", "hat":"",
 		"top":"#9b6445", "sleeve":"#9b6445", "pants":"#416a9b", "shin":"#416a9b", "shoes":"#f0ede4", "belt":"#29252b",
-		"badge":"#efc854", "prop":"revolver", "torso":"suit", "hands":"", "trainers":true},
+		"badge":"#efc854", "prop":"revolver", "torso":"suit", "hands":"", "trainers":true, "shades":true},
 	"undercover_hood": {"skin":"#e8b088", "hair":"#302728", "hair_style":"messy", "hat":"headband", "hat_col":"#233348",
 		"top":"#607867", "sleeve":"#607867", "pants":"#313d59", "shin":"#313d59", "shoes":"#f8f2de", "belt":"#252c37",
 		"badge":"#efc854", "prop":"revolver", "torso":"cardigan", "hands":"", "trainers":true},
 	"swat_shield": {"skin":"#c58a5e", "hair":"#17171b", "hair_style":"none", "hat":"swat", "hat_col":"#222e3b",
 		"top":"#283846", "sleeve":"#334553", "pants":"#222e3a", "shin":"#334553", "shoes":"#10151e", "belt":"#111a24",
-		"badge":"#d1edf1", "prop":"rifle", "torso":"vest", "hands":"#161e28", "ballistic_shield":true, "build":{"tw":19}},
+		"badge":"#d1edf1", "prop":"rifle", "torso":"vest", "hands":"#161e28", "ballistic_shield":true, "build":{"tw":19}, "kneepads":true},
 	"guard": {"skin":"#8a5a3c", "hair":"#211e18", "hair_style":"none", "hat":"swat", "hat_col":"#66744b",
 		"top":"#78825b", "sleeve":"#69754d", "pants":"#69774c", "shin":"#69774c", "shoes":"#453b2d", "belt":"#464d33",
-		"badge":"#ded8a0", "prop":"rifle", "torso":"vest", "hands":"#4a513a", "camo":true, "build":{"tw":19}},
+		"badge":"#ded8a0", "prop":"rifle", "torso":"vest", "hands":"#4a513a", "camo":true, "build":{"tw":19}, "kneepads":true, "chinstrap":true},
 	"cop": {"skin": "#e8a878", "hair": "#3a2a1e", "hair_style": "short", "hat": "police",
 		"top": "#3157c0", "sleeve": "#3157c0", "pants": "#1d2c6b", "shin": "#1d2c6b", "shoes": "#17171c", "belt": "#121420",
 		"hat_col": "#1b2558", "badge": "#ffd23c", "prop": "baton", "torso": "uniform", "hands": ""},
 	"swat": {"skin": "#c58a5e", "hair": "#1a1410", "hair_style": "none", "hat": "swat",
-		"top": "#2b2d33", "sleeve": "#33363e", "pants": "#25272d", "shin": "#25272d", "shoes": "#0e0e12", "belt": "#16171b",
-		"hat_col": "#24262c", "badge": "#d8dde4", "prop": "rifle", "torso": "vest", "hands": "#1a1a1e", "build": {"tw": 18}},
+		"top": "#323844", "sleeve": "#3c4350", "pants": "#2a2f38", "shin": "#2a2f38", "shoes": "#0e0e12", "belt": "#16171b",
+		"hat_col": "#2c313b", "badge": "#e4ecf4", "prop": "rifle", "torso": "vest", "hands": "#1a1a1e", "build": {"tw": 18}, "kneepads": true},
 	"det": {"skin": "#f0c8a8", "hair": "#4a3420", "hair_style": "short", "hat": "fedora",
 		"top": "#b08a52", "sleeve": "#b08a52", "pants": "#4a3a2e", "shin": "#4a3a2e", "shoes": "#2a1a12", "belt": "#5a3d22",
 		"hat_col": "#5a3d22", "badge": "#c83030", "prop": "revolver", "torso": "trench", "hands": ""},
@@ -122,7 +129,7 @@ var anchors := {}
 
 func paint(kind: String, state: String, i: int) -> Pixels:
 	anchors = {}
-	if kind in ["interceptor", "tank", "robodog"]:
+	if kind in ["interceptor", "tank", "robodog", "vex_sentry", "vex_mine"]:
 		var machine := Machines.new()
 		var canvas: Pixels = machine.paint(kind, state, i)
 		anchors = machine.anchors
@@ -140,9 +147,9 @@ func paint(kind: String, state: String, i: int) -> Pixels:
 	return c
 
 # ---------------------------------------------------------------- poses
-const WALK_DX = [6, 3, -1, -5, -2, 3]
-const WALK_LIFT = [0, 0, 0, 0, 3, 2]
-const WALK_BOB = [0, 1, 1, 0, 1, 1]
+const WALK_DX = [6, 3, 0, -3, -6, -3, 1, 5]
+const WALK_LIFT = [0, 0, 0, 0, 0, 3, 5, 3]
+const WALK_BOB = [0, 1, 1, 0, 0, 1, 1, 0]
 
 func _pose(kind: String, state: String, i: int) -> Dictionary:
 	var hero := kind.begins_with("hero_")
@@ -153,15 +160,17 @@ func _pose(kind: String, state: String, i: int) -> Dictionary:
 	if kind == "hero_paragon": p.hover = true
 	match state:
 		"idle":
-			p.bob = i % 2; p.cape = i % 2; p.skirt = i % 2
+			p.bob = [0, 0, 1, 0][i % 4]; p.cape = [0, 1, 2, 1][i % 4]; p.skirt = p.bob
+			p.an_bend += p.bob * 3.0; p.af_bend -= p.bob * 3.0
 			if p.hover: p.bob = [0, 1, 2, 1][i % 4]; p.cape = i; p.fdx = 1; p.bdx = -2
 		"walk", "panic":
-			var f := i % 6; var g := (i + 3) % 6
+			var f := i % 8; var g := (i + 4) % 8
 			var stride := k * (1.3 if state == "panic" else 1.0)
 			p.fdx = WALK_DX[f] * stride; p.flift = WALK_LIFT[f] * stride
 			p.bdx = WALK_DX[g] * stride; p.blift = WALK_LIFT[g] * stride
 			p.bob = WALK_BOB[f]; p.an = -WALK_DX[f] * 4.0 - 4.0; p.af = WALK_DX[f] * 4.0 + 4.0
-			p.cape = f % 3; p.skirt = f % 3 - 1
+			p.cape = [1, 0, 0, 1, 2, 3, 3, 2][f]; p.skirt = [0, -1, -1, 0, 0, 1, 1, 0][f]
+			p.an_bend = 12.0 + WALK_LIFT[g] * 5.0; p.af_bend = 12.0 + WALK_LIFT[f] * 5.0
 			if state == "panic":
 				p.lean = 2; p.eyes = "wide"; p.mouth = "open"; p.prop = "flail"
 				p.an = 150.0 + (25.0 if f % 2 == 0 else -15.0); p.an_bend = -30.0
@@ -184,6 +193,7 @@ func _pose(kind: String, state: String, i: int) -> Dictionary:
 					p.af = 20.0; p.prop = ["aim", "recoil", "aim"][i]
 				"riot":
 					p.an = [40.0, 80.0, 60.0][i]; p.an_bend = [60.0, 10.0, 40.0][i]; p.lean = [-1, 3, 1][i]; p.fdx = [0.0, 4.0, 2.0][i]
+					p.af = [175.0, 120.0, 60.0][i]; p.af_bend = [-30.0, 0.0, 30.0][i]
 		"hurt":
 			p.lean = -2; p.eyes = "shut"; p.mouth = "open"; p.head_dx = -1; p.an = -25.0; p.af = -35.0; p.an_bend = 30.0
 			p.fdx = -2; p.bdx = 2
@@ -228,6 +238,22 @@ func _pose(kind: String, state: String, i: int) -> Dictionary:
 		p.pointed = true
 		if state in ["idle", "walk"]:
 			p.an = -30.0; p.an_bend = 45.0; p.af = 35.0; p.af_bend = -55.0
+	if kind == "hero_vex":
+		if state in ["attack","aim"]:
+			p.an = 82.0; p.an_bend = -4.0; p.af = 72.0; p.af_bend = 8.0
+			p.lean = -1 if state == "attack" and i == 1 else 1; p.prop = "aim"; p.mouth = "grin"
+			p.head_dx = i%2
+		elif state == "deploy":
+			p.an = 35.0+i*12; p.an_bend = 50.0; p.af = 65.0; p.af_bend = -15.0
+			p.crouch = 2+i; p.prop = "carry"; p.mouth = "grin"
+	# Armed patrols keep their weapon in a ready carry while the legs walk beneath it.
+	if state in ["idle", "walk"]:
+		if kind in ["swat", "swat_shield", "guard"]:
+			p.an = 58.0 + p.bob * 2.0; p.an_bend = 24.0; p.af = 50.0; p.af_bend = 55.0
+		elif kind in ["det", "undercover", "undercover_hood"]:
+			p.an = 25.0 + p.bob * 2.0; p.an_bend = 38.0
+		elif kind == "riot":
+			p.an = 18.0; p.an_bend = 45.0; p.af = -12.0; p.af_bend = 28.0
 	return p
 
 # ---------------------------------------------------------------- humanoid
@@ -279,6 +305,8 @@ func _humanoid(kind: String, pose: Dictionary, cell: Dictionary) -> Pixels:
 			p.R(tx-4,top_y-6+tube*5,5,3,"#161827"); p.P(tx-2,top_y-5+tube*5,"#ff90ca")
 	# far arm
 	_arm(p, s, sh_f, pose.af, pose.af_bend, arm_len, aw, 4.0, true, bd.fist)
+	if s.prop == "dual_blaster" and pose.prop != "drop": _blaster(p,hand_f,pose,"#ed87ff",8)
+	if s.prop == "shield" and pose.prop != "drop": _baton(p, hand_f, _dir(pose.af + pose.af_bend), 6.0)
 	# far leg
 	if not s.get("gown", false): _leg(p, s, hip_f, foot_f, leg_len, lw, 5.0, true, pose.pointed)
 	if kind == "civ_granny" or s.get("skirt", false) and not s.get("gown", false):
@@ -291,12 +319,18 @@ func _humanoid(kind: String, pose: Dictionary, cell: Dictionary) -> Pixels:
 			p.R(tx + patch.x, top_y + patch.y, 5, 3, "#414d34")
 			p.R(tx + patch.x + 2, top_y + patch.y - 1, 3, 2, "#b3aa78")
 	# near leg
+	_costume_details(p, s, kind, tx, top_y, tw, bd.th)
 	if s.get("gown", false): _gown(p, s, tx, hip_y, tw, fy, pose.skirt)
 	else: _leg(p, s, hip_n, foot_n, leg_len, lw, 9.0, false, pose.pointed)
 	if s.get("skirt", false) and not s.get("gown", false): _skirt(p, s, tx, hip_y, tw, pose.skirt)
-	if s.torso == "trench": _coat_tail(p, s, tx, hip_y, tw, pose)
+	if s.torso in ["trench","labcoat"]: _coat_tail(p, s, tx, hip_y, tw, pose)
 	# head
 	_head(p, s, kind, head, hr, pose)
+	if kind == "hero_vex":
+		# Brass-framed green laboratory goggles, with long violet hair behind the coat.
+		p.layer(29); p.R(head.x-7,head.y-1,16,5,"#4e4258")
+		p.R(head.x-6,head.y,6,3,"#78e1d6"); p.R(head.x+2,head.y,6,3,"#78e1d6")
+		p.R(head.x-5,head.y,4,1,"#e4ffea"); p.P(head.x+4,head.y,"#e4ffea")
 	if kind == "civ_tourist": _camera_on_chest(p, tx + tw - 5, top_y + 7)
 	# near arm + prop
 	var prop: String = s.prop
@@ -306,7 +340,8 @@ func _humanoid(kind: String, pose: Dictionary, cell: Dictionary) -> Pixels:
 	else:
 		if prop != "": _prop_behind(p, prop, hand_n, pose)
 		_arm(p, s, sh_n, pose.an, pose.an_bend, arm_n, aw, 16.0, false, bd.fist)
-		if prop != "": _prop(p, prop, hand_n, pose)
+		if prop == "dual_blaster" and pose.prop != "drop": _blaster(p,hand_n,pose,"#6bf5ef",22)
+		elif prop != "": _prop(p, prop, hand_n, pose)
 	if s.get("ballistic_shield", false) and pose.prop != "drop":
 		# A separate near-side shield leaves the assault rifle visible above and beyond it.
 		var sx := cx + 4 + lean; var sy := fy - 32
@@ -327,7 +362,80 @@ func _humanoid(kind: String, pose: Dictionary, cell: Dictionary) -> Pixels:
 		muzzle = hand_n + rifle_dir * 14.0
 	anchors = {"hand_n": hand_n, "hand_f": hand_f, "head": head, "eye": Vector2(head.x + hr * 0.55, head.y + 1),
 		"eye_far": Vector2(head.x + hr * 0.05, head.y + 1), "muzzle": muzzle, "chest": Vector2(cx + lean, top_y + bd.th * 0.4)}
+	if prop == "dual_blaster":
+		anchors.muzzle = hand_n + Vector2(19,-3)
+		anchors.muzzle_f = hand_f + Vector2(19,-3)
 	return c
+
+## Material accents follow the torso through every pose, including the death rotation.
+func _costume_details(p: Pen, s: Dictionary, kind: String, x: float, y: float, w: float, h: float) -> void:
+	p.layer(18)
+	match kind:
+		"cop":
+			p.R(x+2,y+8,4,1,"#9fbcf4")
+			p.R(x+w-6,y+10,4,2,"#182d63"); p.P(x+w-5,y+10,"#bed7ef")
+			p.line(x+2,y+2,x+3,y+7,"#182d63")
+		"swat", "swat_shield", "guard":
+			for side in [3.0,w-5.0]:
+				p.R(x+side,y+1,2,5,shade(s.belt,0.15)); p.P(x+side,y+2,"#a8b7b7")
+			for mag in 3:
+				p.R(x+4+mag*4,y+h-5,2,2,shade(s.top,-0.45))
+				p.P(x+4+mag*4,y+h-5,"#8eaaa4" if kind=="guard" else "#829eb1")
+		"det":
+			p.line(x+2,y+2,x+3,y+9,"#e3bd7a")
+			p.R(x+2,y+10,4,1,"#66472d"); p.P(x+w-4,y+3,"#f0d5a0")
+		"riot":
+			for rivet in [3.0,w-4.0]:
+				for plate in 3: p.P(x+rivet,y+3+plate*5,"#b7d1df")
+			p.R(x+w-7,y+8,4,2,"#90bdd1")
+		"undercover", "undercover_hood":
+			# Hanging badges distinguish the plainclothes officers from civilians.
+			p.line(x+w*0.4,y+1,x+w*0.55,y+9,"#dac88e")
+			p.line(x+w-3,y+1,x+w*0.55,y+9,"#dac88e")
+			p.box(x+w*0.55-1,y+9,4,5,"#e6bd58"); p.P(x+w*0.55,y+10,"#fff0b4")
+		"hero_ironclad":
+			p.line(x+w-4,y+3,x+w-3,y+h-5,"#d3e2ed")
+			for rivet in 4: p.P(x+3+rivet*6,y+h-5,"#f7d77c")
+			p.line(x+4,y+4,x+7,y+8,"#43546e")
+		"hero_surge":
+			for side in [2.0,w-4.0]:
+				p.line(x+side,y+3,x+side,y+h-5,"#5578d6",2); p.P(x+side,y+4,"#a7deff")
+			p.R(x+3,y+h-4,4,2,"#fff1a0")
+		"hero_glacia":
+			for shard in 3: p.line(x+3+shard*6,y+2,x+6+shard*5,y+7,"#ffffff",2)
+			p.ell(x+w*0.6,y+8,3,4,"#2e8ebd"); p.P(x+w*0.6-1,y+6,"#e7ffff")
+			p.line(x+w-3,y+10,x+w-4,y+h-3,"#f4ffff")
+		"hero_paragon":
+			p.line(x+2,y+2,x+4,y+h-5,"#9858a4",2)
+			p.line(x+w-3,y+3,x+w-4,y+h-5,"#c27db9")
+			p.R(x+3,y+2,4,2,"#ffd49c"); p.R(x+w-7,y+2,4,2,"#ffd49c")
+		"hero_viper":
+			p.line(x+2,y+8,x+4,y+h-4,"#8c4d80",2)
+			p.line(x+w-3,y+9,x+w-4,y+h-4,"#e7a5d1")
+			p.P(x+w*0.6,y+9,"#fff2f7"); p.R(x+4,y+h-3,w-8,1,"#ff90ca")
+		"hero_vex":
+			p.line(x+w-3,y+5,x+w-3,y+h-4,"#96b6b6")
+			p.box(x+w-8,y+11,5,6,"#c6d8d1")
+			p.R(x+w-7,y+12,3,1,"#6bf5ef"); p.P(x+w-6,y+15,"#c568d9")
+		"civ_suit": p.R(x+w-6,y+5,3,1,"#e9ece3")
+		"civ_tourist": p.line(x+2,y+1,x+5,y+h-3,"#8b3a63")
+		"civ_granny": p.R(x+2,y+8,3,1,"#d9a2d8"); p.P(x+3,y+7,"#ffdbec")
+		"civ_jogger":
+			p.box(x+w*0.4,y+7,7,5,"#e4f1df"); p.R(x+w*0.4+2,y+8,2,3,"#274c4e")
+
+func _blaster(p: Pen, hand: Vector2, pose: Dictionary, glow: String, base: float) -> void:
+	var x := hand.x; var y := hand.y-6
+	p.layer(base,Profiles.slab(x-4,y,x+19,y+7,3,1))
+	p.box(x-4,y,21,7,"#677e8b"); p.R(x-1,y+6,5,5,"#3d354f")
+	p.R(x+3,y+1,10,4,"#3d3558")
+	for coil in 3: p.R(x+3+coil*4,y+1,2,4,glow)
+	p.box(x+15,y-1,5,9,"#40516a"); p.R(x+19,y+1,2,5,glow)
+	p.P(x+18,y+1,"#f1ffe8")
+
+func _baton(p: Pen, hand: Vector2, d: Vector2, base: float) -> void:
+	p.layer(base, Profiles.cap(hand.x, hand.y, hand.x + d.x * 13, hand.y + d.y * 13, 1.5, 2))
+	p.line(hand.x - d.x * 2, hand.y - d.y * 2, hand.x + d.x * 13, hand.y + d.y * 13, "#1c1c22", 3)
+	p.line(hand.x + d.x, hand.y + d.y - 1, hand.x + d.x * 12, hand.y + d.y * 12 - 1, "#62626e", 1)
 
 func _dir(deg: float) -> Vector2:
 	var a := deg_to_rad(deg)
@@ -419,6 +527,10 @@ func _leg(p: Pen, s: Dictionary, hip: Vector2, foot: Vector2, length: float, w: 
 	elif s.shin == s.pants:
 		p.layer(base + 1.5); p.R(foot.x - w / 2.0, foot.y - 4, w, 1, shade(shin, -0.35))   # trouser hem
 	if not far and s.shin != s.skin: p.layer(base + 1.2); p.P(knee.x + 1, knee.y, shade(pants, 0.3))   # knee catch-light
+	if s.get("kneepads", false):
+		var kp := shade(s.belt, 0.05 if not far else -0.1)
+		_blob(p, knee.x + 1, knee.y, maxf(2.0, w * 0.5), 2.5, kp, base + 2.5, 2, false)
+		p.layer(base + 3); p.R(knee.x - 1, knee.y - 2, 3, 1, shade(kp, 0.45))
 	if pointed:   # flying: boot hangs toe-down
 		p.layer(base + 2, Profiles.cylV(foot.x, w / 2.0, 2))
 		p.R(foot.x - w / 2.0, foot.y - 5, w, 5, shoe); p.R(foot.x - w / 2.0 + 1, foot.y, w - 2, 2, shoe); p.P(foot.x + 1, foot.y + 2, shoe)
@@ -456,6 +568,14 @@ func _torso(p: Pen, s: Dictionary, kind: String, x: float, y: float, w: float, h
 	p.R(x + 2, y + h * 0.5, 1, h * 0.3, shade(col, -0.4))   # arm shadow on the flank
 	var mid := x + w * 0.6
 	match s.torso:
+		"labcoat":
+			p.layer(15)
+			p.R(mid-3,y+2,6,h-3,"#5b3b70")
+			p.line(mid-4,y+1,mid-1,y+10,"#ffffff",3)
+			p.line(mid+4,y+1,mid+1,y+10,"#ffffff",3)
+			p.R(x+2,y+8,5,6,"#a1b9b7"); p.R(x+2,y+7,5,2,"#f2f5ec")
+			p.R(x+3,y+4,1,4,"#7e4faf"); p.R(x+5,y+3,1,5,"#55bcb5")
+			for button in 3: p.P(mid+3,y+11+button*4,"#657d84")
 		"viper_suit":
 			p.layer(14)
 			p.line(mid,y+2,mid-2,y+h-3,"#b56c9c",1)
@@ -469,11 +589,16 @@ func _torso(p: Pen, s: Dictionary, kind: String, x: float, y: float, w: float, h
 			p.layer(15, Profiles.dome(mid + 4, y + 5, 2, 2, 2))
 			p.R(mid + 3, y + 4, 3, 3, s.badge); p.P(mid + 3, y + 4, shade(s.badge, 0.5)); p.P(mid + 5, y + 6, shade(s.badge, -0.35))
 			p.layer(12); p.R(x + 1, y + 1, 3, 2, "#ffd23c")                   # shoulder patch
+			p.layer(16, Profiles.slab(x + w - 5, y + 2, x + w - 2, y + 7, 2, 1))
+			p.R(x + w - 5, y + 2, 3, 5, "#16181f"); p.P(x + w - 4, y + 3, "#7aff8a"); p.R(x + w - 4, y + 5, 1, 1, "#3a3e4a")   # shoulder radio
 			p.R(mid - 1, y, 3, 2, "#121a40")                                 # tie knot
 		"vest":
 			p.layer(14, Profiles.slab(x + 2, y + 2, x + w - 1, y + h - 1, 2, 2))
 			p.R(x + 2, y + 2, w - 3, h - 3, shade(col, 0.08))
-			p.R(x + 3, y + 6, w - 5, 3, "#9aa0aa"); p.R(x + 4, y + 7, w - 7, 1, "#d8dde4")      # SWAT band
+			p.R(x + 3, y + 6, w - 5, 3, shade(s.badge, -0.25)); p.R(x + 4, y + 7, w - 7, 1, s.badge)      # reflective band
+			for k in int((w - 8) / 3): p.P(x + 5 + k * 3, y + 7, shade(s.badge, -0.45))           # lettering
+			p.layer(16, Profiles.slab(x + w - 5, y, x + w - 2, y + 5, 2, 1))
+			p.R(x + w - 5, y, 3, 5, "#14161b"); p.P(x + w - 4, y + 1, "#5aff7a"); p.line(x + w - 3, y, x + w - 2, y - 4, "#14161b")   # radio
 			for b in 3:
 				p.layer(15, Profiles.slab(x + 3 + b * 4, y + h - 6, x + 6 + b * 4, y + h - 2, 2, 1))
 				p.R(x + 3 + b * 4, y + h - 6, 3, 4, shade(col, -0.12)); p.R(x + 3 + b * 4, y + h - 6, 3, 1, shade(col, 0.2))
@@ -555,7 +680,7 @@ func _coat_tail(p: Pen, s: Dictionary, x: float, hip_y: float, w: float, pose: D
 		p.R(x - spread - (flare if flare < 0 else 0), hip_y - 3 + r, w + spread * 2 + absf(flare), 1, col if r < 9 else shade(col, -0.2))
 	p.R(x - 1, hip_y - 3, 2, 12, shade(col, -0.3))
 	p.R(x + w * 0.6, hip_y - 3, 1, 12, shade(col, -0.32))
-	p.R(x, hip_y - 3, w, 2, "#5a3d22"); p.R(x + w * 0.55, hip_y - 3, 2, 2, "#c9a227")   # belt + buckle
+	p.R(x, hip_y - 3, w, 2, s.belt); p.R(x + w * 0.55, hip_y - 3, 2, 2, "#c9a227")   # belt + buckle
 
 func _skirt(p: Pen, s: Dictionary, x: float, hip_y: float, w: float, sway: float) -> void:
 	var col: String = s.pants
@@ -696,6 +821,9 @@ func _face(p: Pen, s: Dictionary, kind: String, h: Vector2, r: float, pose: Dict
 		var mode: String = pose.eyes
 		if mode == "open" and kind == "det": mode = "squint"
 		_eyes(p, mode, ef, en, ey, s.get("eyes", dark), s.has("eyes"))
+		if s.get("shades", false) and mode in ["open", "squint"]:
+			p.layer(26); p.R(ef - 2, ey - 1, en - ef + 5, 3, "#101014"); p.R(ef - 2, ey - 1, en - ef + 5, 1, "#2a2a34")
+			p.P(en + 1, ey - 1, "#c8e8ff"); p.P(ef, ey - 1, "#6a7488"); p.layer(24)
 		# brows
 		var bcol := shade(s.hair, -0.4) if s.hair_style != "none" else DD
 		if s.hair in ["#e8e8f0", "#f0f0f0", "#e8f8ff"]: bcol = shade(s.hair, -0.25)
@@ -780,7 +908,9 @@ func _hat(p: Pen, s: Dictionary, h: Vector2, r: float) -> void:
 			p.layer(26, Profiles.dome(h.x - 1, h.y - r * 0.6, r + 1, r * 0.5, 4))
 			p.ell(h.x - 1, h.y - r * 0.65, r + 1, r * 0.45, col)
 			p.R(h.x - r - 1, h.y - r * 0.95, r * 2 + 1, 3, col); p.R(h.x - r, h.y - r * 0.95, r * 2, 1, shade(col, 0.35))
-			p.R(h.x - r, h.y - r * 0.35, r * 2, 2, "#0d0f1c")                      # band
+			for k in int(r * 2):                                                   # chequered band
+				p.P(h.x - r + k, h.y - r * 0.35, "#f0f2f8" if (k / 2) % 2 == 0 else "#0d0f1c")
+				p.P(h.x - r + k, h.y - r * 0.35 + 1, "#0d0f1c" if (k / 2) % 2 == 0 else "#f0f2f8")
 			p.layer(28); p.R(h.x + r * 0.2, h.y - r * 0.35 + 1, r + 3, 2, "#0b0c14")   # visor forward
 			p.R(h.x + r * 0.2, h.y - r * 0.35 + 1, r + 2, 1, "#3a3e58")
 			p.layer(29, Profiles.dome(h.x + r * 0.35, h.y - r * 0.75, 2, 2, 2))
@@ -801,6 +931,7 @@ func _hat(p: Pen, s: Dictionary, h: Vector2, r: float) -> void:
 			p.R(h.x - r * 0.1, h.y - 1, r * 1.1, 4, "#1d3a48"); p.R(h.x, h.y - 1, r * 0.9, 1, "#7ad0ee"); p.P(h.x + r * 0.7, h.y, "#e8faff")
 			p.R(h.x - r, h.y, r * 0.9, 2, "#111114")
 			p.layer(24); p.R(h.x + r * 0.2, h.y + r * 0.45, r * 0.8, 3, "#1a1a1e")   # balaclava
+			if s.get("chinstrap", false): p.layer(25); p.line(h.x - r * 0.6, h.y + 1, h.x + r * 0.1, h.y + r * 0.9, shade(col, -0.35), 1)
 			p.R(h.x - 2, h.y + r * 0.6, 3, 4, "#111114")
 		"riot":
 			p.layer(26, Profiles.dome(h.x - 1, h.y - r * 0.3, r + 2, r * 0.9, 7))
@@ -888,6 +1019,8 @@ func _prop(p: Pen, prop: String, hand: Vector2, pose: Dictionary) -> void:
 			p.line(back.x, back.y - 1, front.x, front.y - 1, "#4a4e58", 1)
 			p.R(hand.x + d2.x * 2 - 1, hand.y + 2, 3, 5, "#24262c")       # magazine
 			p.P(front.x, front.y - 2, "#8a8e98")
+			var lamp := hand + d2 * 8 + Vector2(0, 2)                         # weapon light
+			p.layer(22); p.R(lamp.x - 1, lamp.y, 3, 2, "#2a2c32"); p.P(lamp.x + 1, lamp.y, "#f4fbff")
 		"revolver":
 			var ang3 := deg_to_rad(pose.an + pose.an_bend)
 			var d3 := Vector2(sin(ang3), cos(ang3))
@@ -912,20 +1045,26 @@ func _prop(p: Pen, prop: String, hand: Vector2, pose: Dictionary) -> void:
 
 func _shield(p: Pen, hand: Vector2, fy: float, pose: Dictionary) -> void:
 	if pose.prop == "drop": return
-	var x := hand.x + 1; var top := hand.y - 22; var h := 38.0
-	if pose.prop == "attack": x += 2
+	var x := hand.x - 1; var top := hand.y - 25; var h := 42.0; var w := 11.0
+	if pose.prop == "attack": x += 3; top -= 1
 	if pose.prop == "limp": top += 4
 	if pose.prop == "flail": top -= 4
 	h = minf(h, fy - top - 1)
-	p.layer(24, Profiles.slab(x, top, x + 8, top + h, 3, 2))
+	p.layer(24, Profiles.slab(x, top, x + w, top + h, 4, 2))
 	var a0 := p.alpha
-	p.alpha = 0.62
-	p.R(x, top, 8, h, "#8fb0c8")
+	p.alpha = 0.82
+	p.R(x, top, w, h, "#6f93ad")
+	p.alpha = 0.55
+	p.R(x + 2, top + 3, w - 4, h * 0.3, "#b8def0")                                  # viewport
 	p.alpha = a0
-	p.R(x, top, 8, 1, "#d8eef8"); p.R(x, top + h - 1, 8, 1, "#3a4a5a")
-	p.R(x, top, 1, h, "#3a4a5a"); p.R(x + 7, top, 1, h, "#5a7088")
-	p.R(x + 2, top + 3, 1, h - 10, "#e8f8ff"); p.R(x + 4, top + 5, 1, 6, "#d8eef8")
-	p.R(x + 1, top + h * 0.42, 6, 3, "#1d2c4b"); p.R(x + 2, top + h * 0.42 + 1, 4, 1, "#d8dde4")   # POLICE strip
+	p.R(x, top, w, 1, "#e0f4fc"); p.R(x, top + h - 1, w, 1, "#24303e")
+	p.R(x, top, 1, h, "#24303e"); p.R(x + w - 1, top, 1, h, "#4a6078")
+	p.R(x + 1, top + 1, 1, h - 2, "#9cc4da")
+	p.R(x + 3, top + 4, 1, h * 0.25, "#f4fcff"); p.P(x + 4, top + 4, "#ffffff")       # glare
+	var band := top + h * 0.48
+	p.R(x + 1, band, w - 2, 5, "#16244a"); p.R(x + 1, band, w - 2, 1, "#3a5490")
+	for k in int((w - 4) / 2): p.R(x + 2 + k * 2, band + 2, 1, 2, "#f0f4ff")          # POLICE lettering
+	p.R(x + 2, top + h - 5, w - 4, 1, "#3a4c60")
 
 func _power_glow(p: Pen, kind: String, hn: Vector2, hf: Vector2, g: float) -> void:
 	# baked glow accents on the fists (live emissive overlays add the real light)
@@ -1036,7 +1175,7 @@ func _dog(state: String, i: int) -> Pixels:
 	var fur := "#b07a40"; var saddle := "#2a2018"; var belly := "#d8a868"; var vest := "#1d2c6b"
 	var bob := 0.0; var stretch := 0.0; var head_dy := 0.0; var mouth := false; var tongue := false
 	var legs := [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]   # fx/lift for far-front, far-back, near-front, near-back
-	var eyes := "open"; var tail := 0.0; var lying := false
+	var eyes := "open"; var tail := 0.0; var lying := false; var snarl := false
 	match state:
 		"idle":
 			bob = i % 2; tongue = true; mouth = true; tail = i
@@ -1046,7 +1185,7 @@ func _dog(state: String, i: int) -> Pixels:
 			legs = [[gx[f], gl[f]], [gx[g], gl[g]], [gx[(f + 1) % 6], gl[(f + 1) % 6]], [gx[(g + 1) % 6], gl[(g + 1) % 6]]]
 			bob = [0, 1, 2, 1, 0, 1][f]; stretch = [1, 2, 1, -1, -2, 0][f]; tongue = true; mouth = true; tail = f % 3
 		"attack":
-			stretch = [-2.0, 4.0, 2.0][i]; head_dy = [2.0, -2.0, 0.0][i]; mouth = true; bob = [1.0, -1.0, 0.0][i]
+			stretch = [-3.0, 5.0, 2.0][i]; head_dy = [3.0, -3.0, 0.0][i]; mouth = true; bob = [2.0, -2.0, 0.0][i]; snarl = true; eyes = "angry"; tail = 2
 			legs = [[-3.0, 0.0], [-4.0, 0.0], [8.0, 4.0], [-2.0, 0.0]] if i == 1 else [[-1.0, 0.0], [-3.0, 0.0], [1.0, 0.0], [-2.0, 0.0]]
 		"hurt":
 			eyes = "shut"; head_dy = -2; bob = 1; tail = -2; mouth = true
@@ -1072,10 +1211,16 @@ func _dog(state: String, i: int) -> Pixels:
 	p.layer(15, Profiles.dome(cx - 2, body_y - 3, 10, 3, 2))
 	p.ell(cx - 3, body_y - 3, 10 + stretch * 0.4, 3, saddle)
 	p.R(cx - 8, body_y + 3, 16, 2, belly)
+	if snarl:
+		p.layer(16)
+		for k in 4: p.R(cx - 6 + k * 3, body_y - 7 - (k % 2), 2, 2, saddle)
 	# K9 vest
 	p.layer(16, Profiles.slab(cx - 4, body_y - 5, cx + 6, body_y + 4, 2, 1))
 	p.R(cx - 4, body_y - 5, 10, 9, vest); p.R(cx - 4, body_y - 5, 10, 1, shade(vest, 0.3))
 	p.R(cx - 2, body_y - 2, 6, 2, "#ffd23c")
+	p.R(cx-3,body_y-4,2,8,"#101b3d"); p.R(cx+3,body_y-4,2,8,"#101b3d")
+	p.R(cx-1,body_y+1,3,2,"#b7c8d4"); p.P(cx,body_y+1,"#f5ead0")
+	p.R(cx-1,body_y-2,4,1,"#fff0a0")
 	# near legs
 	_dog_leg(p, Vector2(cx + 10 + stretch * 0.5, body_y + 2), legs[2], fy, fur, 12.0)
 	_dog_leg(p, Vector2(cx - 7 - stretch * 0.5, body_y + 2), legs[3], fy, fur, 12.0)
@@ -1091,12 +1236,20 @@ func _dog(state: String, i: int) -> Pixels:
 		p.layer(18 + e[1] * 2)
 		p.R(ex - 1, hy - 6, 4, 2, e[2]); p.R(ex - 1, hy - 8, 3, 2, e[2]); p.R(ex - 1, hy - 10, 2, 2, e[2]); p.P(ex - 1, hy - 11, e[2])
 		p.R(ex, hy - 7, 1, 3, "#c87a6a")
-	if mouth:
+	if snarl:   # bared fangs, wrinkled muzzle
+		p.layer(21); p.R(hx + 2, hy + 4, 8, 4, "#2a1410"); p.R(hx + 3, hy + 6, 5, 1, "#a83040")
+		p.R(hx + 3, hy + 4, 7, 1, "#f4f0e0"); p.P(hx + 4, hy + 5, "#f4f0e0"); p.P(hx + 8, hy + 5, "#f4f0e0")
+		p.R(hx + 3, hy + 7, 6, 1, "#f4f0e0"); p.P(hx + 5, hy + 6, "#f4f0e0")
+		p.P(hx + 4, hy + 1, shade(fur, -0.35)); p.P(hx + 6, hy + 1, shade(fur, -0.35))
+	elif mouth:
 		p.layer(20); p.R(hx + 3, hy + 5, 6, 2, "#2a1410"); p.P(hx + 6, hy + 5, "#ffffff"); p.P(hx + 8, hy + 5, "#ffffff")
 		if tongue: p.R(hx + 4, hy + 6, 3, 3, "#e86070")
 	p.layer(20)
 	match eyes:
 		"open": p.R(hx + 1, hy - 1, 2, 2, "#111111"); p.P(hx + 1, hy - 1, "#ffffff")
+		"angry":
+			p.R(hx + 1, hy - 1, 2, 2, "#111111"); p.P(hx + 2, hy - 1, "#ff5a3a")
+			p.R(hx, hy - 3, 3, 1, shade(saddle, -0.2)); p.P(hx + 3, hy - 2, shade(saddle, -0.2))   # furrowed brow
 		"shut": p.R(hx, hy, 3, 1, "#111111")
 		"wide": p.R(hx, hy - 2, 3, 3, "#ffffff"); p.P(hx + 1, hy - 1, "#111111")
 		"dizzy": p.ring(hx + 1, hy, 1, "#111111")
@@ -1158,19 +1311,27 @@ func _drone(state: String, i: int) -> Pixels:
 			p.R(ax - bw, ay - 4, bw * 2 + 1, 1, "#c8ccd4" if state != "frozen" else "#e8faff")
 			p.alpha = 1.0
 			p.P(ax - bw, ay - 4, "#e8ecf0"); p.P(ax + bw, ay - 4, "#e8ecf0")
+			p.layer(11); p.R(ax - 9, ay - 3, 2, 2, arm); p.R(ax + 8, ay - 3, 2, 2, arm); p.R(ax - 8, ay - 2, 17, 1, shade(arm, 0.15))   # rotor guard
 		elif not (broken and i >= 2 and side == 1):
 			p.layer(10); p.line(ax - 4, ay - 4, ax + 3, ay - 3 + side, "#7a7e88")
 	# body pod
-	_blob(p, cx, y, 9, 5, body, 12, 6)
+	_blob(p, cx, y, 10, 6, body, 12, 6)
 	p.layer(18, Profiles.slab(cx - 7, y - 4, cx + 7, y - 2, 2, 1))
-	p.R(cx - 6, y - 4, 13, 2, "#6a7684"); p.R(cx - 2, y - 6, 5, 2, "#2a3038")    # top plate, antenna base
-	p.P(cx, y - 8, "#2a3038"); p.P(cx, y - 7, "#2a3038")
+	p.R(cx - 6, y - 4, 13, 2, "#6a7684"); p.R(cx - 4, y - 6, 9, 2, "#2a3038")    # top plate, light-bar mount
+	var lit := -1 if broken or state == "frozen" else i % 2
+	p.layer(20, Profiles.slab(cx - 4, y - 8, cx + 5, y - 6, 2, 1))
+	p.R(cx - 4, y - 8, 4, 2, "#ff4a4a" if lit == 0 else "#6a1a22"); p.R(cx + 1, y - 8, 4, 2, "#4a8cff" if lit == 1 else "#1a2a5a")
+	if lit == 0: p.P(cx - 3, y - 8, "#ffd0d0")
+	if lit == 1: p.P(cx + 2, y - 8, "#d0e4ff")
 	# camera eye on the front
 	p.layer(20, Profiles.dome(cx + 5, y + 1, 3, 3, 3))
 	p.ell(cx + 5, y + 1, 3, 3, "#14181e"); p.ell(cx + 6, y + 1, 1, 1, lens); p.P(cx + 5, y, "#ffffff")
 	# police stripe
 	p.layer(16); p.R(cx - 8, y + 2, 10, 1, "#2f4fb8"); p.R(cx - 8, y + 3, 10, 1, "#e8e8f0")
 	# landing skids
+	p.layer(21)
+	for vent in 3: p.R(cx-7+vent*3,y-2,1,2,"#202b3b")
+	p.R(cx-6,y-4,5,1,"#a4bcc9"); p.P(cx-8,y,"#d6e3e7"); p.P(cx+1,y+4,"#8297a8")
 	p.layer(8); p.R(cx - 6, y + 5, 2, 3, arm); p.R(cx + 4, y + 5, 2, 3, arm); p.R(cx - 8, y + 8, 16, 1, arm)
 	if broken:
 		p.layer(22)

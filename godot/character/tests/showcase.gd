@@ -21,7 +21,7 @@ func _ready() -> void:
 	var ambient = CanvasModulate.new(); ambient.color = Color(0.55,0.57,0.66); add_child(ambient)
 	var background = Polygon2D.new(); background.polygon = PackedVector2Array([Vector2.ZERO,Vector2(960,0),Vector2(960,540),Vector2(0,540)]); background.color = Color("#141e22"); add_child(background)
 	var hud = CanvasLayer.new(); add_child(hud)
-	_label(hud,"MAD VILLAIN / NATIVE GODOT CHARACTER",Vector2(24,16),20,Color("#b4ff3c"))
+	_label(hud,"THE DIABOLICAL DOCTOR / NATIVE GODOT CHARACTER",Vector2(24,16),20,Color("#b4ff3c"))
 	for i in LOADOUTS.size():
 		var config: Dictionary = LOADOUTS[i]
 		var origin = Vector2(16+(i%3)*314,64+(i/3)*234)

@@ -62,6 +62,8 @@ func _spawn(dt: float) -> void:
 		"gravel":
 			if randf() < dt * 14.0: _add("wind", Vector2(view.position.x, randf_range(view.position.y, view.end.y)), Vector2(randf_range(380, 520), randf_range(-20, 20)), 3.0)
 			if randf() < dt * 3.0: _add("leaf", Vector2(view.position.x, randf_range(view.position.y, view.end.y)), Vector2(randf_range(120, 200), randf_range(-30, 30)), 8.0)
+		"train":   # the countryside streams past the moving train (west, away from the engine)
+			if randf() < dt * 30.0: _add("wind", Vector2(view.end.x, randf_range(view.position.y, view.end.y)), Vector2(randf_range(-900, -700), 0), 2.0)
 		"planks":
 			if randf() < dt * 4.0: _add("mist", Vector2(randf_range(view.position.x, view.end.x), randf_range(Levels.AH - 90, Levels.AH - 30)), Vector2(randf_range(8, 20), 0), randf_range(5, 8))
 			if gulls.size() < 3 and randf() < dt * 0.15:

@@ -9,6 +9,7 @@ const Fx = preload("res://enemies/enemy_fx.gd")
 const Flash = preload("res://enemies/muzzle_flash.gd")
 
 const PAGES := [
+	{"title":"Dr. Violet Vex", "kinds":["hero_vex","vex_sentry","vex_mine"]},
 	{"title": "Street response", "kinds": ["undercover", "undercover_hood", "interceptor", "swat_shield"]},
 	{"title": "Military response", "kinds": ["robodog", "guard", "tank"]},
 	{"title": "Police", "kinds": ["cop", "swat", "det", "riot", "dog", "drone"]},
@@ -74,6 +75,7 @@ func _layout() -> void:
 			if kind == "det" and st == "attack":
 				var fl := Flash.new(); add_child(fl); fl.set_meta("pos", pos); flashes.append(fl)
 			x += cell.x + 4
+			width = maxf(width, x)
 		width = maxf(width, x)
 		y += sheet.cell.y + 14
 	var view := get_viewport_rect().size

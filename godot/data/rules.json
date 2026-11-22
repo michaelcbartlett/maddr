@@ -93,7 +93,19 @@
       }
     }
   },
+  "heist": {"waves":[7, 8, 9], "rewards":["bullion", "rail_spike", "steam_piston", "firebox", "headlamp"]},
+  "bank": {"rewards":["vault_plating", "money_counter", "dye_pack", "tumbler_scope", "gold_reserve"]},
   "unlocks": [
+    {"part":"item", "id":"bullion", "need":{"heist":1}},
+    {"part":"item", "id":"rail_spike", "need":{"heist":2}},
+    {"part":"item", "id":"steam_piston", "need":{"heist":3}},
+    {"part":"item", "id":"firebox", "need":{"heist":4}},
+    {"part":"item", "id":"headlamp", "need":{"heist":5}},
+    {"part":"item", "id":"vault_plating", "need":{"bank":1}},
+    {"part":"item", "id":"money_counter", "need":{"bank":2}},
+    {"part":"item", "id":"dye_pack", "need":{"bank":3}},
+    {"part":"item", "id":"tumbler_scope", "need":{"bank":4}},
+    {"part":"item", "id":"gold_reserve", "need":{"bank":5}},
     {"part":"item", "id":"seeker_rack", "min_wave":5, "need":{"pickup_boss":"viper"}},
     {"part":"item", "id":"zigzag", "min_wave":5, "need":{"pickup_boss":"viper", "rare":true}},
     {"part":"item", "id":"iron_slam", "min_wave":5, "need":{"pickup_boss":"ironclad", "rare":true}},

@@ -14,6 +14,7 @@ var next_btn: Button
 var sell_l: Label
 var consumables_box: HBoxContainer
 var consumable_l: Label
+var secondary_l: Label
 const SUPPLY_DESCS := {"disguise":"Disguise · Lose pursuit for 4s. Firing reveals you.", "grenade":"Grenade · Throw along your aim; explodes after a short fuse.", "teleport":"Teleport Pair · Place two pads, then enter either for one trip."}
 var _confirm_id := ""   # owned item waiting for a second press to sell ("part:ammo"/"part:frame" = the main gun's parts)
 
@@ -24,10 +25,12 @@ func _ready() -> void:
 	var left := VBoxContainer.new(); left.custom_minimum_size.x = 260; row.add_child(left)
 	left.add_child(VillainPreview.new(2.5, Vector2(260, 180)))
 	name_l = UiKit.label("", 13, UiKit.NEON); left.add_child(name_l)
+	secondary_l = UiKit.label("", 10, UiKit.DIM); left.add_child(secondary_l)
+	secondary_l.tooltip_text = "Bionic Arm opens shop offers for the rear Weapon Mount, Time Freeze, Proximity Bomb, the Switchblade, Shock Whip and Mad Katana (auto-swing melee), and melee upgrades. Triple Seeker Rack also needs Viper's blueprint. Extra Laser, Bullet and Razor barrels need no arm."
 	var stats_scroll := ScrollContainer.new(); stats_scroll.custom_minimum_size.y = 178
 	stats_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED; left.add_child(stats_scroll)
 	stats_box = VBoxContainer.new(); stats_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL; stats_scroll.add_child(stats_box)
-	var right := VBoxContainer.new(); right.size_flags_horizontal = Control.SIZE_EXPAND_FILL; right.add_theme_constant_override("separation", 10); row.add_child(right)
+	var right := VBoxContainer.new(); right.size_flags_horizontal = Control.SIZE_EXPAND_FILL; right.add_theme_constant_override("separation", 6); row.add_child(right)
 	var top := HBoxContainer.new(); right.add_child(top)
 	title_l = UiKit.label("EVIL SUPPLY DEPOT", 18, UiKit.NEON); title_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL; top.add_child(title_l)
 	scrap_l = UiKit.label("⚙ 0", 20, UiKit.GOLD); scrap_l.autowrap_mode = TextServer.AUTOWRAP_OFF; top.add_child(scrap_l)
@@ -36,10 +39,14 @@ func _ready() -> void:
 	reroll_btn = UiKit.button("Reroll", _on_reroll, true); btns.add_child(reroll_btn)
 	var sp := Control.new(); sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL; btns.add_child(sp)
 	next_btn = UiKit.button("Next Wave ▶", func(): next_wave.emit()); btns.add_child(next_btn)
+	right.add_child(UiKit.label("CONSUMABLES · carry 3 of each", 11, UiKit.NEON))
 	consumables_box = HBoxContainer.new(); consumables_box.add_theme_constant_override("separation", 6); right.add_child(consumables_box)
 	consumable_l = UiKit.label("Y / Q use · D-UP / E switch consumable",10,UiKit.DIM); right.add_child(consumable_l)
-	right.add_child(UiKit.label("INSTALLED MODULES", 14, UiKit.NEON))
-	sell_l = UiKit.label("", 11, UiKit.DIM); right.add_child(sell_l)
+	var owned_head := HBoxContainer.new(); owned_head.add_theme_constant_override("separation", 12); right.add_child(owned_head)
+	var owned_title := UiKit.label("INSTALLED MODULES", 14, UiKit.NEON); owned_title.autowrap_mode = TextServer.AUTOWRAP_OFF; owned_head.add_child(owned_title)
+	# sell hint shares the heading row so hovering a module never shifts the layout
+	sell_l = UiKit.label("", 11, UiKit.DIM); sell_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sell_l.autowrap_mode = TextServer.AUTOWRAP_OFF; sell_l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS; owned_head.add_child(sell_l)
 	var owned_scroll := ScrollContainer.new(); owned_scroll.custom_minimum_size.y = 96
 	owned_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED; right.add_child(owned_scroll)
 	owned_box = HFlowContainer.new(); owned_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -50,6 +57,11 @@ func refresh(focus_idx := -1) -> void:
 	title_l.text = "EVIL SUPPLY DEPOT · %d" % Run.wave
 	scrap_l.text = "⚙ %d" % Run.scrap
 	name_l.text = Run.display_name()
+	secondary_l.text = "SECONDARY · Buy a Bionic Arm" if Run.CNT.get("bionic_arm",0)==0 else "SECONDARY · Arm equipment in shop pool"
+	if Run.build.off != null:
+		var kind: String = Run.build.off.get("kind","gun")
+		secondary_l.text = "SECONDARY · " + ("Rear weapon" if kind=="gun" else Run.arm_name(kind))
+	consumable_l.text = "Y / Q use · D-UP / E switch consumable"
 	for c in stats_box.get_children(): c.queue_free()
 	stats_box.add_child(UiKit.stats_grid(Run.stats_rows()))
 	for c in offers_box.get_children(): c.queue_free()
@@ -59,7 +71,11 @@ func refresh(focus_idx := -1) -> void:
 		if i == focus_idx: focus_me = card[1]
 	reroll_btn.text = "Reroll ⚙ %d" % Run.reroll_cost; reroll_btn.disabled = Run.scrap < Run.reroll_cost
 	for c in consumables_box.get_children(): consumables_box.remove_child(c); c.queue_free()
+	if Run.consumables_owned.is_empty():
+		var hint := UiKit.label("Supply kits show up in the offers above · buy one to unlock refills", 10, UiKit.DIM)
+		hint.autowrap_mode = TextServer.AUTOWRAP_OFF; consumables_box.add_child(hint)
 	for id in Run.CONSUMABLE_IDS:
+		if not Run.owns_consumable(id): continue
 		var price: int = Run.wave_price(Run.CONSUMABLE_PRICES[id])
 		var count: int = Run.consumable_charges[id]
 		var text := "%s %d/3 · ⚙%d" % [Run.CONSUMABLE_NAMES[id],count,price]
@@ -175,9 +191,14 @@ func _offer(i: int) -> Array:
 	if o.sold: p.modulate.a = 0.25
 	var vb := VBoxContainer.new(); p.add_child(vb)
 	vb.add_child(UiKit.label(it.ic, 28, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER))
-	vb.add_child(UiKit.label(it.name, 13, UiKit.TEXT, HORIZONTAL_ALIGNMENT_CENTER))
+	var name_text: String = it.name
+	var description: String = it.desc
+	if it.id == "telescope" and Run.aim_guide_level() >= 1:
+		name_text += " II"
+		description = "Crosshair at max range. Mouse aim: follows the cursor."
+	vb.add_child(UiKit.label(name_text, 13, UiKit.TEXT, HORIZONTAL_ALIGNMENT_CENTER))
 	vb.add_child(UiKit.label(Run.RULES.shop.tier_names[int(it.t)], 10, tc, HORIZONTAL_ALIGNMENT_CENTER))
-	var d := UiKit.label(it.desc, 11, UiKit.TEXT); d.size_flags_vertical = Control.SIZE_EXPAND_FILL; vb.add_child(d)
+	var d := UiKit.label(description, 11, UiKit.TEXT); d.size_flags_vertical = Control.SIZE_EXPAND_FILL; vb.add_child(d)
 	var back := 0
 	if it.has("swap"):
 		# ammo/frame swap: a bought part being replaced is traded in towards the price

@@ -112,12 +112,34 @@ func _run() -> void:
 	var m2 = a.villain.muzzle_global(); var sh2 = a.villain.shoulder_global()
 	a.fire_gun("laser", 0.0, 1.0, m2.x, m2.y, null, sh2.x, sh2.y, 0)
 	_check(not behind.dead and behind.hp > 0.0, "a shot fired forwards doesn't hit a cop behind your back")
+	_test_melee_windup()
 	_test_drone_resistances()
 	_test_ironclad()
 	for e in a.enemies: e.queue_free()
 	a.enemies.clear()
 	print("COMBAT RULE TESTS: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
+
+## Baton cops and riot police wind up before the blow, so a villain who steps away makes them whiff.
+func _test_melee_windup() -> void:
+	for type in ["cop", "riot"]:
+		_setup([])
+		a.P.inv = 0.0
+		var e = _cop(type, a.P.x + 20, a.P.y); e.atk_cd = 0.0
+		var hp: float = a.P.hp
+		e.tick(1.0 / 60.0)
+		_check(e.action_phase == "swing" and a.P.hp == hp, "a %s winds up instead of hitting instantly" % type)
+		_tick(e, 0.5)
+		_check(a.P.hp < hp and e.action_phase == "", "a %s's blow lands when the villain stays in reach" % type)
+		_setup([])
+		a.P.inv = 0.0
+		e = _cop(type, a.P.x + 20, a.P.y); e.atk_cd = 0.0
+		hp = a.P.hp
+		e.tick(1.0 / 60.0)
+		a.P.x -= 140.0   # the villain sidesteps out of reach during the wind-up
+		_tick(e, 0.5)
+		_check(a.P.hp == hp, "a %s whiffs when the villain steps away" % type)
+	a.P.inv = 1000.0
 
 func _test_drone_resistances() -> void:
 	_setup(["poison"], 7)

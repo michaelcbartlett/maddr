@@ -6,7 +6,46 @@ const Profiles = preload("res://character/height_profiles.gd")
 var anchors := {}
 
 func paint(kind: String, state: String, frame: int) -> Pixels:
+	if kind in ["vex_sentry","vex_mine"]: return _gadget(kind,state,frame)
 	return _dog(state, frame) if kind == "robodog" else _vehicle(kind, state, frame)
+
+func _gadget(kind: String, state: String, i: int) -> Pixels:
+	var c := Pixels.new(44,40); var p := Pen.new(c,0,0)
+	var mine := kind == "vex_mine"
+	var y := 28+(i%2); var dead := state == "death"
+	if dead: y += i
+	p.layer(3)
+	for leg in [-1,1]:
+		p.line(22,y-4,22+leg*13,36,"#53677d",3)
+		p.box(20+leg*13,34,5,3,"#28384b")
+	p.layer(8,Profiles.dome(22,y,12,7,5)); p.ell(22,y,12,7,"#6e5b84" if not dead else "#3a3d4f")
+	p.box(13,y-5,18,6,"#9b80b0")
+	if mine:
+		p.layer(15); p.ell(22,y-7,6,5,"#ed87ff" if i%2==0 else "#885cb9")
+		p.R(21,y-10,2,5,"#f5d2ff")
+	else:
+		p.layer(14,Profiles.slab(14,y-21,34,y-10,3,1))
+		p.box(14,y-21,20,11,"#637a8c"); p.box(27,y-19,12,7,"#37455e")
+		p.R(37,y-18,3,5,"#6bf5ef"); p.R(18,y-19,6,3,"#9ce1d7")
+		p.line(15,y-21,12,y-28,"#4b5f75",1); p.P(12,y-29,"#ed87ff")
+		if state == "attack": p.R(40,y-17,1+i,3,"#f2ffee")
+	# Bevelled access panels, screws and alternating laboratory status lamps.
+	p.layer(18)
+	p.R(14,y+1,16,1,"#c4b0cd"); p.R(16,y+3,12,1,"#3d4059")
+	for screw in [14,30]: p.P(screw,y-2,"#e1d5da")
+	if not dead:
+		p.P(17,y-3,"#6bf5ef"); p.P(20,y-3,"#ed87ff" if i%2==0 else "#825ca2")
+	if mine:
+		p.R(12,y-1,3,2,"#edbd63"); p.R(29,y-1,3,2,"#edbd63")
+	else:
+		for vent in 3: p.R(16+vent*3,y-15,1,3,"#334357")
+		p.R(28,y-19,7,1,"#b5ccd2")
+	if state == "frozen": p.line(13,y-8,29,y+4,"#b0f4ff",2)
+	if state == "hurt": p.R(13,y-2,18,1,"#ffffff")
+	if state == "stunned": p.R(20,2+i,3,2,"#ffe699")
+	if dead: p.line(17+i,y-9,26,y+5,"#202e44",2); p.box(7+i*2,30-i,4,3,"#8f759d")
+	anchors = {"head":Vector2(22,y-16),"chest":Vector2(22,y-2),"muzzle":Vector2(40,y-16)}
+	return c
 
 func _vehicle(kind: String, state: String, i: int) -> Pixels:
 	var c := Pixels.new(112, 84); var p := Pen.new(c, 0, 0)
@@ -52,6 +91,14 @@ func _vehicle(kind: String, state: String, i: int) -> Pixels:
 		# Door badge and white NYPD stripe.
 		p.R(43,y+5,22,3,"#eff5f3"); p.R(44,y+6,3,1,"#28558c"); p.R(50,y+6,3,1,"#28558c"); p.R(56,y+6,3,1,"#28558c")
 		p.ell(70,y+7,3,4,"#e8c877")
+	p.layer(27)
+	if tank:
+		for bolt in [29,43,65,77]: p.P(bolt,y+12,"#c3c4a2")
+		for vent in 4: p.R(24+vent*4,y-8,2,6,"#354532")
+		p.R(68,y-9,22,1,"#b4bd91")
+	else:
+		p.R(73,y-6,14,1,"#a7bfcd"); p.R(74,y+9,12,1,"#718a9e")
+		p.R(48,y-3,6,1,"#5f7b91"); p.R(11,y+15,85,1,"#8eabb9")
 	if state == "attack": p.R(103,y-11,4+i,3,"#ffe6a3")
 	if dead:
 		p.layer(28); p.line(28,y-16,75,y+16,"#131c23",2+i%2)
@@ -86,6 +133,11 @@ func _dog(state: String, i: int) -> Pixels:
 	p.layer(17, Profiles.slab(33,y-12,47,y-2,4,2)); p.box(33,y-12,14,10,"#344952")
 	p.R(39,y-10,8,3,"#ff554a" if state != "frozen" else "#84e2ff"); p.R(43,y-10,3,1,"#ffd4b2")
 	p.R(34,y-15,3,4,"#93a8a0"); p.line(12,y-9,6,y-15,"#748781",2)
+	p.layer(19)
+	p.R(11,y-6,24,1,"#c0d4ce"); p.R(29,y-5,2,7,"#394f54")
+	for bolt in [12,32]: p.P(bolt,y-4,"#edf0d0")
+	p.R(36,y-5,9,1,"#708d9c"); p.P(40,y-9,"#fff0d7" if not dead else "#744a45")
+	p.R(17,y-9,3,2,"#343f43"); p.P(18,y-9,"#9be3e6" if not dead else "#466064")
 	if state == "attack": p.R(46,y-7,3+i,2,"#91e5ee")
 	if state == "hurt": p.R(11,y-5,24,1,"#fff2c8")
 	if dead: p.line(18+i*2,y-10,30,y+4,"#1c292e",2); p.box(35+i,y-16,4,3,"#b7b28c")

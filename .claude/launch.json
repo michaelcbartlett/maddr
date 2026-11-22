@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8137"],
       "port": 8137
+    },
+    {
+      "name": "godot-web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8138", "--directory", "godot/build/web"],
+      "port": 8138
     }
   ]
 }

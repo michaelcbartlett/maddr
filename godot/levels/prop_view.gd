@@ -55,6 +55,29 @@ func _box(x0: float, x1: float, gy: float, depth: float, height: float, top: Col
 	draw_rect(Rect2(x0, gy - depth - height, w, 1), top.lightened(0.35))
 	draw_rect(Rect2(x0, gy - height, w, 1), top.lightened(0.18))
 
+## Top face of a side-on car, read as a profile: one smooth line rises from a low boot, runs flat over the
+## cabin, then eases down to a low bonnet (no hard steps). `inset` shrinks it for inner fills.
+## Returns the far (north) edge first, then 4 near-edge points.
+const CAR_DECK := 0.25         # boot / bonnet ends sit this fraction of the depth below the roofline
+func _car_top(hw: float, top: float, d: float, inset := 0.0) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	var y0 := top + inset; var y1 := top + d - inset; var x := hw - inset
+	var deck := top + d * CAR_DECK + inset * 0.5
+	for i in 33:
+		var px := lerpf(-x, x, i / 32.0)
+		# 0 at the bumpers, 1 over the cabin: a long gentle rear slope, a shorter windscreen slope at the front
+		var lift := smoothstep(-hw * 0.82, -hw * 0.32, px) * (1.0 - smoothstep(hw * 0.17, hw * 0.62, px))
+		pts.append(Vector2(px, lerpf(deck, y0, lift)))
+	pts.append(Vector2(x, y1 - 3)); pts.append(Vector2(x - 3, y1)); pts.append(Vector2(-x + 3, y1)); pts.append(Vector2(-x, y1 - 3))
+	return pts
+
+func _fill_v(pts: PackedVector2Array, c0: Color, c1: Color) -> void:
+	var lo := INF; var hi := -INF
+	for v in pts: lo = minf(lo, v.y); hi = maxf(hi, v.y)
+	var cs := PackedColorArray()
+	for v in pts: cs.append(c0.lerp(c1, (v.y - lo) / maxf(hi - lo, 1.0)))
+	draw_polygon(pts, cs)
+
 func _star(p: Vector2, r: float, c: Color) -> void:
 	draw_line(p - Vector2(r, 0), p + Vector2(r, 0), c, 1.0); draw_line(p - Vector2(0, r), p + Vector2(0, r), c, 1.0)
 	draw_rect(Rect2(p - Vector2(1, 1), Vector2(2, 2)), c)
@@ -193,11 +216,18 @@ func _draw_car_h() -> void:
 	draw_rect(Rect2(-hw * 0.2, -h + 3, 1, h - 7), body.darkened(0.55))   # door seam
 	draw_rect(Rect2(hw * 0.05, -h * 0.7, 5, 2), Color("#c8ccd0"))           # door handle
 	# top face: bonnet / roof / boot
-	_rr(Rect2(-hw, top, w, d), acc if police else body.darkened(0.1), 11)
-	_grad(Rect2(-hw + 3, top + 2, w - 6, d - 4), body.lightened(0.12) if not police else acc.lightened(0.15), body.darkened(0.08) if not police else acc)
-	if police: _grad(Rect2(-hw * 0.42, top + 2, hw * 0.84, d - 4), Color("#f8fafc"), Color("#c8d0d8"))
-	draw_rect(Rect2(-hw + 8, top + 2, w - 16, 1), Color(1, 1, 1, 0.45))   # specular rim
-	draw_rect(Rect2(hw * 0.45, top + 6, 1, d - 12), Color(0, 0, 0, 0.25)); draw_rect(Rect2(-hw * 0.66, top + 6, 1, d - 12), Color(0, 0, 0, 0.25))
+	draw_colored_polygon(_car_top(hw, top, d), acc if police else body.darkened(0.1))
+	_fill_v(_car_top(hw, top, d, 2.5), body.lightened(0.12) if not police else acc.lightened(0.15), body.darkened(0.08) if not police else acc)
+	if police:   # white roof band, clipped to the body outline
+		var band := PackedVector2Array()
+		for v in _car_top(hw, top, d, 2.0).slice(0, 33):
+			if absf(v.x) <= hw * 0.42: band.append(v)
+		band.append(Vector2(hw * 0.42, top + d - 2)); band.append(Vector2(-hw * 0.42, top + d - 2))
+		_fill_v(band, Color("#f8fafc"), Color("#c8d0d8"))
+	draw_rect(Rect2(-hw * 0.3, top + 2, hw * 0.45, 1), Color(1, 1, 1, 0.45))   # specular rim along the roofline
+	var rim := _car_top(hw, top, d, 1.5)
+	draw_polyline(rim.slice(0, rim.size() - 4), Color(1, 1, 1, 0.22), 1.0)   # light catching the roof, boot and bonnet edge
+	draw_rect(Rect2(hw * 0.45, top + d * 0.4, 1, d * 0.6 - 6), Color(0, 0, 0, 0.25)); draw_rect(Rect2(-hw * 0.72, top + d * 0.4, 1, d * 0.6 - 6), Color(0, 0, 0, 0.25))
 	draw_rect(Rect2(hw * 0.6, top + d * 0.5 - 1, hw * 0.3, 2), Color(1, 1, 1, 0.12))   # bonnet crease
 	# cabin: roof lifted 9 px, glass between roof and body
 	var cx0 := -hw * 0.5; var cx1 := hw * 0.3; var cy0 := top + 9; var cy1 := top + d - 9
@@ -218,7 +248,7 @@ func _draw_car_h() -> void:
 	else:
 		draw_rect(Rect2(rx0 + 6, ry0 + 5, rx1 - rx0 - 12, 2), Color(1, 1, 1, 0.1))
 	# lights: head at +x, tail at -x
-	for y in [top + 6, top + d - 12]:
+	for y in [top + d * CAR_DECK + 4, top + d - 12]:   # far-side lights sit on the boot / bonnet ends
 		_rr(Rect2(hw - 6, y, 5, 7), Color("#fff6d8"), 2); _rr(Rect2(-hw + 1, y, 4, 7), Color("#d82020"), 2)
 	_rr(Rect2(hw - 7, -h + 2, 6, 5), Color("#fff6d8"), 2); _rr(Rect2(-hw + 1, -h + 2, 5, 5), Color("#d82020"), 2)
 	draw_rect(Rect2(cx1 + 2, cy1 - 1, 5, 4), body.darkened(0.4))   # mirror

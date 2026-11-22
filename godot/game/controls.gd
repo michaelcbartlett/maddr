@@ -73,7 +73,7 @@ func _input(e: InputEvent) -> void:
 	if e.is_action_pressed("mute"): muted = not muted; AudioServer.set_bus_mute(0, muted)
 
 func _process(_dt: float) -> void:
-	var cursor := Input.MOUSE_MODE_HIDDEN if aim_src == "pad" and get_tree().paused == false and _in_play() else Input.MOUSE_MODE_VISIBLE
+	var cursor := Input.MOUSE_MODE_HIDDEN if (aim_src == "pad" or Run.aim_guide_level() >= 2) and get_tree().paused == false and _in_play() else Input.MOUSE_MODE_VISIBLE
 	if Input.mouse_mode != cursor: Input.mouse_mode = cursor
 
 func _in_play() -> bool:

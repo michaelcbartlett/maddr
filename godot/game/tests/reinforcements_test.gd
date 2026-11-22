@@ -120,6 +120,16 @@ func _run() -> void:
 	# Supplies are separate from modules and survive wave transitions.
 	_start(); run.scrap = 1000
 	for kind in run.CONSUMABLE_IDS:
+		_check(not run.buy_consumable(kind), "%s refills need its kit first" % kind)
+	for kit in ["kit_disguise","kit_grenade","kit_teleport"]:
+		var it: Dictionary = run.ITEM[kit]
+		_check(run.item_available(it), "%s is offered before it is owned" % kit)
+		run.offers = [{"it":it,"price":run.wave_price(it.c),"sold":false}]
+		_check(run.buy(0) and run.consumable_charges[it.consumable] == 3, "%s gives 3 charges" % kit)
+		_check(not run.item_available(it) and not run.build.items.has(kit), "%s is a one-time unlock, not a module" % kit)
+	for kind in run.CONSUMABLE_IDS: run.consumable_charges[kind] = 0
+	run.selected_consumable = "disguise"
+	for kind in run.CONSUMABLE_IDS:
 		var cash: int = run.scrap
 		_check(run.buy_consumable(kind) and run.scrap == cash-run.wave_price(run.CONSUMABLE_PRICES[kind]), "%s purchase pays the displayed price" % kind)
 		_check(not run.CNT.has(kind) and not run.build.items.has(kind), "%s never occupies a module or arm slot" % kind)
@@ -167,7 +177,7 @@ func _run() -> void:
 		a.P.y = 550; a.P.x = 1100 if reverse else 800; a.consumables.tick(a,0.01,false)
 		_check(a.P.x == (800 if reverse else 1100) and a.consumables.pads.is_empty(), "either pad teleports to its partner once, then both disappear")
 		_check(not a.consumables.activate(a), "an empty inventory cannot create another pair")
-	_start(); run.scrap = 0
+	_start(); run.scrap = 0; run.consumables_owned = {"disguise":true}
 	_check(not run.buy_consumable("disguise") and run.consumable_charges.disguise == 0, "insufficient scrap never grants free supplies")
 	_check(not a.consumables.activate(a), "Y with no supplies is harmless")
 	_start(); run.selected_consumable = "teleport"; run.consumable_charges.teleport = 1

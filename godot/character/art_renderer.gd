@@ -1470,7 +1470,13 @@ func render_weapon(bend = WBEND0, spec = null, off = false):
 		var x_5 = wx
 		var ww = (getv(getv(it_2, "wv"), "w") * 2)
 		layer.call(28, Profiles.cylH(0, 7, 3))
-		if truth((getv(it_2, "id") == "fins")):
+		if getv(it_2, "id") == "steam_piston":   # train heist (Menace): brass piston rings that puff steam
+			for rx in [x_5, x_5 + 3]:
+				box.call(rx, -6, 2, 12, "#9a7a3a")
+				R.call(rx, -6, 1, 12, "#e8c870")
+			R.call(x_5 + 2, -2, 1, 4, "#5a4a2a")
+			A2.call({"k": "mist", "x": x_5 + 2, "y": -6})
+		elif truth((getv(it_2, "id") == "fins")):
 			for fx in [x_5, (x_5 + 2)]:
 				R.call(fx, (-7), 1, 14, "#c0c8d0")
 				P.call(fx, (-7), "#fff")
@@ -1510,6 +1516,25 @@ func render_weapon(bend = WBEND0, spec = null, off = false):
 		var ww_2 = (getv(getv(it_3, "wv"), "w") * 2)
 		layer.call(28, Profiles.dome((x_6 + (ww_2 / float(2))), (tb - 6), ((ww_2 / float(2)) + 1), 7, 3))
 		match getv(it_3, "id"):
+			"headlamp":   # train heist (Arch-Nemesis): a huge brass locomotive headlamp facing down the barrel
+				layer.call(28, Profiles.dome(x_6 + 6, tb - 6, 6, 6, 3))
+				box.call(x_6, tb - 11, 10, 10, "#8a6a2a")
+				R.call(x_6 + 1, tb - 10, 8, 1, "#e8c870")
+				R.call(x_6 + 3, tb - 1, 4, 1, "#5a4a2a")
+				box.call(x_6 + 10, tb - 12, 2, 12, "#c9a227")
+				lift.call(0.5)
+				R.call(x_6 + 11, tb - 10, 1, 8, "#fff8d0")
+				P.call(x_6 + 11, tb - 7, "#ffffff")
+				lift.call(0)
+				A2.call({"k": "pulse", "x": x_6 + 12, "y": tb - 6, "r": 6, "c": "#fff0b0", "a": 0.35})
+			"capacitor":
+				layer.call(28, Profiles.slab(x_6,tb-10,x_6+10,tb-1,3,1))
+				box.call(x_6,tb-10,10,9,"#ad783f")
+				R.call(x_6+1,tb-9,8,1,"#efd49a")
+				R.call(x_6+1,tb-7,8,5,"#372f37")
+				for window in 3: R.call(x_6+2+window*2,tb-6,1,3,"#725842")
+				R.call(x_6+2,tb-1,2,2,"#6b8491"); R.call(x_6+7,tb-1,2,2,"#6b8491")
+				A2.call({"k":"capacitor","x":x_6+2,"y":tb-6})
 			"scope":
 				layer.call(28, Profiles.cylH((tb - 3.5), 2.5, 2.5))
 				box.call(x_6, (tb - 6), 12, 5, "#2a2e33")
@@ -1640,6 +1665,32 @@ func render_weapon(bend = WBEND0, spec = null, off = false):
 		var ww_3 = (getv(getv(it_4, "wv"), "w") * 2)
 		layer.call(27, Profiles.dome((x_7 + (ww_3 / float(2))), (bb + 3), ((ww_3 / float(2)) + 1), 4, 2.5))
 		match getv(it_4, "id"):
+			"bullion":   # train heist (Petty Crook): a stolen gold bar strapped under the barrel
+				layer.call(27, Profiles.slab(x_7, bb, x_7 + 10, bb + 5, 2.5, 1))
+				box.call(x_7, bb, 10, 5, "#c9a227")
+				R.call(x_7 + 1, bb, 8, 1, "#fff0a0")
+				R.call(x_7 + 2, bb + 2, 6, 1, "#e8c840")
+				R.call(x_7 + 3, bb - 1, 1, 6, "#5a4a2a")
+				R.call(x_7 + 7, bb - 1, 1, 6, "#5a4a2a")
+				A2.call({"k": "pulse", "x": x_7 + 5, "y": bb + 2, "r": 3, "c": "#ffe070", "a": 0.25})
+			"rail_spike":   # train heist (Nuisance): an iron rail spike lashed under the muzzle, point forward
+				layer.call(27, Profiles.cylH(bb + 2, 2, 2))
+				R.call(x_7, bb, 3, 4, "#4a4e54")
+				R.call(x_7 + 3, bb + 1, 7, 2, "#7a7e86")
+				R.call(x_7 + 3, bb + 1, 7, 1, "#a8acb4")
+				R.call(x_7 + 10, bb + 1, 2, 1, "#c8ccd0")
+				R.call(x_7 + 4, bb - 1, 1, 4, "#8a5a2a")
+				R.call(x_7 + 8, bb - 1, 1, 4, "#8a5a2a")
+			"firebox":   # train heist (Supervillain): a glowing coal firebox under the gun
+				layer.call(27, Profiles.cylH(bb + 3, 3.5, 2.5))
+				box.call(x_7, bb, 10, 7, "#2a2a2e")
+				R.call(x_7 + 1, bb + 1, 8, 1, "#4a4a52")
+				R.call(x_7 + 2, bb + 3, 6, 3, "#ff7a20")
+				R.call(x_7 + 3, bb + 4, 4, 1, "#ffd040")
+				R.call(x_7 + 1, bb - 1, 2, 1, dark)
+				R.call(x_7 + 10, bb + 1, 2, 2, "#555")
+				A2.call({"k": "flame", "x": x_7 + 12, "y": bb + 2, "side": 1})
+				A2.call({"k": "pulse", "x": x_7 + 5, "y": bb + 4, "r": 4, "c": "#ff8a30", "a": 0.35})
 			"cell":
 				box.call(x_7, bb, 8, 4, "#2a8ad0")
 				R.call((x_7 + 2), (bb + 1), 4, 2, "#9ff")
@@ -1771,6 +1822,12 @@ func draw_effect(p, a, o, t):
 	var R = p.R
 	var P = p.P
 	match getv(a, "k"):
+		"capacitor":
+			var charge: float = clampf(float(o.get("capacitor_charge",0.0)),0.0,1.0)
+			for window in 3:
+				var intensity := clampf(charge*3.0-window,0.0,1.0)
+				p.R(a.x+window*2,a.y,1,3,"#"+Color("#725842").lerp(Color("#ffe7a0"),intensity).to_html(false))
+			if charge>=0.999: p.P(a.x+5,a.y-2,"#fff9d9")
 		"tank":
 			var i = 0
 			while truth((i < 4)):

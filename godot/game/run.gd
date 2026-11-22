@@ -30,9 +30,14 @@ const CONSUMABLE_NAMES := {"disguise":"Disguise", "grenade":"Grenade", "teleport
 const CONSUMABLE_PRICES := {"disguise":14, "grenade":10, "teleport":18}
 var consumable_charges := {"disguise":0, "grenade":0, "teleport":0}
 var selected_consumable := "disguise"
+## Supplies are unlocked by buying their kit from the depot offers (3 charges); refills are bought after that.
+var consumables_owned := {}
+const KIT_CHARGES := 3
+
+func owns_consumable(id: String) -> bool: return consumables_owned.has(id)
 
 func buy_consumable(id: String) -> bool:
-	if not CONSUMABLE_IDS.has(id) or int(consumable_charges[id]) >= 3: return false
+	if not CONSUMABLE_IDS.has(id) or not owns_consumable(id) or int(consumable_charges[id]) >= 3: return false
 	var price := wave_price(CONSUMABLE_PRICES[id])
 	if scrap < price: return false
 	scrap -= price; consumable_charges[id] += 1
@@ -80,6 +85,7 @@ func _ready() -> void:
 	RULES = _load("rules.json")
 	_build_parts()
 	unlocks = UnlocksT.new(RULES.get("unlocks", []), is_test_process())
+	unlocks.difficulty_names = DIFFICULTY
 	recompute()
 
 ## Headless test scripts and the --autoplay/--wave hooks must not write the player's unlock save.
@@ -100,7 +106,7 @@ static func base_stats() -> Dictionary:
 		"burn": 0.0, "acid": 0.0, "poison": 0.0, "bleed": 0.0, "sick": 0.0, "freeze": 0.0, "mind": 0.0, "mindDur": 6.0, "minionMul": 1.0,
 		"chain": 0, "chainMul": 1.0, "execute": 0.0, "explode": 0.0, "bomb": 0.0, "remote": 0.0, "boomMul": 1.0, "lifesuck": 0.0, "frozenMul": 1.0,
 		"sustain": 0, "maxHp": 30.0, "regen": 0.0, "armor": 0.0, "speed": 210.0, "speedPct": 0.0, "pickup": 70.0, "pickupPct": 0.0,
-		"scrapPct": 0.0, "dropPct": 0.0, "burnSpread": 0.0, "poisonSpread": 0.0, "orbs": 0, "moon": 0, "crit": 0.05, "aimGuide": 0, "beam": 0, "guns": []}
+		"scrapPct": 0.0, "dropPct": 0.0, "burnSpread": 0.0, "poisonSpread": 0.0, "orbs": 0, "moon": 0, "crit": 0.05, "meleeSpd": 0.0, "meleeReach": 0.0, "meleeDmg": 0.0, "burnMul": 1.0, "poisonMul": 1.0, "lightningMul": 1.0, "rad": 0.0, "radMul": 1.0, "aimGuide": 0, "beam": 0, "guns": []}
 
 static func apply_def(s: Dictionary, def: Dictionary) -> void:
 	if def.has("set"):
@@ -173,8 +179,9 @@ func new_run() -> void:
 	unlocks.begin_run()
 	custom_name = false; scrap = 0; scrap_f = 0.0; kills = 0; total_scrap = 0; wave = 1
 	arm_cooldowns = {"time_freeze":0.0,"proximity_bomb":0.0,"seeker_rack":0.0}
-	consumable_charges = {"disguise":0, "grenade":0, "teleport":0}; selected_consumable = "disguise"
+	consumable_charges = {"disguise":0, "grenade":0, "teleport":0}; selected_consumable = "disguise"; consumables_owned = {}
 	set_difficulty(1); theme_order = []
+	heist_wave = pick_heist_wave(); bank_cracked = false
 	recompute()
 
 ## Design screen: choose an unlocked starting part (part = "ammo" | "frame"). Locked parts are refused.
@@ -258,20 +265,29 @@ func part_trade_in(part: String) -> int:
 	return 0 if d.is_empty() else maxi(1, roundi(wave_price(d.c) * SELL_RATE))
 
 func item_available(it: Dictionary) -> bool:
+	if it.id == "capacitor" and (CNT.get("capacitor",0)>0 or not has_laser()): return false
+	if it.id == "telescope" and aim_guide_level() >= 2: return false
 	if it.has("swap"): return part_available(it)
+	if it.has("consumable"): return not owns_consumable(it.consumable)
 	if it.has("action") and build.items.has(it.id): return false
 	if it.id == "tesla_helmet" and CNT.get("tesla_helmet", 0) > 0: return false
 	if not unlocks.is_unlocked("item", it.id): return false
 	var unlock_rule: Dictionary = unlocks.rule_for("item", it.id)
 	if wave < int(unlock_rule.get("min_wave", 1)): return false
 	if it.id=="bionic_arm" and CNT.get("bionic_arm",0)>0: return false
-	if (it.id=="offhand" or it.has("arm")) and CNT.get("bionic_arm",0)==0: return false
+	if (it.id=="offhand" or it.has("arm") or it.has("needs_arm")) and CNT.get("bionic_arm",0)==0: return false
 	if it.id == "offhand" and build.off != null and build.off.get("kind","gun")=="gun": return false
 	if it.has("arm") and build.off!=null and build.off.get("kind","gun")==it.arm: return false
 	if it.id == "sustain" and (not (S.guns as Array).has("laser") or S.sustain >= 2 or not S.beam): return false
 	# spread modules only make sense once the effect is on the gun
 	if it.id == "napalm" and not S.burn: return false
 	if it.id == "spores" and not S.poison: return false
+	# damage amplifiers only appear once their effect is in the build
+	if it.id == "bellows" and not S.burn: return false
+	if it.id == "venom" and not S.poison: return false
+	if it.id == "geiger" and not S.rad: return false
+	if it.id == "payraise" and not S.mind: return false
+	if it.id == "windings" and not (S.chain or CNT.get("tesla_helmet",0) > 0 or has_hook()): return false
 	# Focusing Lens: laser bolts -> piercing beam. Meta-unlocked (reach wave 5), one copy, only with a laser equipped.
 	if it.id == "lens" and (not unlocks.is_unlocked("item", "lens") or S.beam or not has_laser()): return false
 	if it.id == "split" and (D.shots >= 9 or has_hook()): return false
@@ -282,6 +298,9 @@ func item_available(it: Dictionary) -> bool:
 func has_laser() -> bool:
 	if (S.guns as Array).has("laser"): return true
 	return build.off != null and build.off.get("kind", "gun") == "gun" and AMMO[int(build.off.get("ammo", 0))].id == "laser"
+
+func aim_guide_level() -> int:
+	return clampi(int(CNT.get("telescope",0)),0,2)
 
 func tier_weights(w: int) -> Dictionary:
 	var sh: Dictionary = RULES.shop
@@ -319,6 +338,11 @@ func buy(i: int) -> bool:
 	if o.it.has("swap"): return _buy_part(o)
 	if o.sold or scrap < o.price or not item_available(o.it): return false
 	scrap -= o.price; o.sold = true
+	if o.it.has("consumable"):   # a supply kit, not a module: fills that supply and unlocks its refills
+		var id: String = o.it.consumable
+		consumables_owned[id] = true; consumable_charges[id] = KIT_CHARGES
+		if int(consumable_charges.get(selected_consumable, 0)) == 0: selected_consumable = id
+		return true
 	build.items.append(o.it.id)
 	if o.it.id == "offhand":
 		build.off = {"kind":"gun","ammo": off_ammo(), "frame": 0, "items": []}
@@ -410,7 +434,31 @@ func equipped_action() -> String:
 	return ""
 
 func arm_name(kind: String) -> String:
-	return {"time_freeze":"Time Freeze", "proximity_bomb":"Proximity Bomb", "seeker_rack":"Triple Seeker Rack"}.get(kind,kind)
+	for it in ITEMS:
+		if it.get("arm","") == kind: return it.name
+	return kind
+
+## Bare bionic fist: what the arm swings when no melee weapon is mounted.
+const FIST_MELEE := {"reach":58.0,"arc":0.4,"swing":0.26,"cd":0.72,"dmg":10.0,"scale":0.35,"knock":130.0,"targets":1,"proc":false}
+
+## Auto-swing stats for the arm slot: the mounted melee weapon, the bare fist, or {} when the arm is busy or absent.
+func melee_spec() -> Dictionary:
+	if CNT.get("bionic_arm",0) == 0: return {}
+	if build.off == null: return _scaled_melee(FIST_MELEE.duplicate())
+	var kind: String = build.off.get("kind","gun")
+	for it in ITEMS:
+		if it.get("arm","") == kind and it.has("melee"):
+			var spec: Dictionary = it.melee.duplicate(); spec.kind = kind; spec.proc = true
+			return _scaled_melee(spec)
+	return {}
+
+## Melee upgrades: attack speed shortens swing + cooldown, reach and damage scale directly.
+func _scaled_melee(spec: Dictionary) -> Dictionary:
+	var speed: float = 1.0 + float(S.meleeSpd)
+	spec.cd = maxf(0.12, float(spec.cd) / speed); spec.swing = maxf(0.08, float(spec.swing) / sqrt(speed))
+	spec.reach = float(spec.reach) * (1.0 + float(S.meleeReach))
+	spec.dmg = float(spec.dmg) * (1.0 + float(S.meleeDmg)); spec.scale = float(spec.scale) * (1.0 + float(S.meleeDmg))
+	return spec
 
 func stats_rows() -> Array:
 	## [label, value, is_effect]
@@ -421,11 +469,15 @@ func stats_rows() -> Array:
 	if D.shots > 1: r.append(["Shots per fire", str(D.shots), false])
 	if S.guns.size() > 1: r.append(["Guns", " + ".join(S.guns), false])
 	if has_laser(): r.append(["Laser", "beam" if S.beam else "bolt", false])
+	if CNT.get("capacitor",0)>0: r.append(["Capacitor", "2.5× laser · 1.5s charge", false])
 	r.append(["Pierce", "∞" if ammo_id() == "laser" and S.beam else str(S.pierce), false])
 	r.append(["Loot drop", pct.call(drop_chance()), false])
 	if build.off != null:
 		var kind: String = build.off.get("kind","gun")
-		r.append(["Arm slot",AMMO[build.off.ammo].name+" · rear fire" if kind=="gun" else arm_name(kind),false])
+		var label: String = AMMO[build.off.ammo].name+" · rear fire" if kind=="gun" else arm_name(kind)
+		var spec := melee_spec()
+		if not spec.is_empty(): label += " · auto melee %.2fs" % float(spec.cd)
+		r.append(["Arm slot",label,false])
 	elif CNT.get("bionic_arm",0)>0: r.append(["Arm slot","Bionic fist · auto melee",false])
 	if equipped_action() != "": r.append(["B action", ITEM[equipped_action()].name, false])
 	if S.burn: r.append(["🔥 Burn", "%.1f/s" % S.burn, true])
@@ -496,8 +548,51 @@ func speed_mult() -> float: return tier("speed")
 func payout_mult() -> float: return tier("payout")
 func payout_for(level: int) -> float: return tier("payout", level)
 
+# =============== TRAIN HEIST (game/train_heist.gd) ===============
+## One wave per run (picked from rules.json heist.waves, never a boss wave) is the train heist: reach the vault car
+## before the wave timer runs out to win this difficulty's reward (heist.rewards[difficulty-1]).
+var heist_wave := 0
+var bank_cracked := false   # the bank vault opens once per run (game/bank_vault.gd)
+
+func pick_heist_wave() -> int:
+	var waves: Array = RULES.get("heist", {}).get("waves", []).filter(func(w): return boss_for(int(w)) == null)
+	return int(waves.pick_random()) if not waves.is_empty() else 0
+
+func is_heist_wave(w: int = -1) -> bool: return heist_wave > 0 and (wave if w < 0 else w) == heist_wave
+
+## Item id of the heist reward for a difficulty (1..5).
+func heist_reward(level: int = -1) -> String:
+	var rewards: Array = RULES.get("heist", {}).get("rewards", [])
+	var i := (difficulty if level < 0 else level) - 1
+	return str(rewards[i]) if i >= 0 and i < rewards.size() else ""
+
+## The villain cracked the vault: unlock this difficulty's reward for good (first time only) and bolt a free copy
+## onto the gun for the rest of the run. Returns {id, unlocked: bool}.
+func claim_heist() -> Dictionary:
+	var id := heist_reward()
+	var got: Array = unlocks.note_heist(difficulty)
+	if id != "" and ITEM.has(id):
+		build.items.append(id); recompute()
+	return {"id": id, "unlocked": got.has("item:" + id)}
+
+## Item id of the bank vault reward for a difficulty (1..5).
+func bank_reward(level: int = -1) -> String:
+	var rewards: Array = RULES.get("bank", {}).get("rewards", [])
+	var i := (difficulty if level < 0 else level) - 1
+	return str(rewards[i]) if i >= 0 and i < rewards.size() else ""
+
+## The villain opened the bank vault: unlock this difficulty's bank reward for good (first time only) and bolt a
+## free copy onto the gun for the rest of the run. Returns {id, unlocked: bool}.
+func claim_bank() -> Dictionary:
+	var id := bank_reward()
+	var got: Array = unlocks.note_bank(difficulty)
+	if id != "" and ITEM.has(id):
+		build.items.append(id); recompute()
+	return {"id": id, "unlocked": got.has("item:" + id)}
+
 ## Wave 1 is always the street; the rest of the themes are shuffled per run.
 func theme_for_wave(w: int) -> String:
+	if is_heist_wave(w): return "train"
 	if theme_order.is_empty():
 		var rest: Array = LevelTheme.ORDER.slice(1); rest.shuffle()
 		theme_order = [LevelTheme.ORDER[0]] + rest

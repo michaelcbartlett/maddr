@@ -91,7 +91,7 @@ static func update_action(a, dt: float) -> void:
 	# Keep the stored path valid even if scenery changed after activation.
 	var contact: Dictionary = a._projectile_wall_hit(old,finish,a.P.r)
 	if not contact.is_empty(): finish = old.lerp(finish,maxf(0.0,contact.fraction - 0.01))
-	a.P.x = finish.x; a.P.y = finish.y; a.P.moving = true
+	a.P.x = finish.x; a.P.y = finish.y; a.P.moving = true; a.P.walk += dt * 20.0
 	a.P.inv = maxf(a.P.inv,0.12)
 	if m.kind == "zigzag":
 		for e in a.enemies.duplicate():

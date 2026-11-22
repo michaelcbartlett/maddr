@@ -1,4 +1,4 @@
-# Mad Villain — ideas backlog
+# The Diabolical Doctor — ideas backlog
 
 Not built yet. Ideas from the 2026-11-22 brainstorm, with notes on where each would fit in the current game.
 Every new item still needs a visible change on the villain and/or the weapon (see the design rules).

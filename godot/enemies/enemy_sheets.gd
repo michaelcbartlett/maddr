@@ -84,7 +84,7 @@ static func anchor(sheet: Dictionary, state: String, index: int, name: String, f
 ## Baking every sheet takes a few seconds of GDScript pixel work, so finished atlases are cached in
 ## user://enemy_sheets/. The key covers the painter/sheet sources (when readable) plus ART_VERSION;
 ## bump ART_VERSION after art changes if scripts are exported as binary tokens.
-const ART_VERSION := 5
+const ART_VERSION := 6
 static var _cache_dir := ""
 
 static func cache_dir() -> String:

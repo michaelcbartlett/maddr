@@ -20,7 +20,8 @@ func _draw() -> void:
 	if not g.has("state"): return
 	var sheet := EnemyArt.sheet(EnemyView.sprite_key(e))
 	draw_fx(self, sheet, g.state, g.frame, Vector2(0, sheet.foot - g.lift) + g.jitter, e.face, e.A.time if e.A else 0.0,
-		{"hero": e.hero, "ally": e.ally, "type": e.type, "laser": e.laser, "frozen": e.frozen_t > 0.0 or e.time_lock > 0.0})
+		{"hero": e.hero, "ally": e.ally, "type": e.type, "laser": e.laser, "frozen": e.frozen_t > 0.0 or e.time_lock > 0.0,
+		"swing": e.action_t if e.action_phase == "swing" else -1.0})
 
 static func _w(sheet: Dictionary, st: String, fi: int, name: String, at: Vector2, face: int, fallback := Vector2(0, -30)) -> Vector2:
 	var a := Sheets.anchor(sheet, st, fi, name, fallback)
@@ -41,13 +42,30 @@ static func draw_fx(ci: CanvasItem, sheet: Dictionary, st: String, fi: int, at: 
 		for k in 6:
 			var a2 := t * 6.0 + k * TAU / 6.0
 			ci.draw_rect(Rect2((head2 + Vector2(cos(a2) * 7.0, -14 + sin(a2) * 2.0)).round(), Vector2(2, 1)), Color("#d07bff", 0.8))
-	if info.get("type", "") == "drone" and st != "death":
+	if info.get("type", "") == "drone" and st != "death" and not frozen:
+		# emissive beacon over the baked light bar: alternating red / blue with a soft halo
 		var on := sin(t * 8.0) > 0.0
-		var top := at + Vector2(0, -27)
-		ci.draw_rect(Rect2(top + Vector2(-3, 0), Vector2(2, 2)), Color("#ff2a2a") if on else Color("#401010"))
-		ci.draw_rect(Rect2(top + Vector2(2, 0), Vector2(2, 2)), Color("#2a5aff") if not on else Color("#101840"))
+		var top := at + Vector2(0, -30)
+		var lamp := top + (Vector2(-2, 1) if on else Vector2(3, 1))
+		var col := Color("#ff2a2a") if on else Color("#2a6aff")
+		ci.draw_circle(lamp, 5.0, Color(col, 0.22)); ci.draw_circle(lamp, 2.5, Color(col, 0.5))
+		ci.draw_rect(Rect2(top + (Vector2(-4, 0) if on else Vector2(1, 0)), Vector2(4, 2)), col)
+	var swing: float = info.get("swing", -1.0)
+	if swing >= 0.0 and not frozen:
+		# a glint on the weapon hand the moment a blow is wound up
+		var hand := _w(sheet, st, fi, "hand_n", at, face).round()
+		var a := clampf(swing / 0.26, 0.0, 1.0)
+		ci.draw_circle(hand, 3.0 + 2.0 * a, Color("#fff2c0", 0.25 * a))
+		_star(ci, hand + Vector2(face * 2, -3), Color("#ffffff", 0.4 + 0.6 * a))
 	if frozen or st == "death": return
 	match info.get("hero", ""):
+		"vex":
+			for anchor in ["muzzle","muzzle_f"]:
+				var muzzle := _w(sheet,st,fi,anchor,at,face)
+				var color := Color("#6bf5ef") if anchor == "muzzle" else Color("#ed87ff")
+				var radius := 3.5+sin(t*12.0) if st in ["aim","attack"] else 2.0
+				ci.draw_circle(muzzle,radius,Color(color,0.45))
+				if st == "aim": _star(ci,muzzle.round(),Color(color,0.9))
 		"surge":
 			# crackling static around the body, arcs from the hand while casting
 			var c := _w(sheet, st, fi, "chest", at, face)

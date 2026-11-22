@@ -100,6 +100,15 @@ func _car(t: float, wreck: bool) -> void:
 	if wreck:
 		_line(_q(-38,-20,26),_q(28,22,32),"#14222b",3)
 		_block(-18,5,22,13,48,55,"#3b454c","#242f35")
+	else:
+		# Door seams, chrome handles, hood vents and the front push bumper.
+		for sy in [-30.8,30.8]:
+			_line(_q(-27,sy,19),_q(-27,sy,28),"#657f92")
+			_line(_q(19,sy,19),_q(19,sy,28),"#657f92")
+			_line(_q(-16,sy,25),_q(-9,sy,25),"#edf5f3",2)
+		for vent in 4: _line(_q(35+vent*3,-9,27),_q(35+vent*3,9,27),"#213c54")
+		_block(67,0,4,42,9,15,"#8eabb9","#344d5e")
+		for sy in [-15.0,15.0]: _block(69,sy,3,4,13,26,"#334957","#192c39")
 
 func _track(side: float, t: float, wreck: bool) -> void:
 	_block(0,side,248,26,0,28,"#495543","#242e2c")
@@ -142,3 +151,11 @@ func _tank(t: float, wreck: bool) -> void:
 	if wreck:
 		_line(_q(-55,-38,41),_q(47,39,51),"#172c2a",4)
 		_block(-5,0,42,31,76,85,"#34463c","#243930")
+	else:
+		# Weld seams, armour fasteners, turret optics and barrel reinforcement rings.
+		for sy in [-43.0,43.0]:
+			_line(_q(-68,sy,41),_q(64,sy,41),"#b2bc8c",2)
+			for x in [-62.0,-23.0,16.0,55.0]: _block(x,sy,3,3,41,43,"#d2cf9d",shadow)
+		_block(34,-20,16,9,76,81,"#283f3f",shadow)
+		_block(38,-20,7,7,81,83,"#8cc6c1","#467c7e")
+		for x in [94.0,137.0,160.0]: _block(x,0,4,15,53,67,"#a3af80","#526644")

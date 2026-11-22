@@ -18,11 +18,15 @@ static var _theme: Theme
 
 static func mono() -> Font:
 	if _mono: return _mono
-	var emoji := SystemFont.new(); emoji.font_names = PackedStringArray(["Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji"])
-	var f := SystemFont.new(); f.font_names = PackedStringArray(["Consolas", "Courier New", "monospace"])
-	f.font_weight = 700; f.fallbacks = [emoji]; f.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
-	_mono = f
-	return f
+	# Bundled (not system) fonts so the web build, which can't see the player's OS fonts, matches desktop.
+	var emoji: FontFile = load("res://ui/fonts/NotoColorEmoji.ttf")
+	var f: FontFile = (load("res://ui/fonts/JetBrainsMono-Bold.ttf") as FontFile).duplicate()
+	f.fallbacks = [emoji]; f.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+	# JetBrains Mono runs wider and taller than the Consolas the layouts were tuned for; tighten to match.
+	var v := FontVariation.new(); v.base_font = f
+	v.spacing_glyph = -1; v.spacing_top = -1; v.spacing_bottom = -1
+	_mono = v
+	return v
 
 static func box(bg: Color, border: Color, w := 3, pad := 8) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new(); s.bg_color = bg; s.border_color = border

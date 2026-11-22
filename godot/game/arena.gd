@@ -7,14 +7,19 @@ class_name Arena
 signal cleared
 signal died
 
-const AW := Levels.AW
-const AH := Levels.AH
+## World size of the current wave's level (the arena, or the longer train heist); set by _setup_level.
+var AW: int = Levels.AW
+var AH: int = Levels.AH
 const VIEW_H := 540.0        # world units visible vertically (index.html shows about 880x580 at its min zoom)
 const BlasterFx = preload("res://fx/blaster_fx.gd")
 const ShotGeometry = preload("res://game/shot_geometry.gd")
 const OFF_HAND = -1
 const UNBOUND_SHOT = -2
 const ArenaLevel = preload("res://levels/arena_level.gd")
+const TrainHeist = preload("res://game/train_heist.gd")
+var heist = TrainHeist.new()    # train heist wave: goal, progress and boarding spawns
+const BankVault = preload("res://game/bank_vault.gd")
+var bank_vault = BankVault.new()   # bank lobby robbery: a customer's vault key opens the vault
 const WallIndex = preload("res://levels/wall_index.gd")
 const BeamView = preload("res://fx/laser_beam.gd")
 const Grapple = preload("res://game/grapple.gd")
@@ -50,6 +55,8 @@ class PlayerState:
 	var melee_t := 0.0
 	var melee_aim := 0.0
 	var melee_hit := false
+	var melee_swing := 0.26   # duration of the current swing (weapon specific)
+	var melee_arc := 0.0      # angular sweep of the current swing, for the pose
 	var helmet_cd := 0.4
 	var disguise_t := 0.0
 
@@ -74,6 +81,9 @@ var beam_tick: Array = []
 var gun_flashes: Array = []
 var blaster_fx = BlasterFx.new()
 var _main_trigger_held := false
+const CAPACITOR_TIME := 1.5
+const CAPACITOR_BONUS := 1.5
+var laser_charge: Dictionary = {}   # independent charge for each gun; releasing its trigger charges it
 var grapple = Grapple.new()   # Shock Grapple state (main gun with "hook" ammo)
 var consumables = Consumables.new()
 var boss: Enemy = null
@@ -162,10 +172,14 @@ func start_wave() -> void:
 		p.x = P.x + 90 + pickups.size() * 30; p.y = P.y + 40; pickups.append(p)
 	markers.clear(); crates.clear(); strikes.clear(); booms.clear(); mines.clear(); novas.clear(); utility_fields.clear(); beam_tick = []
 	blaster_fx.clear(); gun_cd = []; gun_flashes = []; _main_trigger_held = false; grapple.reset()
+	laser_charge.clear()
 	for i in (S.guns as Array).size(): gun_cd.append(0.3 + i * 0.13); beam_tick.append(0.0); gun_flashes.append(0.0)
 	boss = null; wave_dur = Run.wave_len(Run.wave); wave_t = wave_dur; spawn_t = 0.8; crate_t = randf_range(8, 14); moon_t = 3.0; mine_t = 0.0
 	civ_t = randf_range(3, 6); heal_budget = 0.0
 	_setup_level()
+	P.x = arena_level.spawn.x; P.y = arena_level.spawn.y
+	heist.reset(self)
+	bank_vault.reset(self)
 	var B = Run.boss_for(Run.wave)
 	banner_txt = "WAVE %d · %s" % [Run.wave, arena_level.theme.name]
 	if B != null: banner_txt += " · %s INCOMING" % B.name
@@ -184,6 +198,8 @@ func _setup_level() -> void:
 	ambient.color = arena_level.theme.ambient
 	ambient_fx.reset(self, arena_level); decals.clear()
 	walls = arena_level.walls
+	AW = int(arena_level.size.x); AH = int(arena_level.size.y)
+	cam.limit_right = AW; cam.limit_bottom = AH
 	ground.queue_redraw()
 
 func make_enemy(type: String, x: float, y: float) -> Enemy:
@@ -292,6 +308,7 @@ func hit(e: Enemy, amt: float, o := {}) -> void:
 	var S := Run.S; var D := Run.D
 	if e.frozen_t > 0: amt *= S.frozenMul
 	if e.acid_t > 0: amt *= 1.2
+	if o.get("element", "") == "lightning": amt *= S.lightningMul
 	var proc: bool = o.get("proc", false)
 	var crit := false
 	if proc and randf() < S.crit: amt *= 2.0; crit = true
@@ -302,10 +319,11 @@ func hit(e: Enemy, amt: float, o := {}) -> void:
 	if proc:
 		var pf: float = D.pf * o.get("pfm", 1.0)
 		if o.has("kx") and not e.heavy: e.kx += o.kx * 70; e.ky += o.ky * 70
-		if S.burn: e.burn_t = 3.0; e.burn_dps = maxf(e.burn_dps, S.burn * (1.0 + S.dmgPct * 0.5)); e.burn_gen = 0
+		if S.burn: e.burn_t = 3.0; e.burn_dps = maxf(e.burn_dps, S.burn * S.burnMul * (1.0 + S.dmgPct * 0.5)); e.burn_gen = 0
 		if S.acid: e.acid_t = 3.0
 		if S.poison and e.damage_taken("poison") > 0.0: e.poison_s = mini(8, e.poison_s + 1); e.poison_t = 5.0; e.poison_gen = 0
 		if S.bleed: e.bleed_s = mini(10, e.bleed_s + 1); e.bleed_t = 4.0
+		if S.rad and e.damage_taken("radiation") > 0.0: irradiate(e, 1)
 		if S.sick and randf() < S.sick * pf * 2.0: e.sick_t = 6.0
 		if S.freeze:
 			e.chill += S.freeze * pf * (0.3 if e.boss else 1.0); e.slow_t = 2.0
@@ -320,6 +338,18 @@ func hit(e: Enemy, amt: float, o := {}) -> void:
 		if S.mind and not e.boss and not e.civ and e.hp > 0 and randf() < S.mind * pf: make_minion(e); return
 		if S.chain and o.get("chainable", true): chain_from(e, D.dmg * 0.6 * S.chainMul * o.get("mul", 1.0))
 	if e.hp <= 0: kill(e)
+
+const RAD_MAX := 12
+## Uranium Slugs: each hit adds radiation dose. A full dose melts down: a burst on the cop, and its neighbours catch a third of the dose.
+func irradiate(e: Enemy, dose: int) -> void:
+	if e.dead or e.ally: return
+	e.rad_s = mini(RAD_MAX, e.rad_s + dose); e.rad_t = 6.0
+	if e.rad_s < RAD_MAX: return
+	e.rad_s = 0; e.rad_t = 0.0
+	poof(e.x, e.y, Color("#b6ff3a"), 14, 110); snd("zap")
+	for o in live_foes():
+		if o != e and not o.civ and Vector2(o.x - e.x, o.y - e.y).length_squared() < 70.0 * 70.0: irradiate(o, RAD_MAX / 3)
+	hit(e, (20.0 + Run.D.dmg * 2.0) * Run.S.radMul, {"col": Color("#b6ff3a"), "element": "radiation"})
 
 func chain_from(src: Enemy, dmg: float) -> void:
 	var cur := src; var done := {src: true}
@@ -356,7 +386,7 @@ func detonate() -> void:
 	for m in ms: explode(m.x, m.y, (Run.D.dmg * 2.5 + 10) * S.boomMul, 70.0 * sqrt(S.boomMul), Color("#ff5030"))
 
 func make_minion(e: Enemy) -> void:
-	e.ally = true; e.ally_t = Run.S.mindDur; e.frozen_t = 0; e.burn_t = 0; e.chill = 0; e.poison_s = 0; e.bleed_s = 0; e.sick_t = 0; e.acid_t = 0; e.bomb_t = 0
+	e.ally = true; e.ally_t = Run.S.mindDur; e.frozen_t = 0; e.burn_t = 0; e.chill = 0; e.poison_s = 0; e.bleed_s = 0; e.sick_t = 0; e.acid_t = 0; e.bomb_t = 0; e.rad_s = 0; e.rad_t = 0.0
 	e.hp = maxf(e.hp, e.max_hp * 0.6); e.atk_cd = 0
 	add_num(e.x, e.y - 26, "MINION!", Color("#d07bff"), true); poof(e.x, e.y, Color("#d07bff"), 10, 80); snd("mind")
 
@@ -383,6 +413,7 @@ func kill(e: Enemy) -> void:
 		var n := 24 if e.boss else clampi(int(e.scrap), 1, 4)
 		for i in n: pickups.append({"x": e.x + randf_range(-8, 8), "y": e.y + randf_range(-8, 8), "v": v / n, "vx": randf_range(-60, 60), "vy": randf_range(-60, 60), "mag": false})
 	if e.boss:
+		if e.hero == "vex": preload("res://game/rival_scientist.gd").cleanup(e)
 		BossAbilities.drop_rewards(self, e.hero, Vector2(e.x,e.y), randf())
 		if e.hero == "viper":
 			for b in ebul:
@@ -434,6 +465,11 @@ func fire_gun(type: String, ang: float, mul: float, ox: float, oy: float, sus, b
 	var n: int = D.shots
 	var spr := minf(1.2, (S.spread if S.spread else 0.14) * (n - 1) / 2.0 + 0.1 * (n - 1)) if n > 1 else 0.0
 	var dmg: float = D.dmg * mul
+	var charge := 0.0
+	if type == "laser" and Run.CNT.get("capacitor",0)>0 and (sus == null or sus.tick):
+		charge = laser_charge_ratio(source)
+		laser_charge[source] = 0.0   # spend once per volley, so all split nozzles get the same bonus
+		dmg *= 1.0 + CAPACITOR_BONUS * charge
 	if sus != null: dmg *= (0.1 / D.cd) * (1.15 + 0.15 * (S.sustain - 1))   # per 0.1 s tick
 	for i in n:
 		if source!=UNBOUND_SHOT:
@@ -441,6 +477,7 @@ func fire_gun(type: String, ang: float, mul: float, ox: float, oy: float, sus, b
 		var a := ang + ((-spr / 2.0 + spr * i / (n - 1)) if n > 1 else 0.0) + (randf_range(-0.03, 0.03) if type != "laser" else 0.0)
 		var cx := cos(a); var sy := sin(a)
 		var color = Color("#ff4a4a") if type=="laser" else (Color("#ffd76a") if type=="bullet" else Color("#dfe6ec"))
+		if charge>0.0: color = color.lerp(Color("#fff0b0"), charge * 0.8)
 		# A long barrel may visually extend beyond a vault wall. It must not spawn
 		# a shot on the far side of that wall or sweep point-blank damage through it.
 		var barrel = Vector2(ox-bx,oy-by)
@@ -544,9 +581,26 @@ func _sync_beam_views() -> void:
 		var beam: Dictionary = beams[i]
 		_beam_views[i].configure(Vector2(beam.x1,beam.y1),Vector2(beam.x2,beam.y2),beam.w,beam.col,beam.t/beam.m,time,Run.S)
 
+func laser_charge_ratio(source: int = 0) -> float:
+	if Run.CNT.get("capacitor",0)==0: return 0.0
+	return clampf(float(laser_charge.get(source,0.0)) / CAPACITOR_TIME,0.0,1.0)
+
+func laser_charge_display(off := false) -> float:
+	if off: return laser_charge_ratio(OFF_HAND)
+	var charge := 0.0
+	for i in Run.S.guns.size():
+		if Run.S.guns[i]=="laser": charge = maxf(charge,laser_charge_ratio(i))
+	return charge
+
 func _fire_weapons(dt: float, firing: bool, firing_off: bool) -> void:
 	var events: Array = []
 	var guns: Array = Run.S.guns
+	if Run.CNT.get("capacitor",0)>0:
+		for i in guns.size():
+			if guns[i]=="laser" and not firing: laser_charge[i] = minf(CAPACITOR_TIME,float(laser_charge.get(i,0.0))+dt)
+		if Run.build.off!=null and Run.build.off.get("kind","gun")=="gun" and Run.ammo_id(Run.build.off.ammo)=="laser" and not firing_off:
+			laser_charge[OFF_HAND] = minf(CAPACITOR_TIME,float(laser_charge.get(OFF_HAND,0.0))+dt)
+	else: laser_charge.clear()
 	for i in guns.size():
 		gun_cd[i] -= dt; gun_flashes[i] = maxf(0.0,gun_flashes[i]-dt)
 		if guns[i]=="hook": continue   # the grapple is driven by game/grapple.gd below
@@ -586,31 +640,87 @@ func _fire_weapons(dt: float, firing: bool, firing_off: bool) -> void:
 		fire_gun(event.type,P.aim+PI if event.source==OFF_HAND else P.aim,event.mul,origin.x,origin.y,event.sustain,back.x,back.y,event.source)
 	_main_trigger_held = firing
 
-func _melee_extension() -> float:
-	return sin(clampf(1.0-P.melee_t/0.26,0.0,1.0)*PI) if P.melee_t>0.0 else 0.0
+func _melee_progress() -> float:
+	return clampf(1.0-P.melee_t/P.melee_swing,0.0,1.0) if P.melee_t>0.0 else 0.0
 
+func _melee_extension() -> float:
+	return sin(_melee_progress()*PI) if P.melee_t>0.0 else 0.0
+
+## Arm angle shown on the villain: arc weapons sweep across their arc during the swing.
+func _melee_pose_aim() -> float:
+	return P.melee_aim + (_melee_progress()-0.5)*P.melee_arc
+
+const MELEE_COLORS := {"knife":"#e8eef4","katana":"#ff5ad0","whip":"#7df9ff"}
+
+## The bionic arm swings on its own whenever a foe is inside the mounted weapon's reach,
+## then waits out that weapon's cooldown. Bare fist by default; knife/whip/katana from the shop.
 func _update_melee(dt: float) -> void:
 	P.melee_cd = maxf(0.0,P.melee_cd-dt)
-	if Run.build.off!=null or Run.CNT.get("bionic_arm",0)==0: P.melee_t = 0.0; return
+	var spec: Dictionary = Run.melee_spec()
+	if spec.is_empty(): P.melee_t = 0.0; return
 	var origin = villain.off_shoulder_global()
 	if P.melee_t>0.0:
 		P.melee_t = maxf(0.0,P.melee_t-dt)
-		if not P.melee_hit and P.melee_t<=0.156:
+		if not P.melee_hit and P.melee_t<=P.melee_swing*0.6:
 			P.melee_hit = true
-			var direction = Vector2.from_angle(P.melee_aim)
-			var fist = origin+direction*(16.0+42.0*_melee_extension())
-			for enemy in live_foes():
-				if fist.distance_to(Vector2(enemy.x,enemy.y))>enemy.r+16: continue
-				var delta = Vector2(enemy.x,enemy.y)-origin
-				if ray_len(origin.x,origin.y,delta.normalized().x,delta.normalized().y,delta.length())<delta.length()-0.01: continue
-				hit(enemy,10.0+Run.D.dmg*0.35,{"col":Color("#7defff")})
-				if not enemy.heavy: enemy.kx += direction.x*130; enemy.ky += direction.y*130
-				blaster_fx.impact(fist,-direction,Color("#7defff")); snd("pick")
+			_melee_strike(spec,origin)
 	elif P.melee_cd<=0.0:
-		var target = nearest_foe(origin.x,origin.y,72)
+		var target = _melee_target(origin,float(spec.reach)+14.0)
 		if target!=null:
 			P.melee_aim = (Vector2(target.x,target.y)-origin).angle()
-			P.melee_t = 0.26; P.melee_cd = 0.72; P.melee_hit = false
+			P.melee_swing = float(spec.swing); P.melee_arc = float(spec.arc) if float(spec.arc)>1.0 else 0.0
+			P.melee_t = P.melee_swing; P.melee_cd = float(spec.cd); P.melee_hit = false
+
+func _melee_target(origin: Vector2, max_d: float) -> Enemy:
+	var best: Enemy = null; var best_d := max_d*max_d
+	for e in enemies:
+		if e.dead or e.ally or e.civ: continue
+		var d := origin.distance_squared_to(Vector2(e.x,e.y))
+		if d<best_d: best_d = d; best = e
+	return best
+
+func _melee_strike(spec: Dictionary, origin: Vector2) -> void:
+	var direction = Vector2.from_angle(P.melee_aim)
+	var reach: float = spec.reach; var color := Color(MELEE_COLORS.get(spec.get("kind",""),"#7defff"))
+	var victims: Array = []
+	for enemy in live_foes():
+		if enemy.civ: continue
+		var delta = Vector2(enemy.x,enemy.y)-origin; var distance: float = delta.length()
+		if distance>reach+enemy.r: continue
+		var tolerance = float(spec.arc)*0.5 + asin(minf(1.0,enemy.r/maxf(distance,1.0)))
+		if absf(wrapf(delta.angle()-P.melee_aim,-PI,PI))>tolerance: continue
+		if ray_len(origin.x,origin.y,delta.normalized().x,delta.normalized().y,distance)<distance-0.01: continue
+		victims.append([distance,enemy])
+	victims.sort_custom(func(a,b): return a[0]<b[0])
+	var damage: float = float(spec.dmg)+Run.D.dmg*float(spec.scale)
+	for pair in victims.slice(0,int(spec.targets)):
+		var enemy: Enemy = pair[1]
+		var point = Vector2(enemy.x,enemy.y)
+		hit(enemy,damage,{"col":color,"proc":spec.get("proc",false)})
+		if not enemy.heavy and float(spec.knock)>0.0:
+			var push = (point-origin).normalized()*float(spec.knock); enemy.kx += push.x; enemy.ky += push.y
+		if spec.has("stun") and not enemy.boss and not enemy.dead: enemy.time_lock = maxf(enemy.time_lock,float(spec.stun))
+		blaster_fx.impact(point,-direction,color)
+	if spec.get("kind","")!="":
+		utility_fields.append({"kind":"slash","weapon":spec.kind,"position":origin,"radius":reach,"aim":P.melee_aim,"arc":maxf(float(spec.arc),0.12),"time":0.18,"life":0.18,"col":color})
+	if not victims.is_empty(): snd("pick"); Controls.rumble(0.2,0.1,50)
+
+## Swing trail: a crescent for blades, a crackling line for the whip.
+func _draw_slash(g: Node2D, field: Dictionary, fade: float) -> void:
+	var color: Color = field.col; var center: Vector2 = field.position; var reach: float = field.radius
+	if field.weapon == "whip":
+		var direction := Vector2.from_angle(field.aim); var side := direction.orthogonal()
+		var points := PackedVector2Array()
+		for i in 13:
+			var u := i/12.0
+			points.append(center+direction*reach*u+side*sin(u*TAU*1.5+time*40.0)*6.0*u)
+		g.draw_polyline(points,Color(color,0.85*fade),3.0)
+		g.draw_circle(points[points.size()-1],5.0*fade+1.0,Color(1,1,1,fade))
+		return
+	var half: float = field.arc*0.5
+	for band in 3:
+		var radius := reach-band*5.0
+		g.draw_arc(center,radius,field.aim-half,field.aim+half,24,Color(color,(0.75-band*0.22)*fade),4.0-band)
 
 func _update_helmet(dt: float) -> void:
 	if Run.CNT.get("tesla_helmet", 0) == 0: return
@@ -677,6 +787,7 @@ func pick_type() -> String:
 
 ## A free spot in the arena at least `radius_min` from the villain (index.html spawnGroup).
 func _outside_spawn(radius_min: float = 260.0) -> Vector2:
+	if heist.active: return heist.spawn_point(self, radius_min)
 	var point := Vector2(P.x, P.y)
 	for attempt in 40:
 		point = Vector2(randf_range(60, AW - 60), randf_range(60, AH - 60))
@@ -737,7 +848,9 @@ func _update_play(dt: float) -> void:
 	var S := Run.S; var D := Run.D
 	wave_t -= dt
 	if siren_t > 0: siren_t -= dt
-	if wave_t <= 0: wave_t = 0; end_wave(); return
+	if wave_t <= 0: wave_t = 0; end_wave(); heist.timeout(self); return
+	if heist.update(self, dt): return
+	bank_vault.update(self, dt)
 	SceneryDamage.tick(self, dt)
 	if state != "play": return
 	heal_budget = minf(6.0, heal_budget + dt * 4.0)
@@ -1045,7 +1158,8 @@ func _sync_villain() -> void:
 	villain.visible = P.disguise_t <= 0.0
 	villain.set_state({"aim": P.aim, "off_aim": P.aim+PI, "moving": P.moving, "walk_phase": fposmod(P.walk / 8.0, 1.0), "recoil": P.recoil, "flash": P.flash_t,
 		"recoil2": P.recoil2, "flash2": P.flash_t2, "firing": P.firing_t > 0, "firing2": P.firing2_t > 0,
-		"white": P.inv > 0.3, "zap": P.zap_t > 0,"gun_flashes":gun_flashes,"time":time,"melee_extension":_melee_extension(),"melee_aim":P.melee_aim,"hook_out":grapple.is_out()})
+		"white": P.inv > 0.3, "zap": P.zap_t > 0,"gun_flashes":gun_flashes,"time":time,"melee_extension":_melee_extension(),"melee_aim":_melee_pose_aim(),"hook_out":grapple.is_out(),
+		"capacitor_charge":laser_charge_display(),"capacitor_charge_off":laser_charge_display(true)})
 	villain.modulate.a = 0.5 if P.inv > 0 and P.inv < 0.28 and sin(time * 50) > 0 else 1.0
 
 func _add_lights() -> void:
@@ -1119,6 +1233,7 @@ func _add_lights() -> void:
 func _draw_ground(g: Node2D) -> void:
 	var t := time
 	consumables.draw_ground(self, g)
+	bank_vault.draw_door(self, g)
 	for d in decals:   # scorch marks
 		var al: float = minf(1.0, d.t / 6.0)
 		g.draw_circle(Vector2(d.x, d.y), d.r, Color(0.04, 0.03, 0.03, 0.22 * al))
@@ -1230,6 +1345,9 @@ func _draw_fx_add(g: Node2D) -> void:
 	var S := Run.S
 	blaster_fx.draw_glow(g)
 	grapple.draw_glow(g,villain.muzzle_global(0),time)
+	if boss_move.get("kind","") == "iron_slam":
+		var landing: Vector2 = boss_move.points[0]
+		g.draw_arc(landing,115.0 * sqrt(S.boomMul),0,TAU,48,Color("#ffd890",0.6),2.0)
 	for field in utility_fields:
 		var fade: float = field.time/field.life
 		if field.kind=="time_freeze":
@@ -1239,6 +1357,8 @@ func _draw_fx_add(g: Node2D) -> void:
 				var direction = Vector2.from_angle(i*TAU/12.0)
 				g.draw_line(field.position+direction*(field.radius-10),field.position+direction*field.radius,Color(0.6,0.95,1,fade),2)
 			g.draw_line(field.position,field.position+Vector2.from_angle(-PI/2+time*0.5)*26,Color(0.4,0.9,1,0.6*fade),2)
+		elif field.kind=="slash":
+			_draw_slash(g,field,fade)
 		else:
 			g.draw_arc(field.position,field.radius*(1.0-fade),0,TAU,80,Color(1.0,0.35,0.12,fade),5)
 	if siren_t > 0:
@@ -1276,8 +1396,15 @@ func _draw_fx_add(g: Node2D) -> void:
 			g.draw_line(o, end, Color(1, 0.54, 0.13, 0.5), 22); g.draw_line(o, end, Color("#ffd0a0"), 8); g.draw_line(o, end, Color.WHITE, 3)
 			if randf() < 0.6: poof(end.x, end.y, Color("#ff8a20"), 2, 120, 3)
 
+func aim_marker_position() -> Vector2:
+	if Run.aim_guide_level() >= 2:
+		if Controls.aim_src == "mouse": return get_global_mouse_position()
+		return villain.muzzle_global(0) + Vector2.from_angle(P.aim)*float(Run.D.range)
+	return villain.shoulder_global() + Vector2.from_angle(P.aim)*minf(float(Run.D.range),170.0)
+
 func _draw_fx_top(g: Node2D) -> void:
 	consumables.draw_fx(self, g)
+	bank_vault.draw_top(self, g)
 	var S := Run.S
 	for p in pickups:
 		if not p.has("blueprint"): continue
@@ -1316,7 +1443,17 @@ func _draw_fx_top(g: Node2D) -> void:
 			g.draw_set_transform(Vector2.ZERO)
 	for b in ebul:
 		if b.get("seeker",false): Viper.draw_missile(g,b); continue
-		g.draw_rect(Rect2(b.x - b.r, b.y - b.r, b.r * 2, b.r * 2), b.get("col", Color("#ff4040"))); g.draw_rect(Rect2(b.x - 1, b.y - 1, 2, 2), Color.WHITE)
+		if b.get("laser_bolt",false):
+			var point := Vector2(b.x,b.y); var direction := Vector2(b.vx,b.vy).normalized()
+			g.draw_line(point-direction*14,point,b.col,5.0)
+			g.draw_line(point-direction*11,point,Color.WHITE,2.0)
+			continue
+		# hostile shot: dark outline for contrast on any floor, a trail showing its heading, white-hot core
+		var bp := Vector2(b.x, b.y); var bc: Color = b.get("col", Color("#ff4040"))
+		var bv := Vector2(b.vx, b.vy); var br: float = b.r
+		if bv.length() > 1.0: g.draw_line(bp - bv.normalized() * br * 3.5, bp, Color(bc, 0.35), br * 1.3)
+		g.draw_circle(bp, br + 1.5, Color(0.05, 0.02, 0.03, 0.75)); g.draw_circle(bp, br, bc)
+		g.draw_circle(bp, maxf(1.0, br * 0.45), Color.WHITE)
 	# enemy status bars, bombs
 	for e in enemies:
 		if e.dead: continue
@@ -1336,8 +1473,10 @@ func _draw_fx_top(g: Node2D) -> void:
 		g.draw_string(font, Vector2(n.x - w / 2, n.y), n.txt, HORIZONTAL_ALIGNMENT_LEFT, -1, sz, Color(n.col, al))
 	# aim guide: only with the Telescoping Monocle
 	if S.aimGuide and state == "play":
-		var s0 := villain.shoulder_global(); var rd := minf(Run.D.range, 170.0)
-		var c := s0 + Vector2(cos(P.aim), sin(P.aim)) * rd
+		var c := aim_marker_position()
 		var col := Color("#ff5a5a") if Controls.firing() else Color(0.7, 1, 0.24, 0.8)
 		for ab in [[-8, -1], [5, -1], [-1, -8], [-1, 5]]:
 			g.draw_rect(Rect2(c.x + ab[0], c.y + ab[1], 2 if ab[0] == -1 else 3, 3 if ab[0] == -1 else 2), col)
+		if Run.aim_guide_level() >= 2:
+			g.draw_circle(c,1.5,col)
+			g.draw_arc(c,12,0,TAU,32,Color(col,0.45),1)

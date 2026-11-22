@@ -24,6 +24,8 @@ static func attach(e) -> void:
 	var fx := Fx.new(); fx.enemy = e; e.add_child(fx); g.fx = fx
 	if e.ranged:
 		var f := Flash.new(); e.add_child(f); g.flash = f
+		if e.hero == "vex":
+			var far := Flash.new(); e.add_child(far); g.flash_far = far
 	if e.boss:
 		var light := PointLight2D.new(); light.texture = preload("res://fx/light_pool.gd").light_tex()
 		light.energy = 0.0; light.height = 22.0; light.texture_scale = 0.7; light.blend_mode = Light2D.BLEND_MODE_ADD
@@ -54,26 +56,27 @@ static func update(e) -> void:
 		g.blink_cd = e.blink_cd; g.shard_cd = e.shard_cd
 	_pick(e, g, t)
 	if g.has("flash"): g.flash.tick(dt)
+	if g.has("flash_far"): g.flash_far.tick(dt)
 	if g.has("light"): _boss_light(e, g, t)
 	if g.has("fx"): g.fx.queue_redraw()
 
-static func muzzle_local(e) -> Vector2:
+static func muzzle_local(e, anchor := "muzzle") -> Vector2:
 	var sheet := EnemyArt.sheet(sprite_key(e))
-	var m := Sheets.anchor(sheet, "attack", 1, "muzzle", Vector2(22, -30))
+	var m := Sheets.anchor(sheet, "attack", 1, anchor, Vector2(22, -30))
 	return Vector2(0, sheet.foot) + Vector2(m.x * e.face, m.y)
 
-static func muzzle_world(e) -> Vector2:
-	return Vector2(e.x,e.y) + muzzle_local(e)
+static func muzzle_world(e, anchor := "muzzle") -> Vector2:
+	return Vector2(e.x,e.y) + muzzle_local(e,anchor)
 
-static func _fire_flash(e, g: Dictionary, shot_direction := Vector2.ZERO) -> void:
-	if not g.has("flash"): return
-	var at := muzzle_local(e)
-	var f: Node2D = g.flash
+static func _fire_flash(e, g: Dictionary, shot_direction := Vector2.ZERO, anchor := "muzzle", flash_key := "flash", color := Color("#ffb347")) -> void:
+	if not g.has(flash_key): return
+	var at := muzzle_local(e,anchor)
+	var f: Node2D = g[flash_key]
 	f.position = at
 	var target := shot_direction
 	if target == Vector2.ZERO: target = Vector2(e.A.P.x,e.A.P.y) - muzzle_world(e) if e.A != null and e.A.P != null else Vector2(e.face,0)
 	f.rotation = target.angle()
-	f.fire(Color("#ffb347"))
+	f.fire(color)
 
 static func _pick(e, g: Dictionary, t: float) -> void:
 	var st := "idle"; var fi := int(t * 2.4 + g.seed)
@@ -93,7 +96,10 @@ static func _pick(e, g: Dictionary, t: float) -> void:
 		var window := 0.25 if e.ally else 0.4
 		var start := 0.5 if e.ally else 1.0
 		var k: float = (start - e.atk_cd) / window
-		if e.atk_cd > 0.0 and k >= 0.0 and k < 1.0: st = "attack"; fi = int(k * 3.0)
+		var swinger: bool = e.swings() and not e.ally
+		if e.action_phase == "swing": st = "attack"; fi = 0   # wind-up: baton raised / shield drawn back
+		elif e.atk_cd > 0.0 and k >= 0.0 and k < 1.0:
+			st = "attack"; fi = 1 + mini(1, int(k * 2.0)) if swinger else int(k * 3.0)
 	if e.type == "drone": lift = 0.0
 	if e.action_phase == "rush": st = "attack"; fi = int(t * 12.0) % 3
 	# status overrides
@@ -111,6 +117,10 @@ static func _pick(e, g: Dictionary, t: float) -> void:
 static func _boss_state(e, g: Dictionary, t: float, st: String, fi: int) -> Array:
 	var lift := 0.0; var jitter := Vector2.ZERO
 	match e.hero:
+		"vex":
+			if e.action_phase == "vex_aim": st = "aim"; fi = 1 if e.action_t < 0.4 else 0
+			elif e.action_phase == "vex_burst": st = "attack"; fi = 1
+			elif e.action_phase in ["vex_deploy","vex_mines"]: st = "deploy"; fi = int(t*5.0)%2
 		"ironclad":
 			if e.slam != null:
 				var s: Dictionary = e.slam
@@ -150,6 +160,9 @@ static func _boss_light(e, g: Dictionary, t: float) -> void:
 	var st: String = g.get("state", "idle"); var fi: int = g.get("frame", 0)
 	var base := Vector2(0, sheet.foot - g.get("lift", 0.0))
 	match e.hero:
+		"vex":
+			col = Color("#6bf5ef"); energy = 1.1 if st in ["aim","attack","deploy"] else 0.25
+			at = Sheets.anchor(sheet,st,fi,"chest")
 		"surge":
 			col = Color("#fff36b"); energy = 0.5 + 0.35 * absf(sin(t * 23.0)); at = Sheets.anchor(sheet, st, fi, "chest")
 			if st == "blink" or st == "cast": energy = 1.6
@@ -192,11 +205,25 @@ static func draw(e) -> void:
 	e.draw_circle(Vector2.ZERO, 1.0, Color(0, 0, 0, 0.32))
 	e.draw_set_transform(Vector2.ZERO)
 	var at: Vector2 = foot + Vector2(0, -lift) + g.jitter
-	draw_sprite(e, sheet, g.state, g.frame, at, e.face, g.tint)
+	var sq := _squash(e)
+	if sq != Vector2.ONE:   # scaled about the foot point, so the feet stay planted on the shadow
+		e.draw_set_transform(at, 0.0, sq)
+		draw_sprite(e, sheet, g.state, g.frame, Vector2.ZERO, e.face, g.tint)
+		e.draw_set_transform(Vector2.ZERO)
+	else:
+		draw_sprite(e, sheet, g.state, g.frame, at, e.face, g.tint)
 	if e.civ and e.panic and sin(e.A.time * 12.0 + e.juke) > 0.0:
 		var head := Sheets.anchor(sheet, g.state, g.frame, "head", Vector2(0, -44))
 		var hx: float = at.x + head.x * e.face; var hy: float = at.y + head.y - 20.0
 		e.draw_rect(Rect2(hx - 1, hy, 3, 7), Color.WHITE); e.draw_rect(Rect2(hx - 1, hy + 9, 3, 2), Color.WHITE)
+
+## Brief squash and stretch for weight: stretch while winding up a blow, squash on impact and when hit.
+static func _squash(e) -> Vector2:
+	if e.boss or e.vehicle or e.civ or e.frozen_t > 0.0 or e.time_lock > 0.0: return Vector2.ONE
+	if e.flash > 0.0: return Vector2(1.1, 0.9)
+	if e.action_phase == "swing": return Vector2(0.94, 1.07)
+	if not e.ally and e.atk_cd > 0.9 and e.atk_cd <= 1.0 and (e.swings() or e.type == "k9"): return Vector2(1.12, 0.9)
+	return Vector2.ONE
 
 ## Draws one frame with its foot point at `at` (node space). Left-facing sprites use the baked mirror
 ## atlas (normal x inverted), so they stay on their shadow and light correctly.

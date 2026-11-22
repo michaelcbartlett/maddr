@@ -11,7 +11,7 @@ the robot dog's normal-mapped animation and compact fallback vehicle atlases use
 
 | File | Role |
 |---|---|
-| `enemy_painter.gd` | Specs, poses and painting for every sprite key: humanoids (police and civilians), K9, drone, and the four bosses. It also records anchors per frame: hands, head, eyes, chest and gun muzzle. |
+| `enemy_painter.gd` | Specs, poses and painting for every sprite key: humanoids (police and civilians), K9, drone, and the five bosses. It also records anchors per frame: hands, head, eyes, chest and gun muzzle. |
 | `enemy_sheets.gd` | Bakes one atlas per sprite key: a `CanvasTexture` (albedo plus normal map), a white silhouette for tints, frame rects and anchors. Finished atlases are cached in `user://enemy_sheets/`. The first launch bakes for about 3 s; after that, loading takes under 0.1 s. The cache key is a hash of the painter source plus `ART_VERSION`, so bump `ART_VERSION` if scripts are exported as binary tokens. |
 | `enemy_view.gd` | Reads the enemy's gameplay fields without changing them, and picks the animation state and frame, the tint and the boss power pose. It also draws the lit sprite and ground shadow, and leaves a corpse when an enemy dies. |
 | `enemy_fx.gd` | Unlit, additive overlays: stun stars, the mind-control swirl, drone beacons, Static Surge's crackle and cast arcs, Glacia's frost glow, Ironclad's fist glow, and Omega Paragon's eye glow. |
@@ -23,6 +23,12 @@ the robot dog's normal-mapped animation and compact fallback vehicle atlases use
 
 ## States
 
+The material-detail pass adds uniform seams, hanging plainclothes badges, carrier straps and magazine
+catches, armour rivets, individual boss costume accents, K9 harness hardware, drone vents, robot-dog
+panels and gadget status lamps. Vehicle atlases and the live rotating vehicle renderer both carry the
+pass: door seams, handles, hood vents and push bumpers on interceptors; welds, optics and barrel rings
+on tanks. Details follow the existing animated body parts and retain height-map lighting and tints.
+
 - **Police and civilians:** `idle 2`, `walk 6`, `hurt 1`, `death 4`, `frozen 1`, `stunned 1`.
   - Police also have `attack 3`: baton swing, rifle jab, shield bash, or the detective's aim and recoil.
   - Civilians have `panic 6` (an arms-up run) instead of an attack.
@@ -31,6 +37,7 @@ the robot dog's normal-mapped animation and compact fallback vehicle atlases use
   - Captain Ironclad: `windup` (slam and charge windup), `charge`, `air`, `slam`.
   - Static Surge: `blink` (after-image streak, out and back in), `cast`.
   - Glacia: `throw` (shard fan), `nova` (arms sweep up).
+  - Velvet Viper: patterned stockings, plum bodysuit, seeker pods; `windup`, `charge` and `cast`.
   - Omega Paragon: hovers, plus `dive` and `laser` (eye beams through the visor).
 
 The view infers states from existing fields. For example, a detective has just shot when `shoot_cd` jumps back up, a slam has landed when `slam` clears, and Surge has blinked when `blink_cd` resets. No gameplay hooks are needed.

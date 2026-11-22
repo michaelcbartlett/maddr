@@ -40,7 +40,20 @@ Invoke-GodotCheck 'selling' @('--headless', '--script', 'res://game/tests/sell_t
 Invoke-GodotCheck 'part-swaps' @('--headless', '--script', 'res://game/tests/swap_test.gd')
 Invoke-GodotCheck 'unlocks' @('--headless', '--script', 'res://game/tests/unlocks_test.gd')
 Invoke-GodotCheck 'blueprints' @('--headless', '--script', 'res://game/tests/blueprints_test.gd')
+Invoke-GodotCheck 'train-heist' @('--headless', '--script', 'res://game/tests/heist_test.gd')
+Invoke-GodotCheck 'bank-robbery' @('--headless', '--script', 'res://game/tests/bank_test.gd')
 Invoke-GodotCheck 'combat-rules' @('--headless', '--script', 'res://game/tests/combat_rules_test.gd')
+Invoke-GodotCheck 'melee' @('--headless', '--script', 'res://game/tests/melee_test.gd')
+if ($Screenshots) {
+    Invoke-GodotCheck 'rival-scientist' @('--rendering-method', 'gl_compatibility', '--script', 'res://game/tests/rival_scientist_test.gd', '--', '--screenshots')
+} else {
+    Invoke-GodotCheck 'rival-scientist' @('--headless', '--script', 'res://game/tests/rival_scientist_test.gd')
+}
+if ($Screenshots) {
+    Invoke-GodotCheck 'viper' @('--rendering-method', 'gl_compatibility', '--script', 'res://game/tests/viper_test.gd', '--', '--screenshots')
+} else {
+    Invoke-GodotCheck 'viper' @('--headless', '--script', 'res://game/tests/viper_test.gd')
+}
 if ($Screenshots) {
     Invoke-GodotCheck 'reinforcements' @('--rendering-method', 'gl_compatibility', '--script', 'res://game/tests/reinforcements_test.gd', '--', '--screenshots')
 } else {
@@ -55,6 +68,11 @@ if ($Screenshots) {
     Invoke-GodotCheck 'enemies' @('--rendering-method', 'gl_compatibility', '--script', 'res://enemies/tests/enemy_art_test.gd', '--', '--screenshots')
 } else {
     Invoke-GodotCheck 'enemies' @('--headless', '--script', 'res://enemies/tests/enemy_art_test.gd')
+}
+if ($Screenshots) {
+    Invoke-GodotCheck 'capacitor' @('--rendering-method', 'gl_compatibility', '--script', 'res://game/tests/capacitor_test.gd', '--', '--screenshots')
+} else {
+    Invoke-GodotCheck 'capacitor' @('--headless', '--script', 'res://game/tests/capacitor_test.gd')
 }
 if ($Screenshots) {
     Invoke-GodotCheck 'gun-effects' @('--rendering-method', 'gl_compatibility', '--script', 'res://game/tests/effects_test.gd', '--', '--screenshots')

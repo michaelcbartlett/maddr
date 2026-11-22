@@ -104,8 +104,11 @@ func _test_stats() -> void:
 		# The prototype adds this flag lazily; native code keeps an explicit zero default.
 		if not config.stats.S.has("aimGuide") and stats.aimGuide==0: stats.erase("aimGuide")
 		# Native-only stats (laser beam vs bolt, loot drop modifier); the prototype has no such keys.
-		for key in ["beam","dropPct","burnSpread","poisonSpread"]:
-			if not config.stats.S.has(key) and float(stats[key])==0.0: stats.erase(key)
+		# ...plus melee and damage-type amplifier stats, compared at their neutral defaults.
+		var native := {"beam":0.0,"dropPct":0.0,"burnSpread":0.0,"poisonSpread":0.0,"meleeSpd":0.0,"meleeReach":0.0,"meleeDmg":0.0,
+			"burnMul":1.0,"poisonMul":1.0,"lightningMul":1.0,"rad":0.0,"radMul":1.0}
+		for key in native:
+			if not config.stats.S.has(key) and float(stats[key])==native[key]: stats.erase(key)
 		_check(_same(stats,config.stats.S),config.name+": base stats match browser")
 		var expected = config.stats.D.duplicate(); expected.maxHp = maxi(10,roundi(config.stats.S.maxHp-30.0)); expected.speed *= speed_k
 		_check(_same(run.D,expected),config.name+": derived stats match browser")
