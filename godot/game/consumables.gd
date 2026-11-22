@@ -38,24 +38,32 @@ func tick(a, dt: float, firing: bool) -> void:
 				a.P.x = exit.x; a.P.y = exit.y; a.P.inv = maxf(a.P.inv, 0.65)
 				a.grapple.reset()
 				a.poof(exit.x, exit.y, Color("#b48bff"), 18, 120); a.snd("blink")
-				pads.clear(); pads_armed = false; break
+				pads.clear(); pads_armed = false
+				a.action_cooldown = TELEPORT_COOLDOWN   # the long wait starts once the trip is used
+				break
+
+## Teleport Pads (B action): first press drops a pad, the second drops its partner; stepping on either pad warps
+## to the other once, then the action cooldown starts. Pads left at wave end are cleared and cost nothing.
+const TELEPORT_COOLDOWN := 14.0
+func place_pad(a) -> bool:
+	if a.state != "play" or use_cd > 0.0 or a.action_cooldown > 0.0: return false
+	var center := Vector2(a.P.x, a.P.y)
+	if pads.size() == 2:
+		a.add_num(center.x, center.y-52, "PADS READY", Color("#b48bff"), false); return false
+	# Pad positions must remain safe destinations for the player's collision radius.
+	if a.in_wall(center.x, center.y, a.P.r + 2.0): return false
+	if pads.size() == 1 and center.distance_to(pads[0]) < 90.0:
+		a.add_num(center.x, center.y-52, "MOVE FURTHER", Color("#b48bff"), false); return false
+	pads.append(center); pads_armed = false; use_cd = 0.35; a.snd("blink")
+	if pads.size() == 1: a.add_num(center.x, center.y-52, "B: SECOND PAD", Color("#b48bff"), false)
+	return true
 
 func activate(a) -> bool:
 	if a.state != "play" or use_cd > 0.0: return false
 	var center := Vector2(a.P.x, a.P.y)
-	# Finishing a paid teleport pair takes priority and never spends a second charge.
-	if pads.size() == 1:
-		if center.distance_to(pads[0]) < 90.0:
-			a.add_num(center.x, center.y-52, "MOVE FURTHER", Color("#b48bff"), false); return false
-		pads.append(center); pads_armed = false; use_cd = 0.35; a.snd("blink")
-		return true
 	var id: String = Run.selected_consumable
 	if int(Run.consumable_charges[id]) <= 0:
 		Run.cycle_consumable(); id = Run.selected_consumable
-	if id == "teleport" and pads.size() == 2:
-		a.add_num(center.x, center.y-52, "PADS READY", Color("#b48bff"), false); return false
-	# Pad positions must remain safe destinations for the player's collision radius.
-	if id == "teleport" and a.in_wall(center.x, center.y, a.P.r + 2.0): return false
 	id = Run.spend_consumable()
 	if id == "": return false
 	use_cd = 0.35
@@ -69,9 +77,6 @@ func activate(a) -> bool:
 			a.P.disguise_t = 0.0
 			grenades.append({"position":center, "velocity":Vector2.from_angle(a.P.aim) * 560.0, "t":0.85})
 			a.snd("throw")
-		"teleport":
-			pads.append(center); pads_armed = false
-			a.add_num(center.x, center.y-52, "Y / Q: SECOND PAD", Color("#b48bff"), false); a.snd("blink")
 	return true
 
 func draw_ground(a, g: Node2D) -> void:

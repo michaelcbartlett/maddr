@@ -1,6 +1,6 @@
 [
- {"id":"laser","name":"Laser","noun":"Laser","col":"#ff4a4a","desc":"Fast red bolts","add":{"dmg":8}},
- {"id":"bullet","name":"Bullets","noun":"Slug","col":"#ffd76a","desc":"Fast, hard-hitting slugs.","add":{"dmg":10}},
- {"id":"razor","name":"Razor Blades","noun":"Razor","col":"#dfe6ec","desc":"Spinning blades. Pierce 2, wall ricochets and light bleeding.","add":{"dmg":7,"pierce":2,"bleed":0.6}},
+ {"id":"laser","name":"Laser","noun":"Laser","col":"#ff4a4a","desc":"Fast, precise red bolts. +15% fire rate.","add":{"dmg":8,"atkSpd":0.15}},
+ {"id":"bullet","name":"Bullets","noun":"Slug","col":"#ffd76a","desc":"Fast, hard-hitting slugs.","add":{"dmg":11}},
+ {"id":"razor","name":"Razor Blades","noun":"Razor","col":"#dfe6ec","desc":"Spinning blades. Pierce 2, wall ricochets and light bleeding. 15% slower to throw.","add":{"dmg":5,"pierce":2,"bleed":0.4,"atkSpd":-0.15}},
  {"id":"hook","name":"Shock Grapple","noun":"Grapple","col":"#7df9ff","desc":"Wall grapple · electrified chain","add":{"dmg":9}}
 ]

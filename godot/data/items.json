@@ -764,6 +764,8 @@
     "look": "Red proximity detonator on the bionic arm"
   },
   {"id":"seeker_rack","t":2,"c":48,"ic":"🚀","name":"Triple Seeker Rack","arm":"seeker_rack","desc":"3 homing rockets at nearby foes · 5s cooldown","look":"Three pink-tipped rocket tubes on the bionic forearm"},
+  {"id":"shrink_ray","t":2,"c":44,"ic":"🔮","name":"Shrink Ray","arm":"shrink_ray","desc":"Arm turret · auto-fires shrink bolts (no damage) · 3 hits shrink a cop · stomp shrunk cops for heavy damage","look":"A violet ray dish on the bionic wrist"},
+  {"id":"freeze_ray","t":2,"c":46,"ic":"🧊","name":"Freeze Ray","arm":"freeze_ray","desc":"Arm turret · auto-fires ice bolts (no damage) · 3 hits freeze a cop · kick frozen cops to shatter them into others","look":"A frosted cryo nozzle on the bionic wrist"},
   {"id":"knife","t":2,"c":36,"ic":"🔪","name":"Switchblade","arm":"knife","melee":{"reach":48,"arc":0.6,"swing":0.16,"cd":0.34,"dmg":6,"scale":0.3,"knock":40,"targets":1},"desc":"Auto stab · 48 reach · 0.34s cooldown · triggers on-hit effects","look":"A flick-out switchblade clipped to the bionic fist"},
   {"id":"whip","t":2,"c":44,"ic":"〰","name":"Shock Whip","arm":"whip","melee":{"reach":150,"arc":0.3,"swing":0.4,"cd":1.4,"dmg":11,"scale":0.4,"knock":0,"targets":99,"stun":0.5},"desc":"Auto lash · 150 reach · hits the whole line, stuns 0.5s · 1.4s cooldown","look":"A coiled electrified whip hanging from the bionic fist"},
   {"id":"katana","t":3,"c":62,"ic":"🗡","name":"Mad Katana","arm":"katana","melee":{"reach":84,"arc":2.4,"swing":0.3,"cd":0.95,"dmg":20,"scale":0.7,"knock":90,"targets":99},"desc":"Auto slash · 84 reach · hits every foe in a wide arc · 0.95s cooldown","look":"A long glowing katana gripped in the bionic fist"},
@@ -779,7 +781,7 @@
   {"id":"payraise","t":1,"c":14,"ic":"💵","name":"Henchman Pay Raise","desc":"+30% minion damage","look":"A wad of cash tucked in the coat pocket","add":{"minionMul":0.3}},
   {"id":"kit_disguise","t":1,"c":30,"ic":"🥸","name":"Disguise Kit","consumable":"disguise","desc":"Supply · 3 disguises (Y / Q): lose pursuit for 4s. Unlocks refills","look":"A fake moustache and tourist hat"},
   {"id":"kit_grenade","t":1,"c":24,"ic":"💣","name":"Grenade Satchel","consumable":"grenade","desc":"Supply · 3 grenades (Y / Q): thrown along your aim. Unlocks refills","look":"A canvas satchel of grenades"},
-  {"id":"kit_teleport","t":1,"c":38,"ic":"🌀","name":"Teleport Pads","consumable":"teleport","desc":"Supply · 3 teleport pairs (Y / Q): place two pads, step in for one trip. Unlocks refills","look":"A pair of glowing purple floor pads"},
+  {"id":"teleport","t":2,"c":40,"ic":"🌀","name":"Teleport Pads","action":"teleport","desc":"B / Shift: drop a pad, press again to drop its partner; step on either pad to warp · 14s cooldown after each trip","look":"Two glowing purple floor pads clipped to the lab coat"},
   {"id":"vault_plating","t":2,"c":30,"ic":"🛡","name":"Vault Door Plating","bank":1,"desc":"+4 armor · +10 max HP","look":"Riveted steel slabs cut from a vault door","add":{"armor":4,"maxHp":10}},
   {"id":"money_counter","t":2,"c":34,"ic":"💸","name":"Money Counter Motor","bank":2,"desc":"+20% fire rate · +10% scrap","look":"A whirring bank-note counter feeding the breech","add":{"atkSpd":0.2,"scrapPct":0.1}},
   {"id":"dye_pack","t":3,"c":58,"ic":"🎨","name":"Exploding Dye Pack","bank":3,"desc":"+10% explode chance · +15% damage","look":"A red dye pack taped under the barrel","add":{"explode":0.1,"dmgPct":0.15}},

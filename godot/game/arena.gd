@@ -208,10 +208,8 @@ func make_enemy(type: String, x: float, y: float) -> Enemy:
 	return e
 
 func end_wave() -> void:
-	# An unused teleport kit is returned before this wave's arena dressing is replaced.
-	if not consumables.pads.is_empty():
-		Run.consumable_charges.teleport = mini(3, int(Run.consumable_charges.teleport) + 1)
-		consumables.pads.clear(); consumables.pads_armed = false
+	# Unused Teleport Pads (B action) vanish with this wave's arena; the action cooldown only starts on a trip.
+	consumables.pads.clear(); consumables.pads_armed = false
 	state = "clear"; clear_t = 1.6; banner_txt = "WAVE CLEARED!"; banner_t = 1.6
 	for e in enemies:
 		if not e.dead: poof(e.x, e.y, Color("#88aabb"), 10); e.dead = true
@@ -351,6 +349,99 @@ func irradiate(e: Enemy, dose: int) -> void:
 		if o != e and not o.civ and Vector2(o.x - e.x, o.y - e.y).length_squared() < 70.0 * 70.0: irradiate(o, RAD_MAX / 3)
 	hit(e, (20.0 + Run.D.dmg * 2.0) * Run.S.radMul, {"col": Color("#b6ff3a"), "element": "radiation"})
 
+## Arm-slot ray turrets: auto-fire an effect-only bolt (no damage) at the nearest cop in range.
+const RAY_TURRETS := {"shrink_ray": {"bolt": "shrink", "cd": 0.7, "col": "#c08bff"}, "freeze_ray": {"bolt": "freeze", "cd": 0.85, "col": "#8fe6ff"}}
+const RAY_RANGE := 420.0
+const RAY_SPEED := 650.0
+func _fire_ray_turret(kind: String) -> bool:
+	var origin: Vector2 = villain.off_shoulder_global()
+	var foes: Array = BossAbilities.targets(self, origin, RAY_RANGE)
+	if foes.is_empty(): return false
+	var spec: Dictionary = RAY_TURRETS[kind]
+	# prefer the nearest cop that isn't already shrunk / frozen, so bolts aren't wasted
+	var fresh: Array = foes.filter(func(e): return (e.shrunk_t <= 0.0) if spec.bolt == "shrink" else (e.frozen_t <= 0.0 and not e.vehicle))
+	var target = fresh[0] if not fresh.is_empty() else foes[0]
+	var direction := (Vector2(target.x, target.y) - origin).normalized()
+	projs.append({"type": spec.bolt, "x": origin.x, "y": origin.y, "vx": direction.x * RAY_SPEED, "vy": direction.y * RAY_SPEED, "r": 4.5,
+		"dmg": 0.0, "mul": 1.0, "pierce": 0, "life": RAY_RANGE / RAY_SPEED * 1.15, "hit": {}, "spin": 0.0, "bounces": 0,
+		"trail": PackedVector2Array([origin]), "color": Color(spec.col), "source": UNBOUND_SHOT, "shot": 0})
+	P.recoil2 = 0.6; P.flash_t2 = 0.05
+	blaster_fx.muzzle(origin, direction, Color(spec.col), false)
+	snd("zap")
+	return true
+
+## Shrink Ray: three hits shrink a cop for 4 s; bosses build up slowly and shrink briefly; vehicles can't shrink.
+const SHRINK_PER_HIT := 0.34
+const SHRINK_TIME := 4.0
+const STOMP_COOLDOWN := 0.5
+func _shrink_hit(e: Enemy) -> void:
+	if e.vehicle or e.dead: return
+	e.shrink_meter += SHRINK_PER_HIT * (0.25 if e.boss else 1.0)
+	if e.shrink_meter < 1.0: return
+	e.shrink_meter = 0.0
+	var fresh: bool = e.shrunk_t <= 0.0
+	e.shrink(1.5 if e.boss else SHRINK_TIME)
+	if fresh: poof(e.x, e.y, Color("#c08bff"), 10, 90, 3); add_num(e.x, e.y - e.r - 14, "SHRUNK!", Color("#d7b5ff"), false); snd("shrink")
+
+## Freeze Ray: three hits freeze a cop solid; bosses freeze briefly after a long build-up; vehicles can't freeze.
+const FREEZE_PER_HIT := 0.45   # outpaces chill decay (0.2/s) so three turret bolts freeze
+const FREEZE_TIME := 3.5
+const KICK_SPEED := 560.0
+func _freeze_hit(e: Enemy) -> void:
+	if e.vehicle or e.dead: return
+	e.chill += FREEZE_PER_HIT * (0.25 if e.boss else 1.0)
+	if e.chill < 1.0: return
+	e.chill = 0.0
+	var fresh: bool = e.frozen_t <= 0.0
+	e.frozen_t = maxf(e.frozen_t, 0.8 if e.boss else FREEZE_TIME)
+	if fresh: poof(e.x, e.y, Color("#bff4ff"), 10, 90, 3); add_num(e.x, e.y - e.r - 14, "FROZEN!", Color("#bff4ff"), false); snd("frz")
+
+## Walk into a frozen cop to kick it; the ice block slides and shatters into the first cop or wall it meets.
+func _update_ice(dt: float) -> void:
+	var player := Vector2(P.x, P.y)
+	for e in live_foes():
+		if e.frozen_t <= 0.0 or e.boss or e.vehicle or e.slide != Vector2.ZERO: continue
+		var gap := Vector2(e.x, e.y) - player
+		if gap.length() > P.r + e.r + 3.0 or gap.length() < 0.01: continue
+		e.slide = gap.normalized() * KICK_SPEED; e.frozen_t = maxf(e.frozen_t, 1.5); e.slide_from = null
+		poof(e.x, e.y, Color("#dff8ff"), 6, 80, 3); snd("kick"); Controls.rumble(0.3, 0.2, 60)
+	for e in live_foes():
+		if e.slide == Vector2.ZERO: continue
+		var step: Vector2 = e.slide * dt
+		e.x += step.x; e.y += step.y
+		e.slide *= pow(0.25, dt)   # friction: slides a few hundred pixels
+		if in_wall(e.x, e.y, e.r * 0.6) or e.x < e.r or e.y < e.r or e.x > AW - e.r or e.y > AH - e.r:
+			_shatter(e, null); continue
+		for o in live_foes():
+			if o == e or o == e.slide_from or o.civ: continue
+			if Vector2(o.x - e.x, o.y - e.y).length() < o.r + e.r:
+				_shatter(e, o); break
+		if not e.dead and e.slide.length() < 60.0: e.slide = Vector2.ZERO
+
+func _shatter(block: Enemy, target) -> void:
+	var dmg: float = 20.0 + Run.D.dmg * 2.5
+	var center := Vector2(block.x, block.y)
+	block.slide = Vector2.ZERO; block.frozen_t = 0.0
+	if target != null:
+		var push: Vector2 = (Vector2(target.x, target.y) - center).normalized()
+		hit(target, dmg, {"col": Color("#bff4ff")})
+		if not target.dead:
+			target.chill += 0.6
+			if not target.heavy: target.kx += push.x * 260.0; target.ky += push.y * 260.0
+	hit(block, dmg * 1.2, {"col": Color("#bff4ff")})
+	for i in 14: part(center.x, center.y, randf_range(-220, 220), randf_range(-220, 220), 0.45, [Color("#dff8ff"), Color("#8fe6ff"), Color("#ffffff")].pick_random(), 4)
+	snd("shard"); shake = maxf(shake, 5)
+
+## Walking over a shrunk cop stomps it.
+func _update_stomps() -> void:
+	for e in live_foes():
+		if e.shrunk_t <= 0.0 or e.stomp_cd > 0.0 or e.civ: continue
+		if Vector2(P.x - e.x, P.y - e.y).length() > P.r + e.r + 4.0: continue
+		e.stomp_cd = STOMP_COOLDOWN
+		hit(e, 18.0 + Run.D.dmg * 2.5, {"col": Color("#d7b5ff")})
+		poof(e.x, e.y, Color("#c08bff"), 12, 110, 4); snd("squish"); shake = maxf(shake, 4)
+		Controls.rumble(0.4, 0.2, 80)
+
 func chain_from(src: Enemy, dmg: float) -> void:
 	var cur := src; var done := {src: true}
 	for i in int(Run.S.chain):
@@ -386,7 +477,7 @@ func detonate() -> void:
 	for m in ms: explode(m.x, m.y, (Run.D.dmg * 2.5 + 10) * S.boomMul, 70.0 * sqrt(S.boomMul), Color("#ff5030"))
 
 func make_minion(e: Enemy) -> void:
-	e.ally = true; e.ally_t = Run.S.mindDur; e.frozen_t = 0; e.burn_t = 0; e.chill = 0; e.poison_s = 0; e.bleed_s = 0; e.sick_t = 0; e.acid_t = 0; e.bomb_t = 0; e.rad_s = 0; e.rad_t = 0.0
+	e.ally = true; e.ally_t = Run.S.mindDur; e.frozen_t = 0; e.burn_t = 0; e.chill = 0; e.poison_s = 0; e.bleed_s = 0; e.sick_t = 0; e.acid_t = 0; e.bomb_t = 0; e.rad_s = 0; e.rad_t = 0.0; e.unshrink(); e.shrink_meter = 0.0
 	e.hp = maxf(e.hp, e.max_hp * 0.6); e.atk_cd = 0
 	add_num(e.x, e.y - 26, "MINION!", Color("#d07bff"), true); poof(e.x, e.y, Color("#d07bff"), 10, 80); snd("mind")
 
@@ -752,6 +843,9 @@ func _update_utility(dt: float) -> void:
 	if kind=="seeker_rack":
 		if BossAbilities.launch_rockets(self): Run.arm_cooldowns[kind] = 5.0
 		return
+	if kind in RAY_TURRETS:
+		if _fire_ray_turret(kind): Run.arm_cooldowns[kind] = RAY_TURRETS[kind].cd
+		return
 	var center = Vector2(P.x,P.y)
 	var radius = 240.0 if kind=="time_freeze" else 140.0*sqrt(Run.S.boomMul)
 	if nearest_foe(P.x,P.y,radius)==null and not Controls.firing_off(): return
@@ -892,6 +986,8 @@ func _update_play(dt: float) -> void:
 	P.firing2_t = 0.2 if firing2 else P.firing2_t-dt
 	_fire_weapons(dt,firing,firing2)
 	if P.disguise_t <= 0.0: _update_melee(dt)
+	_update_stomps()
+	_update_ice(dt)
 	if P.disguise_t <= 0.0: _update_utility(dt)
 	if P.disguise_t <= 0.0: _update_helmet(dt)
 	# ---- orbs ----
@@ -1075,7 +1171,10 @@ func _update_projs(dt: float) -> void:
 				var point = start.lerp(finish,contact.fraction)
 				projectile.hit[enemy] = true
 				var direction = velocity.normalized()
-				hit(enemy,projectile.dmg,{"proc":true,"kx":direction.x*0.4,"ky":direction.y*0.4,"mul":projectile.mul})
+				# Shrink / Freeze Ray turret bolts do no damage: they only shrink or freeze (see _fire_ray_turret)
+				if projectile.type == "shrink": _shrink_hit(enemy)
+				elif projectile.type == "freeze": _freeze_hit(enemy)
+				else: hit(enemy,projectile.dmg,{"proc":true,"kx":direction.x*0.4,"ky":direction.y*0.4,"mul":projectile.mul})
 				blaster_fx.impact(point,-direction,projectile.color)
 				projectile.pierce -= 1
 				if projectile.pierce<0:
@@ -1218,7 +1317,7 @@ func _add_lights() -> void:
 	for m in mines: lights.add(Vector2(m.x, m.y), Color("#ff3030"), 0.6 if sin(time * 10) > 0 else 0.15, 30, 10)
 	for p in projs:
 		if lights.count() > 80: break
-		lights.add(Vector2(p.x, p.y), Color("#ffd76a") if p.type == "bullet" else (Color("#ff4a4a") if p.type == "bolt" else Color("#dfe6ec")), 0.6, 34, 12)
+		lights.add(Vector2(p.x, p.y), Color("#ffd76a") if p.type == "bullet" else (Color("#ff4a4a") if p.type == "bolt" else (Color("#c08bff") if p.type == "shrink" else (Color("#8fe6ff") if p.type == "freeze" else Color("#dfe6ec")))), 0.6, 34, 12)
 	for b in ebul:
 		if lights.count() > 86: break
 		lights.add(Vector2(b.x, b.y), b.get("col", Color("#ff4040")), 0.5, 28, 10)
@@ -1429,6 +1528,20 @@ func _draw_fx_top(g: Node2D) -> void:
 		elif p.type == "bullet":
 			if p.trail.size()>1: g.draw_polyline(p.trail,Color(1,0.84,0.42,0.7),maxf(1.0,p.r*0.7))
 			g.draw_rect(Rect2(p.x - p.r / 2, p.y - p.r / 2, p.r, p.r), Color("#ffe9a0"))
+		elif p.type == "freeze":
+			# a spinning ice crystal with a frosty trail
+			if p.trail.size()>1: g.draw_polyline(p.trail,Color(0.7,0.95,1.0,0.55),maxf(1.0,p.r*0.9))
+			g.draw_set_transform(Vector2(p.x, p.y), p.spin * 0.5)
+			var r2: float = p.r * 1.4
+			g.draw_colored_polygon(PackedVector2Array([Vector2(r2, 0), Vector2(0, r2 * 0.55), Vector2(-r2, 0), Vector2(0, -r2 * 0.55)]), Color("#bff4ff"))
+			g.draw_colored_polygon(PackedVector2Array([Vector2(r2 * 0.5, 0), Vector2(0, r2 * 0.3), Vector2(-r2 * 0.5, 0), Vector2(0, -r2 * 0.3)]), Color("#ffffff"))
+			g.draw_set_transform(Vector2.ZERO)
+		elif p.type == "shrink":
+			# a pulsing violet ring with a white core
+			var pulse := 1.0 + 0.25 * sin(time * 30.0 + p.x * 0.05)
+			if p.trail.size()>1: g.draw_polyline(p.trail,Color(0.75,0.55,1.0,0.5),maxf(1.0,p.r*0.8))
+			g.draw_arc(Vector2(p.x, p.y), p.r * 1.3 * pulse, 0, TAU, 16, Color("#c08bff"), 2.0)
+			g.draw_circle(Vector2(p.x, p.y), p.r * 0.6, Color("#f3e8ff"))
 		elif p.type == "bolt":
 			# short red dash: glow streak behind a white-hot core
 			var dir := Vector2(p.vx, p.vy).normalized(); var head := Vector2(p.x, p.y)

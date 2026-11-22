@@ -53,10 +53,10 @@ func _draw() -> void:
 	var id: String = Run.selected_consumable
 	var text := "Y / Q  %s ×%d" % [Run.CONSUMABLE_NAMES[id].to_upper(),Run.consumable_charges[id]]
 	if Run.consumable_charges.values().all(func(n): return n == 0): text = "Y / Q  NO CONSUMABLES"
-	if A.consumables.pads.size() == 1: text = "Y / Q  PLACE SECOND PAD"
+	if A.consumables.pads.size() == 1: text = "B / SHIFT  PLACE SECOND PAD"
 	elif P.disguise_t > 0.0: text = "DISGUISED · %.1fs" % P.disguise_t
 	_txt(Vector2(pad,pad+110),text,11,Color("#a4e8c4"))
-	if A.consumables.pads.size() == 2: _txt(Vector2(pad,pad+126),"ENTER A PAD · ONE TRIP",10,Color("#bf9aff"))
+	if A.consumables.pads.size() == 2: _txt(Vector2(pad,pad+126),"STEP ON A PAD · ONE TRIP",10,Color("#bf9aff"))
 	else:
 		var carried := 0
 		for key in Run.CONSUMABLE_IDS:

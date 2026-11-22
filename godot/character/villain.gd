@@ -343,6 +343,10 @@ func _draw_off_fx() -> void:
 		elif arm_mode=="seeker_rack":
 			for i in 3:
 				p.R(fist.x-5,-7+i*5,13,4,"#394258"); p.R(fist.x-4,-6+i*5,10,1,"#b8c6d8"); p.R(fist.x+7,-6+i*5,3,2,"#ff70b8")
+		elif arm_mode == "shrink_ray":   # violet dish
+			p.R(fist.x+5,-3,4,7,"#3a2f4a"); p.ell(fist.x+11,0,3,6,"#c08bff"); p.ell(fist.x+11,0,1,3,"#f3e8ff")
+		elif arm_mode == "freeze_ray":   # frosted cryo nozzle
+			p.R(fist.x+5,-3,8,7,"#2f4a58"); p.R(fist.x+13,-2,4,5,"#8fe6ff"); p.P(fist.x+15,-1,"#ffffff"); p.P(fist.x+7,-4,"#dff8ff")
 		elif arm_mode in MELEE_WEAPONS: _draw_melee_weapon(p,fist)
 
 const MELEE_WEAPONS := ["knife","katana","whip"]

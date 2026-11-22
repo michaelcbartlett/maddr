@@ -25,6 +25,8 @@ const P := {
 	"melt": [70, .5, "sine", .065, .25, false],         # radiation meltdown
 	"throw": [700, .12, "noise", .03, .4, false],      # grenade toss
 	"capshot": [1400, .18, "saw", .04, .3, true],      # Patience Capacitor charged laser
+	"shrink": [900, .22, "sine", .05, .3, true], "squish": [180, .12, "noise", .06, .35, true],   # Shrink Ray
+	"kick": [260, .1, "noise", .05, .5, true],   # Freeze Ray: booting an ice block
 	"logo": [110, .35, "saw", .08, .5, false], "logo2": [1760, .25, "tri", .05, .6, false],   # AngryRatGames name sting
 }
 

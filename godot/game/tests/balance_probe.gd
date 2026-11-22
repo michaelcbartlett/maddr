@@ -4,6 +4,7 @@ extends SceneTree
 ## could afford in the shop. The bot never dies: HP is topped up after each hit and the would-be deaths
 ## are counted instead, so later waves are still measured.
 ##   Godot_console --path . --audio-driver Dummy --headless --script res://game/tests/balance_probe.gd -- [--waves 10] [--diff 1,3,5] [--ammo 0] [--frame 0]
+##     [--seed 77] [--no-parts]   --no-parts keeps the starting ammo/frame (no shop part swaps) for fair loadout comparisons
 var scene
 var arena
 var run
@@ -15,7 +16,7 @@ func _arg(name: String, def: String) -> String:
 	return a[i + 1] if i >= 0 and i + 1 < a.size() else def
 
 func _run() -> void:
-	seed(77)
+	seed(int(_arg("--seed", "77")))
 	run = root.get_node("Run")
 	run.unlocks.highest_difficulty = 5
 	scene = load("res://game/main.tscn").instantiate(); root.add_child(scene); current_scene = scene
@@ -44,6 +45,7 @@ func _play(diff: int, waves: int, ammo: int, frame: int) -> void:
 	print("== %s (%s %s) ==" % [run.difficulty_name(), run.AMMO[ammo].id, run.FRAMES[frame].id])
 	print("  wave  len  kills  dmgTaken/maxHp  deaths  scrap  peakAlive  bank  gunDPS  boss  bought")
 	var dt := 1.0 / 30.0
+	var tot_kills := 0; var tot_deaths := 0; var tot_taken := 0.0; var boss_times: Array = []
 	for w in range(1, waves + 1):
 		arena.start_wave(); scene.state = "play"
 		var k0: int = run.kills; var s0: int = run.total_scrap; var taken := 0.0; var deaths := 0; var peak := 0
@@ -60,6 +62,8 @@ func _play(diff: int, waves: int, ammo: int, frame: int) -> void:
 			if arena.boss != null and boss_t0 < 0.0: boss_t0 = t
 			if boss_t0 >= 0.0 and boss_ttk == "-" and arena.boss == null: boss_ttk = "%.0fs" % (t - boss_t0)
 		if boss_t0 >= 0.0 and boss_ttk == "-": boss_ttk = "alive"
+		tot_kills += run.kills - k0; tot_deaths += deaths; tot_taken += taken
+		if boss_ttk != "-": boss_times.append(boss_ttk)
 		while arena.state == "clear": arena._process(dt)
 		var earned: int = run.total_scrap - s0
 		var dps_hp := [run.D.dmg * run.D.shots * run.S.guns.size() / run.D.cd, run.D.maxHp]   # build as played this wave
@@ -70,11 +74,13 @@ func _play(diff: int, waves: int, ammo: int, frame: int) -> void:
 			for r in 4:   # buy cheapest-first; reroll while there's clearly money left over
 				var idx := range(run.offers.size()); idx.sort_custom(func(a, b): return run.offers[a].price < run.offers[b].price)
 				for i in idx:
+					if OS.get_cmdline_user_args().has("--no-parts") and run.offers[i].it.has("swap"): continue
 					if run.buy(i): bought.append("%s(%d)" % [run.offers[i].it.id, run.offers[i].price])
 				if run.scrap < run.reroll_cost * 4 or not run.reroll(): break
 				bought.append("R")
 		print("  %4d  %3.0f  %5d  %5.1f/%-3d       %3d   %5d  %9d  %4d  %6.1f  %5s  %s" % [w, run.wave_len(w), run.kills - k0, taken, dps_hp[1], deaths, earned, peak, run.scrap, dps_hp[0], boss_ttk, " ".join(bought)])
 		Input.action_release("fire")
+	print("SUMMARY %s %s diff%d: kills %d  deaths %d  taken %.0f  boss %s" % [run.AMMO[ammo].id, run.FRAMES[frame].id, diff, tot_kills, tot_deaths, tot_taken, ",".join(boss_times)])
 
 func _bot() -> void:
 	var P = arena.P; var pos := Vector2(P.x, P.y)

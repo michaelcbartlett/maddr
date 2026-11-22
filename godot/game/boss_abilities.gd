@@ -57,6 +57,7 @@ static func update_rocket(a, p: Dictionary, dt: float) -> void:
 		p.life = 0.0; a.explode(p.x,p.y,p.dmg,48.0 * sqrt(run.S.boomMul),Color("#83f4d0"))
 
 static func start_action(a, kind: String) -> bool:
+	if kind == "teleport": return a.consumables.place_pad(a)
 	if not a.boss_move.is_empty() or a.action_cooldown > 0.0: return false
 	var origin := Vector2(a.P.x,a.P.y)
 	var direction: Vector2 = a.get_node("/root/Controls").move_vec()

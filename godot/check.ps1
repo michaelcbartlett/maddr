@@ -44,6 +44,8 @@ Invoke-GodotCheck 'train-heist' @('--headless', '--script', 'res://game/tests/he
 Invoke-GodotCheck 'bank-robbery' @('--headless', '--script', 'res://game/tests/bank_test.gd')
 Invoke-GodotCheck 'combat-rules' @('--headless', '--script', 'res://game/tests/combat_rules_test.gd')
 Invoke-GodotCheck 'melee' @('--headless', '--script', 'res://game/tests/melee_test.gd')
+Invoke-GodotCheck 'shrink-ray' @('--headless', '--script', 'res://game/tests/shrink_test.gd')
+Invoke-GodotCheck 'freeze-ray' @('--headless', '--script', 'res://game/tests/freeze_test.gd')
 if ($Screenshots) {
     Invoke-GodotCheck 'rival-scientist' @('--rendering-method', 'gl_compatibility', '--script', 'res://game/tests/rival_scientist_test.gd', '--', '--screenshots')
 } else {

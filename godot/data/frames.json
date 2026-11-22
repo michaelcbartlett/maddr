@@ -1,6 +1,6 @@
 [
- {"id":"pistol","name":"Ray Pistol","noun":"Pistol","desc":"Balanced. Medium range and fire rate.","set":{"range":300,"width":10,"cd":0.6,"dmgMul":1}},
+ {"id":"pistol","name":"Ray Pistol","noun":"Pistol","desc":"Balanced. Medium range and fire rate.","set":{"range":300,"width":10,"cd":0.52,"dmgMul":1}},
  {"id":"blunder","name":"Blunderbuss","noun":"Blunderbuss","desc":"Short range. Fires a wide spread of 3 shots.","set":{"range":200,"width":16,"cd":0.95,"dmgMul":0.8,"spread":0.5},"add":{"shots":2}},
- {"id":"rifle","name":"Long Rifle","noun":"Rifle","desc":"Long range with heavy damage, but slow to fire.","set":{"range":500,"width":8,"cd":1.05,"dmgMul":1.8}},
+ {"id":"rifle","name":"Long Rifle","noun":"Rifle","desc":"Long range with heavy damage that pierces, but slow to fire.","set":{"range":500,"width":8,"cd":1.05,"dmgMul":1.6},"add":{"pierce":1}},
  {"id":"repeater","name":"Auto-Repeater","noun":"Repeater","desc":"Fires very fast with weaker shots.","set":{"range":280,"width":8,"cd":0.22,"dmgMul":0.42}}
 ]

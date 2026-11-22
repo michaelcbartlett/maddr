@@ -219,6 +219,10 @@ static func draw(e) -> void:
 
 ## Brief squash and stretch for weight: stretch while winding up a blow, squash on impact and when hit.
 static func _squash(e) -> Vector2:
+	var k := 0.5 if e.shrunk_t > 0.0 else 1.0   # Shrink Ray
+	return _squash_pose(e) * k
+
+static func _squash_pose(e) -> Vector2:
 	if e.boss or e.vehicle or e.civ or e.frozen_t > 0.0 or e.time_lock > 0.0: return Vector2.ONE
 	if e.flash > 0.0: return Vector2(1.1, 0.9)
 	if e.action_phase == "swing": return Vector2(0.94, 1.07)

@@ -24,11 +24,12 @@ var unlocks: RefCounted          # persistent starting-part unlocks (game/unlock
 var build := {"ammo": 0, "frame": 0, "items": [], "name": "", "off": null, "start": {"ammo": 0, "frame": 0}, "swapped": {"ammo": false, "frame": false}}
 var custom_name := false
 var run_serial := 0
-var arm_cooldowns := {"time_freeze":0.0,"proximity_bomb":0.0,"seeker_rack":0.0}
-const CONSUMABLE_IDS := ["disguise", "grenade", "teleport"]
-const CONSUMABLE_NAMES := {"disguise":"Disguise", "grenade":"Grenade", "teleport":"Teleport Pair"}
-const CONSUMABLE_PRICES := {"disguise":14, "grenade":10, "teleport":18}
-var consumable_charges := {"disguise":0, "grenade":0, "teleport":0}
+var arm_cooldowns := {"time_freeze":0.0,"proximity_bomb":0.0,"seeker_rack":0.0,"shrink_ray":0.0,"freeze_ray":0.0}
+## Teleport Pads used to be a supply; they are now a B action (item "teleport", consumables.gd place_pad).
+const CONSUMABLE_IDS := ["disguise", "grenade"]
+const CONSUMABLE_NAMES := {"disguise":"Disguise", "grenade":"Grenade"}
+const CONSUMABLE_PRICES := {"disguise":14, "grenade":10}
+var consumable_charges := {"disguise":0, "grenade":0}
 var selected_consumable := "disguise"
 ## Supplies are unlocked by buying their kit from the depot offers (3 charges); refills are bought after that.
 var consumables_owned := {}
@@ -47,7 +48,7 @@ func buy_consumable(id: String) -> bool:
 func cycle_consumable() -> void:
 	var current := CONSUMABLE_IDS.find(selected_consumable)
 	for offset in range(1, 4):
-		var id: String = CONSUMABLE_IDS[(current + offset) % 3]
+		var id: String = CONSUMABLE_IDS[(current + offset) % CONSUMABLE_IDS.size()]
 		if int(consumable_charges[id]) > 0: selected_consumable = id; return
 
 func spend_consumable() -> String:
@@ -178,8 +179,8 @@ func new_run() -> void:
 	build = {"ammo": 0, "frame": 0, "items": [], "name": "", "off": null, "start": {"ammo": 0, "frame": 0}, "swapped": {"ammo": false, "frame": false}}
 	unlocks.begin_run()
 	custom_name = false; scrap = 0; scrap_f = 0.0; kills = 0; total_scrap = 0; wave = 1
-	arm_cooldowns = {"time_freeze":0.0,"proximity_bomb":0.0,"seeker_rack":0.0}
-	consumable_charges = {"disguise":0, "grenade":0, "teleport":0}; selected_consumable = "disguise"; consumables_owned = {}
+	arm_cooldowns = {"time_freeze":0.0,"proximity_bomb":0.0,"seeker_rack":0.0,"shrink_ray":0.0,"freeze_ray":0.0}
+	consumable_charges = {"disguise":0, "grenade":0}; selected_consumable = "disguise"; consumables_owned = {}
 	set_difficulty(1); theme_order = []
 	heist_wave = pick_heist_wave(); bank_cracked = false
 	recompute()

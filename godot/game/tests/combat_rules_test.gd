@@ -187,8 +187,8 @@ func _test_ironclad() -> void:
 	iron._boss_ai(1.0, 250, 0, 250, iron.spd)
 	_check(iron.x - start > normal_stride * 1.15, "Ironclad visibly speeds up below half health")
 	iron.hp = iron.max_hp; iron.x = start; iron.charge_t = -0.001; iron.charging = 0
-	for frame in 11: iron._boss_ai(0.05, 250, 0, 250, iron.spd)
-	_check(iron.charging > 0 and iron.charge_t < 3 and Vector2(iron.cvx, iron.cvy).length() > iron.spd * 3, "Ironclad launches a fast charge within 0.55 seconds, with a shorter recovery")
+	for frame in 12: iron._boss_ai(0.05, 250, 0, 250, iron.spd)
+	_check(iron.charging > 0 and iron.charge_t < 3 and Vector2(iron.cvx, iron.cvy).length() > iron.spd * 3, "Ironclad launches a fast charge within 0.6 seconds, with a shorter recovery")
 	iron.charging = 0; iron.charge_t = 10; iron.slam_cd = 0; iron.x = start
 	iron._boss_ai(0.01, 250, 0, 250, iron.spd)
 	_check(iron.slam != null and iron.slam.T <= 0.8 and iron.slam.radius == 115 and iron.slam_cd <= 4, "Ironclad's normal slam has a shorter leap and recovery")

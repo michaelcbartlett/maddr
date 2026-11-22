@@ -121,7 +121,7 @@ func _run() -> void:
 	_start(); run.scrap = 1000
 	for kind in run.CONSUMABLE_IDS:
 		_check(not run.buy_consumable(kind), "%s refills need its kit first" % kind)
-	for kit in ["kit_disguise","kit_grenade","kit_teleport"]:
+	for kit in ["kit_disguise","kit_grenade"]:
 		var it: Dictionary = run.ITEM[kit]
 		_check(run.item_available(it), "%s is offered before it is owned" % kit)
 		run.offers = [{"it":it,"price":run.wave_price(it.c),"sold":false}]
@@ -164,25 +164,30 @@ func _run() -> void:
 	_check(a.consumables.grenades.size() == 1 and run.consumable_charges.grenade == 0, "Y / Q throws one paid grenade")
 	for frame in 60: a.consumables.tick(a,1.0/60.0,false)
 	_check(near.hp < 1000 and far.hp == 1000 and a.consumables.grenades.is_empty(), "grenade explodes after its fuse and only damages foes in the blast")
-	# One purchased kit, two placements, one traversal in either direction.
+	# Teleport Pads are a B action now (not a supply): two placements, one traversal either way, then a long cooldown.
+	_check(not run.CONSUMABLE_IDS.has("teleport") and not run.ITEM.has("kit_teleport"), "teleport pads are no longer a supply")
+	_check(run.ITEM.has("teleport") and run.ITEM.teleport.get("action", "") == "teleport", "teleport pads are a B-button action")
 	for reverse in [false,true]:
-		_start(); run.selected_consumable = "teleport"; run.consumable_charges.teleport = 1
-		_check(a.consumables.activate(a) and a.consumables.pads.size() == 1, "teleport kit places its first pad")
+		_start(); run.build.items.append("teleport"); run.recompute()
+		_check(run.equipped_action() == "teleport", "buying the pads puts them on B")
+		_check(a.BossAbilities.start_action(a, "teleport") and a.consumables.pads.size() == 1, "B places the first pad")
 		a.consumables.use_cd = 0
-		_check(not a.consumables.activate(a) and a.consumables.pads.size() == 1, "second pad cannot overlap the first")
-		a.P.x = 1100; _check(a.consumables.activate(a) and a.consumables.pads.size() == 2 and run.consumable_charges.teleport == 0, "second pad is included in the same paid kit")
+		_check(not a.BossAbilities.start_action(a, "teleport") and a.consumables.pads.size() == 1, "second pad cannot overlap the first")
+		a.P.x = 1100; _check(a.BossAbilities.start_action(a, "teleport") and a.consumables.pads.size() == 2, "B again places the partner pad")
 		a.consumables.tick(a,0.01,false)
-		_check(a.P.x == 1100 and not a.consumables.pads_armed, "placing a pad does not instantly teleport the player")
+		_check(a.P.x == 1100 and not a.consumables.pads_armed and a.action_cooldown == 0.0, "placing a pad does not teleport or start the cooldown")
 		a.P.y = 650; a.consumables.tick(a,0.4,false)
 		a.P.y = 550; a.P.x = 1100 if reverse else 800; a.consumables.tick(a,0.01,false)
 		_check(a.P.x == (800 if reverse else 1100) and a.consumables.pads.is_empty(), "either pad teleports to its partner once, then both disappear")
-		_check(not a.consumables.activate(a), "an empty inventory cannot create another pair")
+		_check(a.action_cooldown >= 13.9, "the trip starts a long cooldown")
+		a.consumables.use_cd = 0
+		_check(not a.BossAbilities.start_action(a, "teleport") and a.consumables.pads.is_empty(), "no new pads until the cooldown ends")
 	_start(); run.scrap = 0; run.consumables_owned = {"disguise":true}
 	_check(not run.buy_consumable("disguise") and run.consumable_charges.disguise == 0, "insufficient scrap never grants free supplies")
 	_check(not a.consumables.activate(a), "Y with no supplies is harmless")
-	_start(); run.selected_consumable = "teleport"; run.consumable_charges.teleport = 1
-	a.consumables.activate(a); a.end_wave()
-	_check(run.consumable_charges.teleport == 1 and a.consumables.pads.is_empty(), "an unused deployed teleport kit returns to inventory at wave end")
+	_start(); run.build.items.append("teleport"); run.recompute()
+	a.BossAbilities.start_action(a, "teleport"); a.end_wave(); a.start_wave()
+	_check(a.consumables.pads.is_empty() and a.action_cooldown == 0.0, "unused pads are cleared at wave end without costing the cooldown")
 	_start(); run.consumable_charges.disguise = 1; run.consumable_charges.grenade = 1
 	run.spend_consumable()
 	_check(run.selected_consumable == "grenade", "using the final charge selects the next carried supply")
@@ -198,7 +203,7 @@ func _screenshots() -> void:
 	_start(16); run.theme_order = ["street"]; a.start_wave()
 	a.set_process(false); a.banner_t = 0; a.siren_t = 0; a.wave_t = 45; a.P.inv = 0
 	a.P.x = 800; a.P.y = 550; a.P.aim = -0.3
-	run.consumable_charges = {"disguise":2,"grenade":3,"teleport":1}
+	run.consumable_charges = {"disguise":2,"grenade":3}
 	for fixture in [["undercover",635,410],["undercover",700,715],["swat_shield",965,480],["swat",1010,525],["guard",1060,430],["robodog",615,625],["interceptor",510,510],["tank",1100,680]]:
 		var e = a.make_enemy(fixture[0],fixture[1],fixture[2]); e.shoot_cd = 1
 		if e.type in ["tank","interceptor","robodog"]:
@@ -211,8 +216,8 @@ func _screenshots() -> void:
 			e.shoot_cd = 0.0; e.tick(0.01); e.sync()
 	await _shot("reinforcements-muzzle-flashes")
 	run.selected_consumable = "disguise"; a.consumables.activate(a); a._sync(0); await _shot("consumable-disguise")
-	a.P.disguise_t = 0; a.consumables.use_cd = 0; run.selected_consumable = "teleport"; a.consumables.activate(a)
-	a.P.x = 1030; a.P.y = 600; a.consumables.use_cd = 0; a.consumables.activate(a); a._sync(0); await _shot("consumable-teleports")
+	a.P.disguise_t = 0; a.consumables.use_cd = 0; a.action_cooldown = 0.0; a.consumables.place_pad(a)
+	a.P.x = 1030; a.P.y = 600; a.consumables.use_cd = 0; a.consumables.place_pad(a); a._sync(0); await _shot("consumable-teleports")
 	run.wave = 5; run.scrap = 120; run.gen_offers(); scene.shop_s.refresh(); scene._show("shop"); await _shot("consumable-shop")
 
 func _shot(name: String) -> void:

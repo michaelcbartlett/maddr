@@ -15,7 +15,7 @@ var sell_l: Label
 var consumables_box: HBoxContainer
 var consumable_l: Label
 var secondary_l: Label
-const SUPPLY_DESCS := {"disguise":"Disguise · Lose pursuit for 4s. Firing reveals you.", "grenade":"Grenade · Throw along your aim; explodes after a short fuse.", "teleport":"Teleport Pair · Place two pads, then enter either for one trip."}
+const SUPPLY_DESCS := {"disguise":"Disguise · Lose pursuit for 4s. Firing reveals you.", "grenade":"Grenade · Throw along your aim; explodes after a short fuse."}
 var _confirm_id := ""   # owned item waiting for a second press to sell ("part:ammo"/"part:frame" = the main gun's parts)
 
 func _ready() -> void:
@@ -83,7 +83,7 @@ func refresh(focus_idx := -1) -> void:
 			if Run.buy_consumable(id): refresh(); next_btn.call_deferred("grab_focus")
 		, true)
 		button.add_theme_font_size_override("font_size",10)
-		button.tooltip_text = {"disguise":"Y / Q: lose pursuit for 4s. Firing ends the disguise.","grenade":"Y / Q: throw a grenade along your aim.","teleport":"Y / Q: place two pads, then enter either for one trip."}[id]
+		button.tooltip_text = {"disguise":"Y / Q: lose pursuit for 4s. Firing ends the disguise.","grenade":"Y / Q: throw a grenade along your aim."}[id]
 		button.disabled = count >= 3 or Run.scrap < price
 		button.focus_entered.connect(func(): consumable_l.text = SUPPLY_DESCS[id])
 		button.mouse_entered.connect(func(): consumable_l.text = SUPPLY_DESCS[id])

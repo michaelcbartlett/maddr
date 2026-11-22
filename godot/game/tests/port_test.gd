@@ -86,16 +86,33 @@ func _run() -> void:
 
 ## Balance values tuned after the browser prototype was frozen (README "Tuning notes"). The stat check is about
 ## the build formulas, so it runs with the prototype's numbers swapped back in, then restores the tuned ones.
-const BROWSER_VALUES := {"laser": ["add", "dmg", 7], "storm": ["add", "chainMul", 0.4], "clock": ["add", "bomb", 0.15],
-	"virus": ["add", "sick", 0.25], "hive": ["mul", "minionMul", 2]}
+## Values the native game deliberately retuned away from the browser prototype: [id, section, key, browser value].
+## A null browser value means the prototype has no such key. Ammo, frames and items are all looked up by id.
+const BROWSER_VALUES := [["laser", "add", "dmg", 7], ["laser", "add", "atkSpd", null], ["razor", "add", "dmg", 7], ["razor", "add", "atkSpd", null], ["razor", "add", "bleed", 0.6], ["bullet", "add", "dmg", 10], ["rifle", "set", "dmgMul", 1.8],
+	["pistol", "set", "cd", 0.6], ["blunder", "set", "dmgMul", 0.8], ["rifle", "add", "pierce", null],
+	["storm", "add", "chainMul", 0.4], ["clock", "add", "bomb", 0.15], ["virus", "add", "sick", 0.25], ["hive", "mul", "minionMul", 2]]
+
+func _tuned_def(id: String) -> Dictionary:
+	for table in [run.AMMO, run.FRAMES]:
+		for d in table:
+			if d.id == id: return d
+	return run.ITEM[id]
+
+## Swap each tuned value for its browser value; returns what to put back.
+func _swap_values(values: Array) -> Array:
+	var previous: Array = []
+	for v in values:
+		var section: Dictionary = _tuned_def(v[0]).get(v[1], {})
+		if not _tuned_def(v[0]).has(v[1]): _tuned_def(v[0])[v[1]] = section
+		previous.append([v[0], v[1], v[2], section.get(v[2])])
+		if v[3] == null: section.erase(v[2])
+		else: section[v[2]] = v[3]
+	return previous
 const BROWSER_SPEED := 150.0
 
 func _test_stats() -> void:
 	var manifest = JSON.parse_string(FileAccess.get_file_as_string("res://character/tests/reference/cases.json"))
-	var tuned := {}
-	for id in BROWSER_VALUES:
-		var def: Dictionary = run.AMMO.filter(func(a): return a.id == id)[0] if id == "laser" else run.ITEM[id]
-		var v: Array = BROWSER_VALUES[id]; tuned[id] = def[v[0]][v[1]]; def[v[0]][v[1]] = v[2]
+	var tuned := _swap_values(BROWSER_VALUES)
 	var speed_k: float = run.base_stats().speed / BROWSER_SPEED
 	for config in manifest.cases:
 		run.build = {"ammo":int(config.ammo),"frame":int(config.frame),"items":config.items,"name":"","off":null}
@@ -113,9 +130,7 @@ func _test_stats() -> void:
 		var expected = config.stats.D.duplicate(); expected.maxHp = maxi(10,roundi(config.stats.S.maxHp-30.0)); expected.speed *= speed_k
 		_check(_same(run.D,expected),config.name+": derived stats match browser")
 		_check(_same(run.CNT,config.stats.CNT),config.name+": stack counts match browser")
-	for id in tuned:
-		var def: Dictionary = run.AMMO.filter(func(a): return a.id == id)[0] if id == "laser" else run.ITEM[id]
-		def[BROWSER_VALUES[id][0]][BROWSER_VALUES[id][1]] = tuned[id]
+	tuned.reverse(); _swap_values(tuned)
 	run.new_run()
 
 func _same(a, b) -> bool:

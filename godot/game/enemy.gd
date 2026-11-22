@@ -54,6 +54,13 @@ var bleed_s := 0
 var bleed_t := 0.0
 var sick_t := 0.0
 var rad_s := 0
+var shrink_meter := 0.0   # Shrink Ray build-up; at 1.0 the cop shrinks (shrunk_t)
+var shrunk_t := 0.0
+var stomp_cd := 0.0
+var slide := Vector2.ZERO    # Freeze Ray: a kicked ice block sliding across the floor (Arena._update_ice)
+var slide_from = null        # the frozen cop that was kicked into this one never re-hits it
+var _full_r := 0.0
+var _full_dmg := 0.0
 var rad_t := 0.0
 var dot := 0.0
 var bomb_t := 0.0
@@ -146,10 +153,22 @@ func setup(arena: Node, t: String, px: float, py: float) -> void:
 		if hero == "surge": spd *= 1.3
 		if hero == "vex": spd *= float(B.get("speed",1.0)); ranged = true; action_cd = 1.8
 		if hero == "ironclad":
-			spd *= float(B.get("speed", 1.0)); charge_t = 1.25; charge_windup = 0.5; slam_cd = 2.4
+			spd *= float(B.get("speed", 1.0)); charge_t = 1.25; charge_windup = 0.55; slam_cd = 2.4
 
 func damage_taken(element: String) -> float:
 	return float(Run.ET[type].get("damage_taken", {}).get(element, 1.0))
+
+## Shrink Ray: half size, a smaller hitbox and 30% damage until shrunk_t runs out (stomping is in Arena._update_stomps).
+func shrink(duration: float) -> void:
+	if shrunk_t <= 0.0:
+		_full_r = r; _full_dmg = dmg
+		r = maxf(5.0, r * 0.6); dmg *= 0.3
+	shrunk_t = maxf(shrunk_t, duration)
+
+func unshrink() -> void:
+	shrunk_t = 0.0
+	if _full_r > 0.0: r = _full_r; dmg = _full_dmg
+	_full_r = 0.0
 
 # =============== UPDATE ===============
 func tick(dt: float) -> void:
@@ -196,6 +215,10 @@ func tick(dt: float) -> void:
 			if dead: return
 	chill = maxf(0.0, chill - dt * 0.2)
 	if slow_t > 0.0: slow_t -= dt
+	stomp_cd = maxf(0.0, stomp_cd - dt)
+	if shrunk_t > 0.0:
+		shrunk_t -= dt
+		if shrunk_t <= 0.0: unshrink()
 	# knockback
 	x += kx * dt; y += ky * dt; kx *= 0.85; ky *= 0.85
 	if ally: _ally_ai(dt); return
@@ -208,7 +231,7 @@ func tick(dt: float) -> void:
 	if behavior in ["vex_sentry","vex_mine"]:
 		preload("res://game/rival_scientist.gd").gadget_tick(self,dt)
 		return
-	var sp := spd * (0.55 if slow_t > 0.0 else 1.0) * (0.7 if sick_t > 0.0 else 1.0)
+	var sp := spd * (0.55 if slow_t > 0.0 else 1.0) * (0.7 if sick_t > 0.0 else 1.0) * (0.6 if shrunk_t > 0.0 else 1.0)
 	var P = A.P
 	var tx: float = P.x; var ty: float = P.y; var tgt_ally: Enemy = null
 	tgt_t -= dt
@@ -325,7 +348,7 @@ func _civ_ai(dt: float) -> void:
 	life += dt
 	var P = A.P
 	var dx: float = x - P.x; var dy: float = y - P.y; var d := maxf(0.0001, sqrt(dx * dx + dy * dy))
-	var sp := spd * (0.55 if slow_t > 0.0 else 1.0) * (0.7 if sick_t > 0.0 else 1.0)
+	var sp := spd * (0.55 if slow_t > 0.0 else 1.0) * (0.7 if sick_t > 0.0 else 1.0) * (0.6 if shrunk_t > 0.0 else 1.0)
 	var vx := 0.0; var vy := 0.0; var k := 1.0
 	var AW: float = A.AW; var AH: float = A.AH
 	if d < 340:
@@ -373,7 +396,7 @@ func _boss_ai(dt: float, dx: float, dy: float, d: float, sp: float) -> void:
 			preload("res://game/rival_scientist.gd").tick(self,dt,sp)
 		"ironclad":   # armored bruiser: charge + leaping ground slam
 			var rage := hp < max_hp * 0.5
-			charge_windup = 0.4 if rage else 0.5
+			charge_windup = 0.45 if rage else 0.55   # a touch more telegraph than before (was 0.4 / 0.5)
 			if rage: sp *= 1.18
 			if slam != null:
 				var s: Dictionary = slam; s.t -= dt; var k: float = 1.0 - maxf(0.0, s.t) / s.T
@@ -382,7 +405,7 @@ func _boss_ai(dt: float, dx: float, dy: float, d: float, sp: float) -> void:
 					air = 0.0; var rr: float = s.get("radius", 115.0)
 					A.booms.append({"x": x, "y": y, "r": rr, "t": 0.4, "col": Color("#d8c8a8")}); A.poof(x, y, Color("#a89878"), 26, 280, 5)
 					A.shake = 12.0; Controls.rumble(0.6, 1.0, 300); A.snd("slam")
-					if Vector2(P.x - x, P.y - y).length() < rr + P.r: A.hurt_player(dmg * 1.3)
+					if Vector2(P.x - x, P.y - y).length() < rr + P.r: A.hurt_player(dmg * 1.2)   # was 1.3: a slightly gentler landing
 					slam = null
 				return
 			if charging > 0.0:
