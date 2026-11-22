@@ -43,6 +43,11 @@ func _ready() -> void:
 	var i := args.find("--autoplay"); if i >= 0: _auto = float(args[i + 1])
 	i = args.find("--shot"); if i >= 0: _shot = args[i + 1]
 	_show("title")
+	# Opening company logo (ui/splash.gd) over a hidden title screen; never in test runs or capture hooks.
+	if not Run.is_test_process() and _shot == "":
+		title_s.visible = false; state = "splash"
+		var splash: Control = preload("res://ui/splash.gd").new(); fit.add_child(splash)
+		splash.finished.connect(func(): _show("title"))
 	i = args.find("--wave")
 	if i >= 0:
 		Run.new_run(); Run.wave = int(args[i + 1])
