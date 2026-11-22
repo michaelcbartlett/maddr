@@ -19,6 +19,7 @@ var pause_s: Control
 var over_s: Control
 var over_title: Label
 var over_text: Label
+var level_music: AudioStreamPlayer
 
 # test hooks
 var _auto := -1.0
@@ -28,6 +29,13 @@ var _t := 0.0
 func _ready() -> void:
 	get_window().title = "The Diabolical Doctor"
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Temporary run track; continues through shops and pauses with the game.
+	level_music = AudioStreamPlayer.new()
+	level_music.stream = preload("res://audio/doctor_diabolical_scratch.mp3").duplicate()
+	level_music.stream.loop = true
+	level_music.volume_db = -14.0
+	level_music.process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_child(level_music)
 	arena = Arena.new(); arena.process_mode = Node.PROCESS_MODE_PAUSABLE; add_child(arena)
 	arena.cleared.connect(_on_cleared); arena.died.connect(func(): _game_over(false))
 	arena.visible = false
@@ -109,6 +117,10 @@ func _show(st: String) -> void:
 	arena.visible = st in ["play", "paused"]
 	arena.fx_layer.visible = arena.visible
 	get_tree().paused = st == "paused"
+	if st in ["play", "shop"]:
+		if not level_music.playing: level_music.play()
+	elif st != "paused":
+		level_music.stop()
 	if st == "paused":
 		var controls: Label = pause_s.get_meta("controls")
 		controls.text = "L / R sticks · Move / Aim\nRT / LT · Fire / Arm\nX / LB / RB · Detonate\nStart · Resume" if Controls.aim_src == "pad" else "WASD · Move    Mouse · Aim\nLMB / RMB · Fire / Arm\nSpace · Detonate    M · Mute\nEsc · Resume"

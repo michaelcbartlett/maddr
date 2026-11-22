@@ -79,7 +79,8 @@ static func _fire_flash(e, g: Dictionary, shot_direction := Vector2.ZERO, anchor
 	f.fire(color)
 
 static func _pick(e, g: Dictionary, t: float) -> void:
-	var st := "idle"; var fi := int(t * 2.4 + g.seed)
+	var idle_fps := Sheets.CopEditedArt.fps("idle") if e.spr == "cop" else 2.4
+	var st := "idle"; var fi := int(t * idle_fps + g.seed)
 	var moving: bool = g.speed > 12.0
 	var walk_i := int(e.walk * 0.9)
 	if moving: st = "walk"; fi = walk_i

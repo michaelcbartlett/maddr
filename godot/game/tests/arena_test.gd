@@ -48,14 +48,14 @@ func _run() -> void:
 	run.scrap = 0; run.scrap_f = 0.0; arena.pickups.clear()
 	arena.pickups.append({"x": arena.P.x + 4, "y": arena.P.y, "v": 3.0, "vx": 0.0, "vy": 0.0, "mag": false})
 	arena._process(1.0 / 60.0)
-	_check(run.scrap == 3 and arena.pickups.is_empty(), "walking onto a scrap gear collects it in full")
+	_check(run.scrap == floori(run.scrap_value(3.0)) and arena.pickups.is_empty(), "walking onto a scrap gear collects it in full")
 	arena.pickups.append({"x": arena.P.x, "y": arena.P.y + 6, "v": 5.0, "vx": 0.0, "vy": 0.0, "cash": 1})
 	arena._process(1.0 / 60.0)
-	_check(run.scrap == 8, "cash piles are collected too")
+	_check(run.scrap == floori(run.scrap_value(8.0)), "cash piles are collected too")
 	var far := {"x": arena.P.x + run.D.pickup - 10, "y": arena.P.y, "v": 2.0, "vx": 0.0, "vy": 0.0, "mag": false}
 	arena.pickups.append(far)
 	for frame in 60: arena._process(1.0 / 60.0)
-	_check(run.scrap == 10, "the magnet pulls in scrap inside the pickup range")
+	_check(run.scrap == floori(run.scrap_value(10.0)), "the magnet pulls in scrap inside the pickup range")
 	var outside := {"x": arena.P.x + run.D.pickup + 120, "y": arena.P.y, "v": 2.0, "vx": 0.0, "vy": 0.0, "mag": false}
 	arena.pickups.append(outside); arena._process(1.0 / 60.0)
 	_check(arena.pickups.has(outside), "scrap outside the range stays put")
@@ -64,9 +64,10 @@ func _run() -> void:
 	_check(arena.pickups.filter(func(p): return p.has("cash")).size() == 3, "civilians drop cash")
 	arena.pickups.clear()
 	arena.P.hp = 10; var before: int = run.scrap
+	var crate_payout := floori(run.scrap_f + run.scrap_value(6.0))
 	arena.crates.append({"x": arena.P.x + 10, "y": arena.P.y, "v": 6, "t": 0.0, "got": false})
 	arena._process(1.0 / 60.0)
-	_check(run.scrap == before + 6 and arena.P.hp > 10 and arena.crates.is_empty(), "plutonium crates pay scrap and heal")
+	_check(run.scrap == before + crate_payout and arena.P.hp > 10 and arena.crates.is_empty(), "plutonium crates pay scrap and heal")
 	# ---- arm slot (carried over from the heist suite) ----
 	_check(not arena.villain.rig.has_bionic, "the villain starts without the bionic arm")
 	_check(not run.item_available(run.ITEM.time_freeze), "arm weapons require the purchased arm")

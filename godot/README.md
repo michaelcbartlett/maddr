@@ -3,6 +3,10 @@
 Open `project.godot` in **Godot 4.7** and press **F5**. The main scene is `game/main.tscn`.
 The game runs entirely in Godot: no browser, JavaScript runtime, sprite exporter, or local server is needed.
 
+Scratch level music: `audio/doctor_diabolical_scratch.mp3` loops during every wave, including the train heist,
+at −14 dB beneath the effects, continuing through the supply depot without restarting between waves.
+It pauses with the game and stops when the run ends. **M** mutes all audio.
+
 The Diabolical Doctor is a Brotato-style arena game. You build a doomsday weapon, then survive 20 waves of police in a
 single 1,600×1,100 arena (`levels/arena_level.gd`). Waves are back to back: 30 s, then +5 s a wave up to 60 s. The
 supply depot opens between waves. Bosses arrive on waves 5, 10, 12, 15, 18 and 20 (Captain Ironclad, Static
@@ -230,7 +234,7 @@ damage and wrecks reset with the next wave. Run `game/tests/scenery_test.gd` for
 
 **Economy.** Cops drop scrap gears, civilians drop cash when hit (and escape at the edges), and plutonium crates
 pay scrap and heal 15%. The magnet range is the pickup stat. Starting health is **30 HP**. Income is the
-prototype's full rate (`data/rules.json` `economy.income_multiplier` = 1.0). In the **shop**, owned modules can be
+prototype's rate plus 10% (`data/rules.json` `economy.income_multiplier` = 1.1). In the **shop**, owned modules can be
 **sold** for 45% of their current price: select one, then press A or click again to confirm. The Bionic
 Arm can't be sold while a weapon or utility is mounted on it.
 

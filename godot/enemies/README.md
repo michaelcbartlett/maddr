@@ -1,5 +1,16 @@
 # Enemy, NPC and boss art
 
+The basic cop's **idle**, **walk**, and **baton attack** use the edited PixelStudio clips in
+`art/enemies/cop/`, through `cop_edited_art.gd`. Their normal maps are rebuilt from each original
+body part's physical height profile after applying the saved artist poses; their joint anchors
+follow the edited parts. The foot origin is unchanged. The cop's other states and the other
+enemies keep their procedural artwork. The sheet cache includes hashes of the edited artwork,
+normals and clip metadata. Restart a running game to load updated clips.
+
+Editable projects with the matched normals are in `export/pixelstudio/cop-{idle,walk,attack}-improved/`
+at the repository root. The Godot importer opens these current edited sources. Preserve the
+layered projects when replacing the textures so the puppet remains available for further edits.
+
 All enemies are painted procedurally, the same way as the scientist in `character/`. They use one pixel per world pixel, so they match his size and density. The painter reuses the character's `pixel_canvas.gd`, `pixel_pen.gd` and `height_profiles.gd` without changing them. That gives the enemies the same hue-shifted shading (cool shadows, warm highlights), 1 px selective outlines, height maps and OpenGL normal maps, so they react to the game's 2D lights.
 
 Moving cars and tanks use `vehicle_view.gd` during combat and in the gallery. It projects a rotating ground

@@ -46,7 +46,7 @@
     "starting_hp": 30
   },
   "economy": {
-    "income_multiplier": 1.0,
+    "income_multiplier": 1.1,
     "kill_scrap_falloff": 0.3,
     "_kill_scrap_falloff": "scrap per cop kill x 1/(1 + falloff*(wave-1)); wave 10 pays 27%, wave 20 pays 15% per kill",
     "drop_chance": 0.65,

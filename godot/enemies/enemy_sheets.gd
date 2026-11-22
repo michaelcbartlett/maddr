@@ -3,6 +3,7 @@ class_name EnemySheets
 ## Bakes every enemy sprite key into one atlas: albedo + OpenGL normal map (CanvasTexture) and a white
 ## silhouette used for the hit-flash / frozen / mind-control / sickness tints.
 const Painter = preload("res://enemies/enemy_painter.gd")
+const CopEditedArt = preload("res://enemies/cop_edited_art.gd")
 const COLUMNS := 8
 
 ## Sheet dictionary:
@@ -25,15 +26,23 @@ static func build(kind: String) -> Dictionary:
 	for st in states:
 		frames[st] = []; anchors[st] = []
 		for i in int(states[st]):
-			var canvas = painter.paint(kind, st, i)
-			var img: Image = canvas.outlined_image()
-			var nrm: Image = canvas.normal_image()
+			var replacement := CopEditedArt.frame(st, i) if kind == "cop" else {}
+			var img: Image
+			var nrm: Image
+			var local := {}
+			if not replacement.is_empty():
+				img = replacement.art
+				nrm = replacement.normal
+				local = replacement.anchors
+			else:
+				var canvas = painter.paint(kind, st, i)
+				img = canvas.outlined_image()
+				nrm = canvas.normal_image()
+				for name in painter.anchors: local[name] = painter.anchors[name] + Vector2.ONE - origin
 			var at := Vector2i((n % COLUMNS) * cw, (n / COLUMNS) * ch)
 			albedo.blit_rect(img, Rect2i(Vector2i.ZERO, img.get_size()), at)
 			normal.blit_rect(nrm, Rect2i(Vector2i.ZERO, nrm.get_size()), at)
 			frames[st].append(Rect2(Vector2(at), Vector2(cw, ch)))
-			var local := {}
-			for name in painter.anchors: local[name] = painter.anchors[name] + Vector2.ONE - origin
 			anchors[st].append(local)
 			n += 1
 	return _finish({"kind": kind, "albedo": albedo, "normal": normal,
@@ -84,12 +93,13 @@ static func anchor(sheet: Dictionary, state: String, index: int, name: String, f
 ## Baking every sheet takes a few seconds of GDScript pixel work, so finished atlases are cached in
 ## user://enemy_sheets/. The key covers the painter/sheet sources (when readable) plus ART_VERSION;
 ## bump ART_VERSION after art changes if scripts are exported as binary tokens.
-const ART_VERSION := 6
+const ART_VERSION := 7
 static var _cache_dir := ""
 
 static func cache_dir() -> String:
 	if _cache_dir != "": return _cache_dir
 	var src := FileAccess.get_file_as_string("res://enemies/enemy_painter.gd") + FileAccess.get_file_as_string("res://enemies/enemy_sheets.gd") + FileAccess.get_file_as_string("res://enemies/machine_painter.gd")
+	src += CopEditedArt.cache_signature()
 	_cache_dir = "user://enemy_sheets/v%d_%x" % [ART_VERSION, src.hash() & 0x7fffffff]
 	return _cache_dir
 

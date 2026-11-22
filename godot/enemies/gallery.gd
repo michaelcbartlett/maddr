@@ -117,6 +117,7 @@ func _process(dt: float) -> void:
 
 func _frame(entry: Dictionary) -> int:
 	var st: String = entry.state
+	if entry.kind == "cop" and st in ["idle", "walk", "attack"]: return int(t * Sheets.CopEditedArt.fps(st))
 	if st == "attack" and entry.kind == "det": return 1 if fmod(t, 0.8) < 0.12 else 0
 	if st == "death": return mini(3, int(fmod(t, 2.0) * 8.0))
 	return int(t * (10.0 if st in ["walk", "panic", "blink"] else 4.0))

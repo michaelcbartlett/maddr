@@ -67,6 +67,7 @@ if ($Screenshots) {
 } else {
     Invoke-GodotCheck 'grapple' @('--headless', '--script', 'res://game/tests/grapple_test.gd')
 }
+Invoke-GodotCheck 'cop-edited-art' @('--headless', '--script', 'res://enemies/tests/cop_edited_art_test.gd')
 if ($Screenshots) {
     Invoke-GodotCheck 'enemies' @('--rendering-method', 'gl_compatibility', '--script', 'res://enemies/tests/enemy_art_test.gd', '--', '--screenshots')
 } else {
