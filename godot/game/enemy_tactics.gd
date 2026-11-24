@@ -87,7 +87,7 @@ const FLEE_SPEED := 1.35
 const PINNED := 0.55
 const HOLD_NEAR := 185.0
 const HOLD_FAR := 275.0
-const STEADY := 0.45          # rooted aim before the shot (matches the sight line)
+const STEADY := 0.38          # rooted aim before the shot (matches the sight line)
 
 static func _marksman(e, dt: float, speed: float, distance: float, dir: Vector2) -> void:
 	var clear := _clear(e, dir, distance)
@@ -105,7 +105,7 @@ static func _marksman(e, dt: float, speed: float, distance: float, dir: Vector2)
 		e.action_t -= dt
 		if e.action_t <= 0.0:
 			if distance < 420.0: _revolver(e, true)
-			e.action_phase = ""; e.action_cd = FLEE_REST; e.shoot_cd = randf_range(1.6, 2.2)
+			e.action_phase = ""; e.action_cd = FLEE_REST; e.shoot_cd = randf_range(1.3, 1.8)
 		return
 	if distance < FLEE_IN and e.action_cd <= 0.0:
 		e.action_phase = "flee"; e.action_t = FLEE_MAX; e.w_t = 0.0; e.juke = 0.0; e.gfx.erase("flee_at")
@@ -115,7 +115,7 @@ static func _marksman(e, dt: float, speed: float, distance: float, dir: Vector2)
 		if not clear: e.action_phase = ""; e.shoot_cd = 0.6
 		elif e.action_t <= 0.0:
 			_revolver(e, false)
-			e.action_phase = ""; e.shoot_cd = randf_range(1.8, 2.6)
+			e.action_phase = ""; e.shoot_cd = randf_range(1.4, 2.0)
 		return
 	if not clear or distance > HOLD_FAR: _advance(e, Vector2(e.A.P.x, e.A.P.y), speed, dt)
 	elif distance < HOLD_NEAR:
@@ -127,10 +127,10 @@ static func _marksman(e, dt: float, speed: float, distance: float, dir: Vector2)
 		e.action_phase = "aim"; e.action_t = STEADY
 
 static func _revolver(e, wild: bool) -> void:
-	var muzzle := EnemyView.muzzle_world(e); var target := Vector2(e.A.P.x, e.A.P.y)
+	var muzzle := EnemyView.muzzle_world(e); var target := Vector2(e.A.P.x, e.A.P.y - 28.0)
 	if not e.A.nav.clear_segment(Vector2(e.x, e.y), muzzle, 0.0) or not e.A.nav.clear_segment(muzzle, target, 0.0): return
 	var shot := (target - muzzle).normalized().rotated(randf_range(-0.16, 0.16) if wild else 0.0)
-	e.A.ebul.append({"x":muzzle.x, "y":muzzle.y, "vx":shot.x * 210.0, "vy":shot.y * 210.0, "r":4.0, "dmg":e.dmg, "t":3.0})
+	e.A.ebul.append({"x":muzzle.x, "y":muzzle.y, "vx":shot.x * 255.0, "vy":shot.y * 255.0, "r":4.0, "dmg":e.dmg, "t":3.0})
 	e.gfx.shot_t = 0.0
 	EnemyView._fire_flash(e, e.gfx, shot)
 	e.A.snd("ebul")

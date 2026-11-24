@@ -22,7 +22,7 @@ R=lambda a,n,step=1:list(range(a,a+n,step))
 KINDS={
  'cop':{'height':80,'clips':{
   'idle':('101',R(23,33),24,True,500),'walk':('102',R(28,29),24,True,500),'run':('103',R(71,12),24,True,500),
-  'attack':('120',R(12,36),24,False,430),'hurt':('145',[18,19,21,23,26],20,False,430),
+  'attack':('120',R(12,36),30,False,430),'hurt':('145',[18,19,21,23,26],20,False,430),
   'stagger':('146',R(10,42,2),12,False,430),'frozen':('113',[70],1,False,500),'stunned':('112',R(44,20,2),12,True,500),
   'sick':('114',R(57,46,3),8,True,500),'hypnotized':('115',R(55,19),24,True,500),'burning':('117',R(75,9),18,True,500),
   'death':('110',R(34,30),24,False,340),'death_poison':('151',R(22,60,3),10,False,340),

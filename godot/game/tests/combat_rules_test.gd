@@ -129,7 +129,7 @@ func _test_melee_windup() -> void:
 		var hp: float = a.P.hp
 		e.tick(1.0 / 60.0)
 		_check(e.action_phase == "swing" and a.P.hp == hp, "a %s winds up instead of hitting instantly" % type)
-		_tick(e, 1.55 if type == "cop" else 0.5)
+		_tick(e, 1.25 if type == "cop" else 0.5)
 		_check(a.P.hp < hp and e.action_phase == "", "a %s's blow lands when the villain stays in reach" % type)
 		_setup([])
 		a.P.inv = 0.0

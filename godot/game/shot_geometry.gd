@@ -27,3 +27,17 @@ static func rect_entry(start: Vector2, finish: Vector2, rect: Rect2) -> Dictiona
 	if leave<0.0 or enter>1.0: return {}
 	if enter<0.0: return {"fraction":0.0,"normal":-delta.normalized()}
 	return {"fraction":enter,"normal":normal}
+
+## Swept hit on an upright body: a vertical capsule from `low` (feet) to `high` (head), same x.
+static func capsule_fraction(start: Vector2, finish: Vector2, low: Vector2, high: Vector2, radius: float) -> float:
+	var best := circle_fraction(start,finish,low,radius)
+	if low.is_equal_approx(high): return best
+	var top := circle_fraction(start,finish,high,radius)
+	if top>=0.0 and (best<0.0 or top<best): best = top
+	var contact := rect_entry(start,finish,Rect2(high.x-radius,minf(high.y,low.y),radius*2.0,absf(low.y-high.y)))
+	if not contact.is_empty() and (best<0.0 or contact.fraction<best): best = contact.fraction
+	return best
+
+## `shape` is {low, high, r} from EnemyView.hurt_shape().
+static func body_fraction(start: Vector2, finish: Vector2, shape: Dictionary, extra := 0.0) -> float:
+	return capsule_fraction(start,finish,shape.low,shape.high,float(shape.r)+extra)

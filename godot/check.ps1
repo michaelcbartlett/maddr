@@ -84,6 +84,7 @@ if ($Screenshots) {
 Invoke-GodotCheck 'cop-edited-art' @('--headless', '--script', 'res://enemies/tests/cop_edited_art_test.gd')
 Invoke-GodotCheck 'cop-locomotion' @('--headless', '--script', 'res://enemies/tests/cop_locomotion_test.gd')
 Invoke-GodotCheck 'scientist-gear' @('--headless', '--script', 'res://character/tests/scientist_gear_test.gd')
+Invoke-GodotCheck 'hitbox' @('--headless', '--script', 'res://game/tests/hitbox_test.gd')
 Invoke-GodotCheck 'shove' @('--headless', '--script', 'res://game/tests/shove_test.gd')
 Invoke-GodotCheck 'reactions' @('--headless', '--script', 'res://game/tests/reaction_test.gd', '--', '--character-studio')
 Invoke-GodotCheck 'detective' @('--headless', '--script', 'res://game/tests/detective_test.gd')

@@ -84,6 +84,32 @@ static func _fire_flash(e, g: Dictionary, shot_direction := Vector2.ZERO, anchor
 static func native(e) -> bool:
 	return bool(Sheets.EditedArt.clip(e.spr, "idle").get("metadata", {}).get("native", false))
 
+static var _heights: Dictionary = {}
+## Drawn height of the standing sprite, in world px.
+static func body_height(e) -> float:
+	var key := sprite_key(e)
+	if not _heights.has(key):
+		var sheet := EnemyArt.sheet(key)
+		var cell := Rect2i(Sheets.frame(sheet, "idle", 0))
+		var used: Rect2i = (sheet.albedo as Image).get_region(cell).get_used_rect()
+		_heights[key] = Sheets.frame_origin(sheet, "idle").y - used.position.y
+	return float(_heights[key]) * (0.5 if e.shrunk_t > 0.0 else 1.0)
+
+static func foot_y(e) -> float: return e.y + float(EnemyArt.sheet(sprite_key(e)).foot)
+## Just above the head: health bars, damage numbers and status marks.
+static func head_y(e) -> float:
+	if e.vehicle or e.fly: return e.y - e.r
+	return foot_y(e) - body_height(e)
+
+## Where shots and blades connect: the whole drawn body for the tall imported enemies, a circle for the rest.
+const BODY_RADIUS := 16.0
+static func hurt_shape(e) -> Dictionary:
+	var at := Vector2(e.x, e.y)
+	if e.vehicle or e.boss or e.civ or not native(e): return {"low": at, "high": at, "r": e.r}
+	var k := 0.5 if e.shrunk_t > 0.0 else 1.0
+	var radius := BODY_RADIUS * k; var foot := foot_y(e)
+	return {"low": Vector2(e.x, foot - radius), "high": Vector2(e.x, foot - body_height(e) + radius), "r": radius}
+
 ## Frame of the aiming sweep that points at the villain; other attacks return 1.
 static func aim_frame(e) -> int:
 	var aims: Array = Sheets.EditedArt.clip(e.spr, "attack").get("metadata", {}).get("aim_degrees", [])

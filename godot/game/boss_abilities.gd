@@ -47,7 +47,7 @@ static func update_rocket(a, p: Dictionary, dt: float) -> void:
 	var first := 2.0
 	for e in a.enemies:
 		if e.dead or e.ally or e.civ: continue
-		var f := Geometry.circle_fraction(old, finish, Vector2(e.x,e.y), p.r + e.r)
+		var f := Geometry.body_fraction(old, finish, EnemyView.hurt_shape(e), p.r)
 		if f >= 0.0: first = minf(first, f)
 	Viper.intercept(a, old, old.lerp(finish,minf(first,1.0)), p.r)
 	if first <= 1.0: finish = old.lerp(finish, first)

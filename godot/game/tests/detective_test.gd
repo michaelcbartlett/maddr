@@ -10,7 +10,7 @@ func _check(ok: bool, label: String) -> void:
 func _spawn(at: Vector2):
 	for e in a.enemies: e.queue_free()
 	a.enemies.clear(); a.ebul.clear(); a.walls = []
-	var e = a.make_enemy("det",at.x,at.y); e.shoot_cd = 2.0; e.action_cd = 0.0; e.action_phase = ""
+	var e = a.make_enemy("det",at.x,at.y); e.shoot_cd = 2.0; e.action_cd = 0.0; e.action_phase = ""; e.spd = 104.0
 	return e
 func _tick(e, dt: float) -> void:
 	var before := Vector2(e.x,e.y); e.tick(dt)
@@ -33,7 +33,7 @@ func _run() -> void:
 	e = _spawn(Vector2(950,550)); e.action_cd = 9.0; e.shoot_cd = 9.0; _steps(e,90)
 	_check(_distance(e)>165.0,"he backs off when a little too close (%.0f)" % _distance(e))
 	# steady, then one shot
-	e = _spawn(Vector2(1030,550)); e.shoot_cd = 0.5
+	e = _spawn(Vector2(1030,550)); e.shoot_cd = 0.45
 	_steps(e,6); _check(e.action_phase == "aim","he plants and aims before firing")
 	var at := Vector2(e.x,e.y); _steps(e,20); _check(Vector2(e.x,e.y).distance_to(at)<0.5 and a.ebul.is_empty(),"rooted while aiming, no early shot")
 	_steps(e,12); _check(a.ebul.size()==1,"one shot per aim (%d)" % a.ebul.size())

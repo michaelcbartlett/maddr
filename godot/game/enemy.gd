@@ -131,6 +131,8 @@ func setup(arena: Node, t: String, px: float, py: float) -> void:
 	var sc: Dictionary = Run.SCALING
 	var hp_m: float = 1.0 + sc.hp_lin * w + sc.hp_quad * w * w
 	hp = T.hp * hp_m
+	# Flat growth ("hp_wave") keeps fodder one-shot early on, like a Brotato Baby Alien: base + n per wave.
+	if T.has("hp_wave"): hp = float(T.hp) + float(T.hp_wave) * w
 	if T.get("boss", 0): hp = T.hp * hp_m * (Run.wave / 5.0) * float((Run.boss_for(Run.wave) if Run.boss_for(Run.wave) != null else Run.BOSSES[20]).get("hp", 1.0))   # per-hero factor (bosses table)
 	hp *= Run.tough_mult()
 	max_hp = hp; r = T.r
@@ -336,7 +338,7 @@ func _strike(dt: float, pd: float, profile: Dictionary, victim = null) -> void:
 					var away := (Vector2(x, y) - target).normalized()
 					_move(away.x * BITE_KNOCKBACK * 0.6 / hits.size(), away.y * BITE_KNOCKBACK * 0.6 / hits.size())
 	if action_t <= 0.0:
-		action_phase = ""; atk_cd = 0.5 if ally else 1.0
+		action_phase = ""; atk_cd = 0.5 if ally else 0.75
 
 func _swing(dt: float, pd: float) -> void:
 	var profile := strike_profile()

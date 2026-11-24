@@ -98,7 +98,7 @@ func _strike_in_flight(A, start: Vector2, finish: Vector2, D: Dictionary) -> voi
 	preload("res://game/viper_boss.gd").intercept(A,start,finish,5.0)
 	for e in A.live_foes():
 		if flown.has(e): continue
-		if _seg_dist(Vector2(e.x, e.y), start, finish) > e.r + 5.0: continue
+		if preload("res://game/shot_geometry.gd").body_fraction(start, finish, EnemyView.hurt_shape(e), 5.0) < 0.0: continue
 		flown[e] = true
 		A.hit(e, flight_damage(D), {"proc": true, "kx": dir.x * 0.5, "ky": dir.y * 0.5, "col": COLOR})
 		A.blaster_fx.impact(Vector2(e.x, e.y), -dir, COLOR)
@@ -120,7 +120,7 @@ func _shock(A, origin: Vector2, anchor: Vector2, D: Dictionary) -> void:
 		if shock_cd.has(e): continue
 		var pos := Vector2(e.x, e.y)
 		var near := _closest(pos, origin, anchor)
-		if near.distance_to(pos) > e.r + reach: continue
+		if preload("res://game/shot_geometry.gd").body_fraction(origin, anchor, EnemyView.hurt_shape(e), reach) < 0.0: continue
 		shock_cd[e] = interval
 		A.hit(e, shock_damage(D), {"proc": true, "pfm": interval / float(D.cd), "col": COLOR, "silent": randf() < 0.5, "element":"lightning"})
 		A.arcs.append({"x1": near.x, "y1": near.y, "x2": e.x, "y2": e.y, "t": 0.12})

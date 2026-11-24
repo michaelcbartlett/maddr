@@ -339,10 +339,10 @@ func _update_sparring(dt: float) -> void:
 	for kind in _studio_wait:
 		if enemies.any(func(e): return e.type == kind and not e.dead): continue
 		_studio_wait[kind] -= dt
-		if _studio_wait[kind] <= 0.0: _studio_wait[kind] = 3.0; studio_target(kind,Run.ET[kind].hp*3.0,360.0)
+		if _studio_wait[kind] <= 0.0: _studio_wait[kind] = 3.0; studio_target(kind,0.0,360.0)
 
 ## Practice targets for the studio: 6 cop, 7 detective, 8 clear. He takes no damage there.
-func studio_target(kind: String, health := 60.0, distance := 150.0) -> void:
+func studio_target(kind: String, health := 0.0, distance := 150.0) -> void:
 	var at := Vector2(P.x,P.y); var facing := P.aim
 	for i in 24:
 		# Straight ahead first, then further round until there is room.
@@ -352,7 +352,8 @@ func studio_target(kind: String, health := 60.0, distance := 150.0) -> void:
 	_studio_allow = true
 	var e = make_enemy(kind,at.x,at.y)
 	_studio_allow = false
-	if e != null: e.hp = health; e.max_hp = health; poof(at.x,at.y,Color("#b8c8e0"),8,70,3.0)
+	if e != null and health > 0.0: e.hp = health; e.max_hp = health
+	if e != null: poof(at.x,at.y,Color("#b8c8e0"),8,70,3.0)
 
 ## Studio previews: 1 hurt, 2 cackle, 3 burn, 4 tazed (D-pad left, right, down on a pad); 5 / Back: time of day.
 func _unhandled_input(e: InputEvent) -> void:
@@ -451,7 +452,7 @@ func hit(e: Enemy, amt: float, o := {}) -> void:
 	var crit := false
 	if proc and randf() < S.crit: amt *= 2.0; crit = true
 	e.hp -= amt; e.flash = 0.07
-	if not o.get("silent", false): add_num(e.x, e.y - e.r - 6, roundi(amt), Color("#ffe14a") if crit else o.get("col", Color.WHITE), crit)
+	if not o.get("silent", false): add_num(e.x, EnemyView.head_y(e) - 10, roundi(amt), Color("#ffe14a") if crit else o.get("col", Color.WHITE), crit)
 	if S.lifesuck > 0 and heal_budget > 0:
 		var hg := minf(heal_budget, amt * S.lifesuck); heal_budget -= hg; P.hp = minf(D.maxHp, P.hp + hg)
 	if proc:
@@ -527,7 +528,7 @@ func _shrink_hit(e: Enemy) -> void:
 	e.shrink_meter = 0.0
 	var fresh: bool = e.shrunk_t <= 0.0
 	e.shrink(1.5 if e.boss else SHRINK_TIME)
-	if fresh: poof(e.x, e.y, Color("#c08bff"), 10, 90, 3); add_num(e.x, e.y - e.r - 14, "SHRUNK!", Color("#d7b5ff"), false); snd("shrink")
+	if fresh: poof(e.x, e.y, Color("#c08bff"), 10, 90, 3); add_num(e.x, EnemyView.head_y(e) - 18, "SHRUNK!", Color("#d7b5ff"), false); snd("shrink")
 
 ## Freeze Ray: three hits freeze a cop solid; bosses freeze briefly after a long build-up; vehicles can't freeze.
 const FREEZE_PER_HIT := 0.45   # outpaces chill decay (0.2/s) so three turret bolts freeze
@@ -540,7 +541,7 @@ func _freeze_hit(e: Enemy) -> void:
 	e.chill = 0.0
 	var fresh: bool = e.frozen_t <= 0.0
 	e.frozen_t = maxf(e.frozen_t, 0.8 if e.boss else FREEZE_TIME)
-	if fresh: poof(e.x, e.y, Color("#bff4ff"), 10, 90, 3); add_num(e.x, e.y - e.r - 14, "FROZEN!", Color("#bff4ff"), false); snd("frz")
+	if fresh: poof(e.x, e.y, Color("#bff4ff"), 10, 90, 3); add_num(e.x, EnemyView.head_y(e) - 18, "FROZEN!", Color("#bff4ff"), false); snd("frz")
 
 ## Walk into a frozen cop to kick it; the ice block slides and shatters into the first cop or wall it meets.
 func _update_ice(dt: float) -> void:
@@ -763,9 +764,11 @@ func fire_gun(type: String, ang: float, mul: float, ox: float, oy: float, sus, b
 				if e.dead or e.ally: continue
 				var px: float = e.x - bx; var py: float = e.y - by; var proj: float = px * cx + py * sy
 				var touching := touching_body(e, cx, sy)
-				if not touching and (proj < -e.r or proj > back + length + e.r): continue
+				var tall := tall_body(e)
+				if not touching and not tall and (proj < -e.r or proj > back + length + e.r): continue
 				var perp := absf(px * sy - py * cx)
-				if touching or perp <= w / 2.0 + e.r:
+				var along := Vector2(cx, sy) * (back + length)
+				if touching or (ShotGeometry.body_fraction(Vector2(bx, by), Vector2(bx, by) + along, EnemyView.hurt_shape(e), w / 2.0) >= 0.0 if tall else perp <= w / 2.0 + e.r):
 					impact_distance = minf(impact_distance,maxf(0.0,Vector2(e.x-ox,e.y-oy).dot(Vector2(cx,sy))-e.r))
 					if sus != null: hit(e, dmg, {"proc": true, "mul": mul, "pfm": 0.1 / D.cd, "silent": randf() < 0.6, "col": Color("#ff9a9a")})
 					else: hit(e, dmg, {"proc": true, "kx": cx * 0.3, "ky": sy * 0.3, "mul": mul})
@@ -785,11 +788,12 @@ func fire_gun(type: String, ang: float, mul: float, ox: float, oy: float, sus, b
 			var near := enemies.filter(func(e):
 				if e.dead or e.ally: return false
 				var px: float = e.x - bx; var py: float = e.y - by; var proj := px * cx + py * sy
+				if tall_body(e): return touching_body(e, cx, sy) or ShotGeometry.body_fraction(Vector2(bx,by),Vector2(bx,by)+Vector2(cx,sy)*back,EnemyView.hurt_shape(e),r) >= 0.0
 				return touching_body(e, cx, sy) or (proj > -e.r and proj < back + e.r and absf(px * sy - py * cx) <= r + e.r))
 			near.sort_custom(func(p, q): return (p.x - bx) * cx + (p.y - by) * sy < (q.x - bx) * cx + (q.y - by) * sy)
 			for e in near:
 				pr.hit[e] = true; hit(e, dmg, {"proc": true, "kx": cx * 0.4, "ky": sy * 0.4, "mul": mul})
-				blaster_fx.impact(Vector2(e.x,e.y),-Vector2(cx,sy),color)
+				blaster_fx.impact(body_middle(e),-Vector2(cx,sy),color)
 				if type == "bullet": Sfx.play_group("bullet_hit")
 				if type == "razor": poof(e.x, e.y, Color("#c01828"), 3, 60, 2)
 				pr.pierce -= 1
@@ -812,6 +816,16 @@ func touching_body(e: Enemy, cx: float, sy: float) -> bool:
 	var d2 := dx * dx + dy * dy
 	if d2 > reach * reach: return false
 	return dx * cx + dy * sy >= -0.35 * sqrt(d2)   # in front of / beside the body, not behind it
+
+func tall_body(e: Enemy) -> bool:
+	var shape := EnemyView.hurt_shape(e); return not Vector2(shape.low).is_equal_approx(shape.high)
+func body_middle(e: Enemy) -> Vector2:
+	var shape := EnemyView.hurt_shape(e); return (Vector2(shape.low)+Vector2(shape.high))*0.5
+
+## Bullets strike his drawn torso and legs, not only his shins. Slimmer than the art, so near misses miss.
+func bullet_hits_player(at: Vector2, radius: float) -> bool:
+	var nearest := Vector2(P.x,clampf(at.y,P.y-44.0*P.size_scale,P.y-11.0*P.size_scale))
+	return at.distance_squared_to(nearest) < (radius+P.r)*(radius+P.r)
 
 func _shot_muzzle(source: int, shot_index: int = -1) -> Vector2:
 	return villain.off_muzzle_global(shot_index) if source==OFF_HAND else villain.muzzle_global(source,shot_index)
@@ -977,11 +991,12 @@ func _sweep_melee_damage(spec: Dictionary, samples: Array, struck: Dictionary, p
 	for enemy in live_foes():
 		if enemy.civ or struck.has(enemy.get_instance_id()): continue
 		var point := Vector2(enemy.x,enemy.y)
-		if origin.distance_to(point) > float(spec.reach)+enemy.r+20.0: continue
+		if origin.distance_to(point) > float(spec.reach)+enemy.r+20.0+(50.0 if tall_body(enemy) else 0.0): continue
 		var contact := false
+		var shape := EnemyView.hurt_shape(enemy)
 		for path in samples:
 			for j in range(path.size()-1):
-				if ShotGeometry.circle_fraction(path[j],path[j+1],point,enemy.r+2.0) >= 0.0:
+				if ShotGeometry.body_fraction(path[j],path[j+1],shape,2.0) >= 0.0:
 					contact = true; break
 			if contact: break
 		if not contact: continue
@@ -1328,7 +1343,7 @@ func _update_play(dt: float) -> void:
 				_damage_prop_ray(old, Vector2(b.x, b.y), b.dmg, "laser" if b.get("zap", false) else "bullet", 1.0, false)
 				blaster_fx.impact(impact, -motion.normalized(), b.get("col", Color("#ffd76a")))
 			b.x = impact.x; b.y = impact.y; b.t = 0.0
-		if b.t > 0.0 and not dash.safe() and (b.x - P.x) * (b.x - P.x) + (b.y - P.y) * (b.y - P.y) < (b.r + P.r) * (b.r + P.r):
+		if b.t > 0.0 and not dash.safe() and bullet_hits_player(Vector2(b.x,b.y),b.r):
 			b.t = 0.0
 			if not b.has("blast"): hurt_player(b.dmg)
 			if b.get("slow", false): P.slow_t = 1.5
@@ -1400,7 +1415,7 @@ func _update_projs(dt: float) -> void:
 			var contacts: Array = []
 			for enemy in enemies:
 				if enemy.dead or enemy.ally or projectile.hit.has(enemy): continue
-				var fraction = ShotGeometry.circle_fraction(start,finish,Vector2(enemy.x,enemy.y),enemy.r+projectile.r)
+				var fraction := ShotGeometry.body_fraction(start,finish,EnemyView.hurt_shape(enemy),projectile.r)
 				if fraction>=0.0: contacts.append({"enemy":enemy,"fraction":fraction})
 			for b in ebul:
 				if not b.get("seeker",false) or b.t <= 0.0: continue
@@ -1863,13 +1878,14 @@ func _draw_fx_top(g: Node2D) -> void:
 	# enemy status bars, bombs
 	for e in enemies:
 		if e.dead: continue
+		var top: float = EnemyView.head_y(e) - 8.0
 		if e.bomb_t > 0:
-			g.draw_rect(Rect2(e.x - 4, e.y - e.r - 18, 8, 8), Color("#222222"))
-			g.draw_rect(Rect2(e.x - 2, e.y - e.r - 16, 4, 4), Color("#ff2020") if sin(time * (20 / maxf(0.3, e.bomb_t))) > 0 else Color("#660000"))
-		if e.ally: g.draw_rect(Rect2(e.x - 10, e.y - e.r - 14, 20 * e.ally_t / S.mindDur, 3), Color("#d07bff"))
+			g.draw_rect(Rect2(e.x - 4, top - 8, 8, 8), Color("#222222"))
+			g.draw_rect(Rect2(e.x - 2, top - 6, 4, 4), Color("#ff2020") if sin(time * (20 / maxf(0.3, e.bomb_t))) > 0 else Color("#660000"))
+		if e.ally: g.draw_rect(Rect2(e.x - 10, top, 20 * e.ally_t / S.mindDur, 3), Color("#d07bff"))
 		elif e.hp < e.max_hp and not e.boss and not e.civ:
-			g.draw_rect(Rect2(e.x - 10, e.y - e.r - 12, 20, 3), Color("#330000")); g.draw_rect(Rect2(e.x - 10, e.y - e.r - 12, 20 * maxf(0, e.hp / e.max_hp), 3), Color("#ee3333"))
-		if e.chill > 0 and e.frozen_t <= 0: g.draw_rect(Rect2(e.x - 10, e.y - e.r - 8, 20 * minf(1, e.chill), 2), Color("#8ff0ff"))
+			g.draw_rect(Rect2(e.x - 10, top, 20, 3), Color("#330000")); g.draw_rect(Rect2(e.x - 10, top, 20 * maxf(0, e.hp / e.max_hp), 3), Color("#ee3333"))
+		if e.chill > 0 and e.frozen_t <= 0: g.draw_rect(Rect2(e.x - 10, top + 4, 20 * minf(1, e.chill), 2), Color("#8ff0ff"))
 	for p in parts:
 		g.draw_rect(Rect2(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s), Color(p.col, minf(1.0, p.t / (p.m * 0.5))))
 	for n in nums:
