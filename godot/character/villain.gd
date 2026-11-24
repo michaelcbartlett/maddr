@@ -8,6 +8,7 @@ const Art = preload("res://character/art_renderer.gd")
 const Pen = preload("res://character/pixel_pen.gd")
 const Scientist = preload("res://character/scientist_sprites.gd")
 const Gear = preload("res://character/scientist_gear.gd")
+const BionicSupport = preload("res://character/bionic_support.gd")
 static var _gear_cache: Dictionary = {}
 var gear = null   # worn items for the native sprite, or null
 const BODY_ORIGIN = Vector2(29,46)
@@ -25,6 +26,8 @@ var near_hand: Sprite2D
 var far_arm: Sprite2D
 var far_hand: Sprite2D
 var rest_pivot: Node2D
+var natural_off_socket := Vector2.ZERO
+var bionic_support: Node2D
 var shove := -1.0            # 0..1 while the empty off hand pushes
 var shove_aim := 0.0
 var dash_dir := Vector2.ZERO    # non-zero only while phased
@@ -105,6 +108,7 @@ var _external_clock := false
 
 func _ready() -> void:
 	_unshaded = CanvasItemMaterial.new(); _unshaded.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	bionic_support = BionicSupport.new(); bionic_support.name = "BionicSupport"; add_child(bionic_support)
 	off_pivot = Node2D.new(); off_pivot.name = "OffPivot"; add_child(off_pivot)
 	far_arm = _sprite("FarArm",off_pivot)
 	off_gun = _sprite("OffGun",off_pivot)
@@ -275,6 +279,9 @@ func visual_bounds() -> Rect2:
 	if _native_skin():
 		for sprite in [near_arm,near_hand,far_arm,far_hand]:
 			if sprite.is_visible_in_tree(): bounds = bounds.merge(_sprite_bounds(sprite,sprite.get_meta("native_bounds")))
+	if bionic_support.is_visible_in_tree():
+		for sprite in bionic_support.links:
+			bounds = bounds.merge(_sprite_bounds(sprite,sprite.get_rect()))
 	return bounds.grow(3.0)
 
 func _sprite_bounds(sprite: Sprite2D, bounds: Rect2) -> Rect2:
@@ -337,7 +344,7 @@ func _update() -> void:
 			clip = dash_clip()
 			if not Scientist.has_clip(clip): clip = "idle"
 			index = mini(int(dash_progress*Scientist.data().clips[clip].count),int(Scientist.data().clips[clip].count)-1)
-		_body_frame = Scientist.frame(_body_frame,clip,index,has_bionic or face<0 or is_dashing() or is_shoving(),gear)
+		_body_frame = Scientist.frame(_body_frame,clip,index,face<0 or is_dashing() or is_shoving(),gear)
 		if turn_progress>=1.0/3.0 and turn_progress<2.0/3.0 and not is_dashing():
 			_body_frame = Scientist.front_frame(_body_frame,moving)
 		_last_native_time = t
@@ -367,7 +374,8 @@ func _update() -> void:
 	var shoulder = _vector(_body_frame.anchors.shoulderNear if native and face<0 else _body_frame.anchors.shoulderFar)-BODY_ORIGIN
 	gun_pivot.position = Vector2((shoulder.x+kick)*face,shoulder.y)
 	if native: gun_pivot.position += _shoulder_travel(aim)
-	gun_pivot.rotation = aim; gun_pivot.scale = Vector2(1,face if native else (-1 if cos(aim)<0.0 else 1))
+	# The parent may lean around its feet; aim remains a world-space angle.
+	gun_pivot.rotation = aim-global_rotation; gun_pivot.scale = Vector2(1,face if native else (-1 if cos(aim)<0.0 else 1))
 	_set_weapon(gun,gun_fx,_gun_frame,recoil)
 	if native: _attach_native_gun(gun,gun_fx,_gun_frame,primary_arm_view)
 	gun.visible = not ammo in MELEE_WEAPONS
@@ -376,35 +384,47 @@ func _update() -> void:
 	for node_name in _gun_frame.anchors:
 		_marker(gun_anchors,node_name).position = _vector(_gun_frame.anchors[node_name])+WEAPON_PADDING
 	muzzle_light.energy = 2.6 if flash>0.0 and gun.visible else 0.0
-	off_pivot.visible = has_bionic; off_gun.visible = armed; bionic.visible = has_bionic and not armed and not arm_mode in ["knife","katana"]
+	var natural_shoulder = _vector(_body_frame.anchors.shoulderFar if native and face<0 else _body_frame.anchors.shoulderNear)-BODY_ORIGIN
+	natural_off_socket = Vector2((natural_shoulder.x+kick)*face,natural_shoulder.y)
+	if native and turn_progress<1.0: natural_off_socket = _turn_socket(false)+Vector2(kick*face,0)
+	off_pivot.visible = has_bionic; off_gun.visible = armed; bionic.visible = has_bionic and not arm_mode in ["knife","katana"]
+	# This is a third limb mounted on the back, independent of either human shoulder.
+	var mount_face := lerpf(float(_turn_from_face),float(_turn_target_face),smoothstep(0.0,1.0,turn_progress)) if native else float(face)
+	var mount_base := Vector2(-10.0*mount_face+kick*face,-21.0)
+	var mount_tip := Vector2(-24.0*mount_face+kick*face,-80.0 if armed else -30.0)
+	off_pivot.position = mount_tip
+	bionic_support.visible = has_bionic
+	if has_bionic: bionic_support.pose(mount_base,mount_tip,mount_face)
 	if armed:
 		_off_frame = art.weapon_frame(1 if native else bend_for_aim(off_aim),off_spec,true,native)
-		var off_shoulder = _vector(_body_frame.anchors.shoulderFar if native and face<0 else _body_frame.anchors.shoulderNear)-BODY_ORIGIN
-		off_pivot.position = Vector2((off_shoulder.x+kick)*face,off_shoulder.y)
-		if native: off_pivot.position += _shoulder_travel(off_aim)
-		off_pivot.rotation = off_aim; off_pivot.scale = Vector2(1,_off_face if native else (-1 if cos(off_aim)<0.0 else 1))
+		off_pivot.rotation = off_aim-global_rotation; off_pivot.scale = Vector2(1,_off_face if native else (-1 if cos(off_aim)<0.0 else 1))
 		_set_weapon(off_gun,off_fx,_off_frame,recoil2)
-		if native: _attach_native_gun(off_gun,off_fx,_off_frame,secondary_arm_view)
+		# The mechanical clamp, rather than a human sleeve, owns the weapon grip.
+		var grip_offset := Vector2(16,0)-_vector(_off_frame.anchors.grip)
+		off_gun.position += grip_offset; off_fx.position += grip_offset
+		_bionic_frame = art.bionic_frame(0.0)
+		bionic.texture = _bionic_frame.texture; bionic.position = -Vector2(13,17)
+		bionic.scale = Vector2((16.0-roundf(recoil2*3.0))/16.0,1)
 		off_muzzle_light.position = Vector2(_off_frame.muz,0)+WEAPON_PADDING
 		off_muzzle_light.energy = 2.6 if flash2>0.0 else 0.0
 	else:
 		off_muzzle_light.energy = 0.0; _off_frame = {}
-		var shoulder_point = _vector(_body_frame.anchors.shoulderFar if native and face<0 else _body_frame.anchors.shoulderNear)-BODY_ORIGIN
-		off_pivot.position = Vector2((shoulder_point.x+kick)*face,shoulder_point.y)
-		off_pivot.rotation = melee_aim if melee_active or melee_extension>0.0 else (1.2 if face>0 else PI-1.2)
-		off_pivot.scale = Vector2(1,-1 if cos(off_pivot.rotation)<0.0 else 1)
+		var off_angle := melee_aim if melee_active or melee_extension>0.0 else (1.2 if face>0 else PI-1.2)
+		off_pivot.rotation = off_angle-global_rotation
+		off_pivot.scale = Vector2(1,-1 if cos(off_angle)<0.0 else 1)
 		var extension := 0.125 if arm_mode == "knife" else (0.25 if arm_mode == "katana" else melee_extension)
 		_bionic_frame = art.bionic_frame(extension)
 		bionic.texture = _bionic_frame.texture; bionic.position = -Vector2(13,17)
+		bionic.scale = Vector2.ONE
 		if _xray_on(): bionic.texture = art.tinted_texture(_bionic_frame,Color("#3a68ff"),0.65,"blue")
 		off_fx.position = Vector2.ZERO
-	_update_native_arm(far_arm,far_hand,secondary_arm_view,native and armed,recoil2)
-	rest_pivot.visible = native and (face<0 or is_shoving()) and not has_bionic
+	_update_native_arm(far_arm,far_hand,secondary_arm_view,false,recoil2)
+	rest_pivot.visible = native and (face<0 or is_shoving())
 	if rest_pivot.visible:
 		# Empty off hand: the relaxed drawn arm, never the gun pose without its gun.
 		rest_pivot.z_index = 0; rest_hand.visible = false; rest_arm.visible = true
 		var stride := fposmod(t*24.0,float(Scientist.data().clips.walk.count))/float(Scientist.data().clips.walk.count)
-		rest_pivot.position = off_pivot.position; rest_pivot.scale = Vector2(face,1)
+		rest_pivot.position = natural_off_socket; rest_pivot.scale = Vector2(face,1)
 		rest_pivot.rotation = sin(stride*TAU)*0.09*face if moving else 0.0
 		rest_arm.texture = Scientist.worn_part("rest_near",-1,gear)
 		rest_arm.scale = Vector2.ONE*Scientist.WORLD_SCALE; rest_arm.rotation = 0.0
@@ -415,8 +435,6 @@ func _update() -> void:
 		rest_arm.modulate = tint
 	if native and turn_progress<1.0:
 		gun_pivot.position = _turn_socket(true)+Vector2(kick*face,0)
-		off_pivot.position = _turn_socket(false)+Vector2(kick*face,0)
-		rest_pivot.position = off_pivot.position
 	# Phased: arms and weapons are gone and the body is a translucent energy image.
 	var phased := native and is_dashing()
 	var posed := native and zap and _xray_on() and Scientist.reaction("tazed",t) != null
@@ -426,7 +444,7 @@ func _update() -> void:
 			posed = true; body.texture = pose_texture
 			body.material = _unshaded if reaction == "burn" else null
 	gun_pivot.visible = not phased and not posed
-	if phased or posed: off_pivot.visible = false; rest_pivot.visible = false
+	if phased or posed: off_pivot.visible = false; rest_pivot.visible = false; bionic_support.visible = false
 	body.self_modulate = Color(AMMO_COL.get(ammo,Color("#9d7bff")).lerp(Color.WHITE,0.45),0.7) if phased else Color.WHITE
 	# Depth belongs to the limb, not to an aim-angle fade. The near arm stays
 	# foreground; OffPivot already draws the far arm behind the torso and head.
@@ -442,13 +460,13 @@ func _shoulder_travel(angle: float) -> Vector2:
 func palm_global() -> Vector2:
 	var view := "near" if face<0 else "far"
 	var poses: Array = Scientist.data().get("shove",{}).get(view,[])
-	if poses.is_empty(): return off_pivot.global_position+Vector2.from_angle(shove_aim)*30.0*global_scale.x
+	if poses.is_empty(): return to_global(natural_off_socket)+Vector2.from_angle(shove_aim)*30.0*global_scale.x
 	var at: Rect2 = Scientist.part_bounds(view+"_shove",4); var socket: Array = poses[4].shoulder
 	var local := Vector2(at.end.x-socket[0]-2.0,-5.0)*Scientist.WORLD_SCALE
 	var thrust := Vector2.from_angle(shove_aim)*(11.0 if view == "near" else 3.0)
-	return to_global(off_pivot.position+thrust+Vector2(local.x,local.y*face).rotated(shove_aim))
+	return to_global(natural_off_socket+thrust+Vector2(local.x,local.y*face).rotated(shove_aim))
 
-func is_shoving() -> bool: return shove >= 0.0 and not has_bionic and _native_skin()
+func is_shoving() -> bool: return shove >= 0.0 and _native_skin()
 
 ## Draw back, thrust, hold, return. Uses the drawn palm clip when it exists, else the relaxed open arm.
 func _pose_shove() -> void:
@@ -482,9 +500,9 @@ func _native_skin() -> bool:
 func _order_arm_layers(native: bool) -> void:
 	# Child order changes depth within this actor without negative/global z values
 	# hiding the rear gun behind UI backgrounds or breaking arena actor y-sorting.
-	var order: Array = [off_pivot,body_root,gun_pivot,rest_pivot]
-	if native and face<0: order = [gun_pivot,body_root,off_pivot,rest_pivot]
-	elif native and is_shoving(): order = [rest_pivot,off_pivot,body_root,gun_pivot]   # his far arm
+	var order: Array = [bionic_support,off_pivot,body_root,gun_pivot,rest_pivot]
+	if native and face<0: order = [bionic_support,off_pivot,gun_pivot,body_root,rest_pivot]
+	elif native and is_shoving(): order = [bionic_support,off_pivot,rest_pivot,body_root,gun_pivot]
 	for i in order.size():
 		order[i].z_index = 0
 		if order[i].get_index()!=i: move_child(order[i],i)

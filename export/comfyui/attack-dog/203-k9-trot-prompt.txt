@@ -1,0 +1,27 @@
+subject_definitions:
+<Subject 1> is the ONE police German shepherd in <Picture 1>, exactly as drawn.
+<Picture 2> is a calibration swatch only. Its object must NOT appear.
+<Video 1> defines only four-legged pose, joint movement, timing, contact and framing. Never copy the colored mannequin, ear shapes, limb thicknesses or its appearance.
+
+summary:
+[reference generation] A seamless diagonal-pair trot in place.
+
+retention_analysis:
+<Picture 1>: fully_preserved - black-and-tan fur layout, oversized alert head, long muzzle, upright ears, bushy curved tail, four canine legs and paws, navy police harness, back handle, straps, pouches, yellow tabs and existing POLICE/MTA patches, chunky pixel clusters, thick black outlines, palette and original three-quarter screen-right view.
+<Picture 2>: not_preserved - never show the calibration object.
+<Video 1>: partially_preserved - canine leg order, elbow/stifle/hock movement, paw contacts, jaw timing and grounded body motion only.
+
+detailed_description:
+One full-body German shepherd, facing SCREEN-RIGHT throughout. Four legs only: two front legs with backward-bending elbows and wrists, two hind legs with forward stifles then rear hocks and paws. Near and far legs remain attached to their original shoulder/hip sockets. The neck supports the head; lower jaw hinges below the skull. Tail has a continuous chain from the rump. No human knees, hands, upright biped stance, duplicated paws, swapped legs or rubber limbs. Preserve the original character's proportions; the guide is motion only.
+
+Perform in place; the game supplies horizontal travel. Near foreleg and far hind leg move together, opposite pair half a cycle later. Eight complete strides in five seconds. Springy but controlled torso, clear foot plants. End at starting gait phase.
+
+No other character, handler, leash, target, blood, wound, gore, floating symbols, lightning bolts, particles, dust or smoke. The game supplies external effects.
+Preserve head size, body proportions, fur pattern, paw size and fitted harness throughout. Keep existing harness markings stable; add no labels, collar, weapon or accessories. Do not detach the harness, slide the shoulder sockets or change the number of legs. Harness follows torso, not the swinging leg. During ordinary locomotion the spine stays horizontal and the jaw/head do not turn into a human face.
+Fixed orthographic-style camera and original three-quarter view, identical position, size and zoom. Whole ears, muzzle, tail, all four paws and flames if specified stay inside the canvas with margin. No pan, orbit, cuts, crossfades or scale drift. Uniform flat dark blue-gray background, no ground shadow, floor texture or scenery. Crisp separate pixel-art frames, no motion blur, ghost trails, frame blending, smoothing, added texture or crawling colors.
+
+overall_soundscape:
+Silent. No barking audio, speech, sound effects or music.
+
+non_diegetic_music:
+N/A

@@ -6,6 +6,7 @@ const NORTH := 870
 const SOUTH := 1330
 const WEST := 1400
 const EAST := 1800
+const WATER_LEVEL_BIAS := 0.08  # Separate pools with broader stretches of damp asphalt.
 const Vehicles = preload("res://levels/parked_vehicle.gd")
 static var _water: Image
 static var _wet_cells := {}
@@ -17,7 +18,7 @@ static func water_image() -> Image:
 	noise.noise_type=FastNoiseLite.TYPE_SIMPLEX_SMOOTH; noise.fractal_octaves=3
 	for y in _water.get_height():
 		for x in _water.get_width():
-			var value:=noise.get_noise_2d(x*4.0,y*6.0)*0.5+0.5
+			var value:=clampf(noise.get_noise_2d(x*4.0,y*6.0)*0.5+0.5-WATER_LEVEL_BIAS,0.0,1.0)
 			_water.set_pixel(x,y,Color(value,0,0))
 			if value>0.525: _wet_cells[Vector2i(x/16,y/16)]=true
 	return _water

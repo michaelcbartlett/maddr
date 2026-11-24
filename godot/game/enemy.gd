@@ -282,7 +282,7 @@ func tick(dt: float) -> void:
 	elif tgt_ally != null or navigating or pd > r + P.r:
 		# chase, but stop at the villain's edge instead of stacking on its centre
 		var step := sp * dt * _gait(pd)
-		if action_phase == "swing": step *= SWING_SLOW
+		if action_phase == "swing": step *= _strike_follow_speed()
 		if tgt_ally == null and not navigating: step = minf(step, maxf(0.0, pd - (r + P.r) * 0.85))
 		var heading := Vector2(dx / d, dy / d)
 		if tgt_ally == null and not navigating:
@@ -303,6 +303,9 @@ func tick(dt: float) -> void:
 ## windup s, extra reach px, lunge px/s during the wind-up.
 const SWING := {"cop": [0.26, 12.0, 0.0], "riot": [0.42, 16.0, 150.0]}
 const SWING_SLOW := 0.35
+const COP_SWING_FOLLOW := 0.75
+const COP_CLUB_REACH := 52.0
+const COP_STRIKE_STEP := 16.0
 ## Called by EnemyView (dynamically, so the view never compiles this script ahead of the Run autoload).
 func swings() -> bool: return SWING.has(type)
 
@@ -312,29 +315,49 @@ func strike_profile() -> Dictionary:
 	if clip.is_empty() or not clip.metadata.has("hit_frames"): return {}
 	return clip.metadata
 
-## One clock drives the complete authored combo and its two contact events.
+func _strike_follow_speed() -> float:
+	var profile := strike_profile()
+	if not profile.is_empty() and not profile.hit_frames.is_empty():
+		var last_contact := float(profile.hit_frames[-1]) / float(profile.fps)
+		if float(profile.frame_count) / float(profile.fps) - action_t <= last_contact:
+			return COP_SWING_FOLLOW
+	return SWING_SLOW
+
+## One clock drives the authored combo. Each swing can connect once, provided
+## the shared damage grace has expired by its contact frame.
 func _strike(dt: float, pd: float, profile: Dictionary, victim = null) -> void:
 	var duration := float(profile.frame_count) / float(profile.fps)
 	var hits: Array = profile.hit_frames
 	var radius: float = victim.r if victim != null else A.P.r
-	var reach := r + radius + float(SWING.cop[1])
+	var start_reach := r + radius + float(SWING.cop[1])
+	var scale := 0.5 if shrunk_t > 0.0 else 1.0
+	var reach := COP_CLUB_REACH * scale + radius
 	if action_phase != "swing":
-		if pd < reach and atk_cd <= 0.0:
+		if pd < start_reach and atk_cd <= 0.0:
 			action_phase = "swing"; action_t = duration
 		return
 	var before := duration - action_t
 	action_t = maxf(0.0, action_t - dt)
 	var after := duration - action_t
+	var target := Vector2(victim.x, victim.y) if victim != null else Vector2(A.P.x, A.P.y)
+	# A short planted step follows the first wind-up, rather than stopping dead.
+	var first_contact := maxf(float(hits[0]) / float(profile.fps),0.001)
+	var progress := clampf(after / first_contact,0.0,1.0) - clampf(before / first_contact,0.0,1.0)
+	var gap := target - Vector2(x,y)
+	var step := minf(COP_STRIKE_STEP * scale * progress,maxf(0.0,gap.length()-(r+radius)*0.85))
+	if step > 0.0:
+		var from := Vector2(x,y); var direction := gap.normalized()
+		_move(direction.x*step,direction.y*step)
+		if A.has_method("collide_walls"): A.collide_walls(self,r,from)
 	for frame in hits:
 		var contact := float(frame) / float(profile.fps)
 		if before + 0.000001 < contact and after + 0.000001 >= contact:
-			var target := Vector2(victim.x, victim.y) if victim != null else Vector2(A.P.x, A.P.y)
-			if Vector2(x, y).distance_to(target) < reach + 4.0:
+			var clear: bool = not A.has_method("in_wall") or A.nav.clear_segment(Vector2(x,y),target,0.0)
+			if Vector2(x, y).distance_to(target) < reach and clear:
 				if victim != null:
 					A.hit(victim, (dmg * 2.0 + Run.D.dmg * 0.5) * Run.S.minionMul / hits.size(), {"col": Color("#d07bff")})
 					hp -= victim.dmg * (1.0 if victim.boss else 0.6) / hits.size()
-				else:
-					A.hurt_player(dmg / hits.size())
+				elif A.hurt_player(dmg / hits.size()):
 					var away := (Vector2(x, y) - target).normalized()
 					_move(away.x * BITE_KNOCKBACK * 0.6 / hits.size(), away.y * BITE_KNOCKBACK * 0.6 / hits.size())
 	if action_t <= 0.0:

@@ -1,8 +1,8 @@
 {
  "types":{
-  "cop":{"size_class":"small","hp":3,"hp_wave":2.0,"spd":122,"dmg":5,"r":11,"scrap":1,"spr":"cop"},
+  "cop":{"size_class":"small","hp":3,"hp_wave":2.0,"spd":155,"dmg":5,"r":11,"scrap":1,"spr":"cop"},
   "k9":{"size_class":"small","hp":4,"spd":195,"dmg":3,"r":9,"scrap":1,"spr":"dog"},
-  "det":{"size_class":"small","hp":8,"spd":104,"dmg":5,"r":11,"scrap":2,"spr":"det","ranged":1,"behavior":"marksman"},
+  "det":{"size_class":"small","hp":8,"hp_wave":1.0,"spd":132,"dmg":5,"r":11,"scrap":2,"spr":"det","ranged":1,"behavior":"marksman"},
   "riot":{"size_class":"medium","hp":30,"spd":78,"dmg":9,"r":15,"scrap":3,"spr":"riot","heavy":1},
   "drone":{"size_class":"small","hp":5,"spd":172,"dmg":4,"r":9,"scrap":1,"spr":"","fly":1,"damage_taken":{"lightning":2.0,"poison":0.0}},
   "swat":{"size_class":"small","hp":18,"spd":122,"dmg":4,"r":12,"scrap":2,"spr":"swat","ranged":1,"behavior":"rifle","burst":3,"range":310,"shot_speed":305,"cooldown":2.26},

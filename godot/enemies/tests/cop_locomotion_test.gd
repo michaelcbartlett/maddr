@@ -28,10 +28,11 @@ func _run() -> void:
 	var cop = _make("cop",stage); var g: Dictionary = cop.gfx
 	View._pick(cop,g,0.0); _check(g.state == "idle","stands still")
 	g.speed = 40.0; View._pick(cop,g,0.0); _check(g.state == "walk","slow movement walks")
-	g.speed = 108.0; View._pick(cop,g,0.0); _check(g.state == "run" and g.frame == 0,"a chase runs, from its first frame")
+	g.speed = 120.0; View._pick(cop,g,0.0); _check(g.state == "run" and g.frame == 0,"a chase runs, from its first frame")
 	g.dt = 1.0/24.0
 	for i in range(1,12): View._pick(cop,g,0.0); _check(g.frame == i,"run advances at 24 fps (%d)" % i)
 	View._pick(cop,g,0.0); _check(g.frame == 0,"run loops")
+	g.speed = 180.0; View._pick(cop,g,0.0); View._pick(cop,g,0.0); _check(g.frame == 3,"a faster chase takes faster strides"); g.speed = 120.0
 	g.dt = 0.0; cop.flash = 0.1; View._pick(cop,g,0.0); _check(g.state == "hurt","a hit flinches")
 	g.dt = 0.25; cop.flash = 0.0; View._pick(cop,g,0.0); g.dt = 0.0; View._pick(cop,g,0.0); _check(g.state == "run","and it ends")
 	cop.burn_t = 1.0; View._pick(cop,g,0.0); _check(g.state == "burning","on fire"); cop.burn_t = 0.0

@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "note": "Reviewed completed 2026-11-24 SWAT videos. Exceptions cover edge-reaching effects, not cropped character parts. Replacement videos require a new review.",
+  "clips": {
+    "171-swat-guard-idle": {
+      "source_sha256": "7e84122083e397527ce729d7abdaabaab5a3c20e03576fc8d261e2d3fb223c10",
+      "allowed_frames": [
+        16
+      ],
+      "reason": "Incoming projectile enters the right edge; the officer and shield stay inside the canvas."
+    },
+    "180-swat-shield-bash": {
+      "source_sha256": "ad8c742fa292576f76db9387f72b42c650cf114ca03ce8447c64ed512fa38479",
+      "allowed_frames": [
+        29,
+        30,
+        31,
+        32,
+        33,
+        64,
+        65,
+        66,
+        67,
+        68,
+        96,
+        97,
+        98,
+        99,
+        100
+      ],
+      "reason": "Shield-impact sparks reach the right edge; the officer, baton and shield remain inside."
+    },
+    "181-swat-grenade-throw": {
+      "source_sha256": "25a260d552d4c89b600913fd4bde40c77e2f0c23c8ae6315283d0432d1b447c7",
+      "allowed_frames": [
+        71,
+        72
+      ],
+      "reason": "Thrown grenade exits the right edge; the throwing hand and officer remain inside."
+    },
+    "182-swat-shield-block": {
+      "source_sha256": "004365ae07838ec37dac2715d0ac5b5cfb05a87bc4a82fc445e7d72b73c45bb4",
+      "allowed_frames": [
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102
+      ],
+      "reason": "Incoming attack prop and impact effects enter the right edge; the officer and shield remain inside."
+    },
+    "188-swat-sick": {
+      "source_sha256": "587f0289e2c38c5f98ad3302aabd2f6f012223dc0bb8548517a70e838d64395a",
+      "allowed_frames": [
+        66,
+        67,
+        68,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        98,
+        99
+      ],
+      "reason": "Sickness smoke reaches the lower/right edge; the officer remains inside."
+    },
+    "190-swat-tazed": {
+      "source_sha256": "95676973c3ed000a8de24f5653033023d575ff96c17a533090b346db04102fc2",
+      "allowed_frames": [
+        66,
+        67,
+        68,
+        80,
+        81,
+        82,
+        98,
+        99
+      ],
+      "reason": "Electrical discharge reaches the right edge; the officer remains inside."
+    }
+  }
+}

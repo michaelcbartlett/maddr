@@ -1,4 +1,6 @@
 [
+  {"id":"shock_buffer","t":1,"c":18,"ic":"🛡","name":"Shock Buffer","desc":"+25% invulnerability duration after taking damage","look":"A padded copper shock absorber clipped inside the lab coat","add":{"hitProtection":0.25}},
+  {"id":"overclocked_nerves","t":1,"c":18,"ic":"⚡","name":"Overclocked Nerves","desc":"+30% fire rate · -25% invulnerability duration after taking damage","look":"A tiny nerve stimulator clipped to the collar","add":{"atkSpd":0.3,"hitProtection":-0.25}},
   {"id":"capacitor","t":2,"c":32,"ic":"🔋","name":"Patience Capacitor","desc":"Release fire to charge · 1.5s for 2.5× next laser damage","look":"Copper capacitor with three amber charge windows on the gun","wv":{"s":"top","w":5}},
   {"id":"tesla_helmet", "t":2, "c":28, "ic":"⚡", "name":"Electrode Helmet", "desc":"3 lightning damage · 3 targets · 110 radius · 1.5s cooldown", "look":"Silver wire cage helmet with copper electrodes and blue sparks"},
   {
@@ -88,10 +90,10 @@
     "c": 12,
     "ic": "📯",
     "name": "Flared Muzzle",
-    "desc": "+30% shot width",
+    "desc": "+100% shot width",
     "look": "Wider muzzle cone",
     "add": {
-      "widthPct": 0.3
+      "widthPct": 1.0
     }
   },
   {
@@ -676,11 +678,11 @@
     "c": 135,
     "ic": "🕳",
     "name": "Pocket Singularity",
-    "desc": "+60% damage, +50% width, +80 range",
+    "desc": "+60% damage, +150% width, +80 range",
     "look": "A black hole floats near you",
     "add": {
       "dmgPct": 0.6,
-      "widthPct": 0.5,
+      "widthPct": 1.5,
       "rangeAdd": 80
     },
     "wv": {

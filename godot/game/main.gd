@@ -12,6 +12,7 @@ var ui: CanvasLayer
 var fit: Control
 var hud: Control
 var title_s: Control
+var game_select_s: Control
 var design_s: Control
 var shop_s: Control
 var difficulty_s: Control
@@ -26,6 +27,8 @@ var character_studio := false
 var _auto := -1.0
 var _shot := ""
 var _t := 0.0
+var _recorded_run := -1
+var _recorded_result := -1
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
@@ -43,6 +46,7 @@ func _ready() -> void:
 	level_music.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(level_music)
 	arena = Arena.new(); arena.character_studio = character_studio
+	arena.studio_waves = character_studio and not args.has("--practice") and not Run.is_test_process()
 	arena.studio_outdoors = not args.has("--blank-studio")
 	arena.process_mode = Node.PROCESS_MODE_PAUSABLE; add_child(arena)
 	arena.cleared.connect(_on_cleared); arena.died.connect(func(): _game_over(false))
@@ -52,6 +56,8 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_fit); _fit()
 	hud = preload("res://ui/hud.gd").new(); hud.A = arena; fit.add_child(hud)
 	_build_title(); _build_pause(); _build_over()
+	game_select_s=preload("res://ui/game_select.gd").new();fit.add_child(game_select_s)
+	game_select_s.chosen.connect(_select_game);game_select_s.back.connect(func(): _show("title"))
 	design_s = preload("res://ui/design_screen.gd").new(); design_s.begin.connect(_open_difficulty); fit.add_child(design_s)
 	shop_s = preload("res://ui/shop_screen.gd").new(); shop_s.next_wave.connect(_start_wave); fit.add_child(shop_s)
 	difficulty_s = preload("res://ui/difficulty_screen.gd").new(); fit.add_child(difficulty_s); difficulty_s.chosen.connect(func(_l): _start_wave())
@@ -77,7 +83,7 @@ func _ready() -> void:
 		Run._rebuild_off()
 		Run.recompute()
 		_start_wave()
-	elif character_studio:
+	elif character_studio and (Run.is_test_process() or args.has("--practice")):
 		Run.new_run(); _start_wave()
 
 func _part_index(table: Array, value: String) -> int:
@@ -98,7 +104,7 @@ func _build_title() -> void:
 	var s := UiKit.screen(700); title_s = s[0]; fit.add_child(title_s); var vb: VBoxContainer = s[1]
 	var pv := VillainPreview.new(3.0, Vector2(0, 220)); pv.aim_base = -0.25; vb.add_child(pv)
 	vb.add_child(UiKit.title("THE DIABOLICAL DOCTOR", 44))
-	var b := UiKit.button("Enter the Lab", _enter_lab); b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER; vb.add_child(b)
+	var b := UiKit.button("Start Game", _open_game_select); b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER; vb.add_child(b)
 	title_s.set_meta("focus", b)
 
 func _build_pause() -> void:
@@ -113,6 +119,7 @@ func _build_pause() -> void:
 	if character_studio:
 		for id in ["shrink_pill","enlarge_pill","tesla_coil"]:
 			vb.add_child(UiKit.button("Test "+Run.CONSUMABLE_NAMES[id],_studio_supply.bind(id)))
+	vb.add_child(UiKit.button("Title Screen",_return_to_title,true))
 	pause_s.set_meta("focus", r)
 
 func _build_over() -> void:
@@ -126,12 +133,13 @@ func _show(st: String) -> void:
 	state = st
 	title_s.visible = st == "title"; design_s.visible = st == "design"; shop_s.visible = st == "shop"
 	difficulty_s.visible = st == "difficulty"
+	game_select_s.visible=st=="game_select"
 	pause_s.visible = st == "paused"; over_s.visible = st == "over"
-	hud.visible = not character_studio and (st == "play" or st == "paused")
+	hud.visible = not arena.sandbox() and (st == "play" or st == "paused")
 	arena.visible = st in ["play", "paused"]
 	arena.fx_layer.visible = arena.visible
 	get_tree().paused = st == "paused"
-	if st in ["play", "shop"] and not character_studio:
+	if st in ["play", "shop"]:
 		if not level_music.playing: level_music.play()
 	elif st != "paused":
 		level_music.stop()
@@ -142,6 +150,7 @@ func _show(st: String) -> void:
 			controls.text = "L stick · Move    R stick · Swing\nLT · Rear gun (if equipped)\nSecondary melee swings automatically\nA · Highlighted button    Start · Resume" if Controls.aim_src == "pad" else "WASD · Move    Sweep mouse · Swing\nRMB · Rear gun (if equipped)\nSecondary melee swings automatically\nEsc · Resume"
 	match st:
 		"title": (title_s.get_meta("focus") as Control).grab_focus()
+		"game_select": game_select_s.call_deferred("focus_default")
 		"paused": (pause_s.get_meta("focus") as Control).grab_focus()
 		"over": (over_s.get_meta("focus") as Control).grab_focus()
 		"design": design_s.call_deferred("focus_default")
@@ -150,7 +159,23 @@ func _show(st: String) -> void:
 		"play": var f := get_viewport().gui_get_focus_owner(); if f: f.release_focus()
 
 # =============== FLOW ===============
+func _open_game_select() -> void:
+	game_select_s.refresh();_show("game_select")
+
+func _select_game(slot: int) -> void:
+	if not Run.select_save_slot(slot):game_select_s.message.text=Run.save_slots.error;return
+	Run.new_run()
+	# The first mission precedes the Lab reveal. Keep the current street prototype.
+	arena.studio_waves=character_studio
+	_start_wave()
+	if Run.is_test_process():arena.begin_arrival()  # Exercise real menu entry without changing direct test hooks.
+
+func _return_to_title() -> void:
+	arena.state="done";_show("title")
+
 func _enter_lab() -> void:
+	if Run.save_slots.active_slot==0 and not Run.is_test_process():_open_game_select();return
+	arena.state="done"
 	Run.new_run(); design_s.refresh(); _show("design")
 
 ## After designing the weapon: pick the run's difficulty.
@@ -159,11 +184,17 @@ func _open_difficulty() -> void:
 	difficulty_s.refresh(); _show("difficulty")
 
 func _start_wave() -> void:
+	if Run.save_slots.active_slot>0:
+		if _recorded_run!=Run.run_serial:
+			Run.save_slots.note_run();_recorded_run=Run.run_serial
+		Run.save_slots.note_wave(Run.wave)
 	if not character_studio: Run.note_wave_reached(Run.wave)   # meta unlocks: "reach wave N"
-	arena.start_wave(); _show("play")
+	arena.start_wave()
+	if Run.wave==1 and not Run.is_test_process():arena.begin_arrival()
+	_show("play")
 
 func _on_cleared() -> void:
-	if Run.wave >= int(Run.RULES.waves.last): _game_over(true); return
+	if Run.wave >= (Arena.WORLD_WAVES if character_studio else int(Run.RULES.waves.last)): _game_over(true); return
 	Run.open_shop_for_next_wave(); shop_s.refresh(); _show("shop")
 
 func _resume() -> void: _show("play")
@@ -174,10 +205,15 @@ func _studio_supply(id: String) -> void:
 	_resume()
 
 func _game_over(win: bool) -> void:
+	if _recorded_result!=Run.run_serial:
+		Run.save_slots.note_result(win,arena.P.hp<=0.0);_recorded_result=Run.run_serial
 	arena.state = "over"
 	over_title.text = "CITY CONQUERED!" if win else ["BUSTED!","FOILED AGAIN!","CURSES!","MEDDLING COPPERS!"].pick_random()
 	over_title.add_theme_color_override("font_color", UiKit.NEON if win else UiKit.BAD)
-	if win: over_text.text = "You survived all 20 waves on %s.\nThe city is yours.\n%d cops defeated · %d scrap looted" % [Run.difficulty_name(), Run.kills, Run.total_scrap]
+	if win and character_studio:
+		over_title.text = "STREET CLEARED!"
+		over_text.text = "You survived waves 1-%d.\n%d cops defeated · %d scrap looted" % [Run.wave, Run.kills, Run.total_scrap]
+	elif win: over_text.text = "You survived all 20 waves on %s.\nThe city is yours.\n%d cops defeated · %d scrap looted" % [Run.difficulty_name(), Run.kills, Run.total_scrap]
 	else: over_text.text = "Arrested on wave %d (%s).\n%d cops defeated · %d scrap looted · %d modules" % [Run.wave, Run.difficulty_name(), Run.kills, Run.total_scrap, Run.build.items.size()]
 	over_text.text += "\n" + Run.display_name()
 	if not win and Run.unlocks.best_wave > 0: over_text.text += "  ·  furthest: wave %d" % Run.unlocks.best_wave
@@ -189,6 +225,8 @@ func _game_over(win: bool) -> void:
 	_show("over")
 
 func _unhandled_input(e: InputEvent) -> void:
+	if (e.is_action_pressed("menu_back") or e.is_action_pressed("pause")) and state=="game_select":
+		_show("title");get_viewport().set_input_as_handled();return
 	if e.is_action_pressed("menu_back") and state in ["design","difficulty"]:
 		_show("design" if state == "difficulty" else "title")
 		Sfx.play("ui"); get_viewport().set_input_as_handled(); return
@@ -201,7 +239,7 @@ func _notification(what: int) -> void:
 
 # =============== TEST HOOKS ===============
 func _process(dt: float) -> void:
-	if character_studio and state == "play":
+	if arena.sandbox() and state == "play":
 		hud.visible = arena.P.size_t>0.0 or not arena.consumables.coils.is_empty() or Run.consumable_charges.values().any(func(n): return n>0)
 	if _auto < 0: return
 	_t += dt

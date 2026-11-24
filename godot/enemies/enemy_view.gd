@@ -123,9 +123,14 @@ static func aim_frame(e) -> int:
 	return best
 
 ## Plays a state at its own frame rate from the moment it was entered.
+## Ground speed each stride clip was made for; faster legs keep the feet from skating.
+const STRIDE := {"walk": 85.0, "run": 120.0, "flee": 140.0, "backpedal": 62.0}
+static func stride_rate(st: String, speed: float) -> float:
+	return clampf(speed / float(STRIDE[st]), 0.85, 1.6) if STRIDE.has(st) else 1.0
+
 static func _native_frame(e, g: Dictionary, st: String) -> int:
 	if g.get("native_state", "") != st: g.native_state = st; g.native_t = 0.0
-	else: g.native_t = g.get("native_t", 0.0) + g.get("dt", 0.0)
+	else: g.native_t = g.get("native_t", 0.0) + g.get("dt", 0.0) * stride_rate(st, g.get("speed", 0.0))
 	var meta: Dictionary = Sheets.EditedArt.clip(e.spr, st).get("metadata", {})
 	var index := int(floor((g.native_t + (g.seed if meta.get("loop", false) else 0.0)) * float(meta.get("fps", 24.0)) + 0.000001))
 	var count := int(meta.get("frame_count", 1))

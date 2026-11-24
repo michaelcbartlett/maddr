@@ -16,6 +16,11 @@ anchors. View names describe the visible end of the vehicle: `front` points down
 points up-screen, and `left`/`right` name the direction of the nose. The diagonal views are retained
 for future use; curb parking uses the four road-aligned directions.
 
+Police `bulbs` are the measured centers of the painted red/blue glass components. Per-view
+`lens_regions` and cached runtime alpha masks restrict each flash to that glass, including its
+slanted outline. Flash sprites share the body sprite's source origin and scale, rather than a
+generic rotated rectangle. Normal-map lighting and puddle emissions use the same measured centers.
+
 The generated masters keep their original RGBA pixels. `tools/vehicles/package_sheets.py` copies
 masters and detects region bounds; it does not resample or repaint them. Sprite regions exclude
 unrelated stray alpha outside the vehicle bounds. The sedan uses the cleaned second generation.

@@ -1,5 +1,15 @@
 # PixelStudio Godot character bridge
 
+## Quadruped H3 references
+
+The police attack-dog batch and reusable organic/mechanical motion guides are in
+[attack-dog](../../export/comfyui/attack-dog/README.md) and
+[quadruped-guides](../../export/comfyui/quadruped-guides/README.md).
+Root launchers: **Queue Attack Dog.bat**, **Build Attack Dog MoGe.bat**, and
+**Build Quadruped Guides.bat** (prepares guides only). Four independent canine
+leg chains, paw contacts, jaw, neck and tail replace the humanoid mannequin.
+Robot guides await a separate robot-dog character reference.
+
 ## Native 128px sprite replacements
 
 The new base cop comes from `export/pixelstudio/base-cop/BASE_COP_frames.zip`.

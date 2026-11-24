@@ -1,0 +1,326 @@
+[
+  {
+    "mode": "organic",
+    "study": "idle",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-idle.mp4",
+    "joints": "organic\\guide-idle.json"
+  },
+  {
+    "mode": "organic",
+    "study": "walk",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-walk.mp4",
+    "joints": "organic\\guide-walk.json"
+  },
+  {
+    "mode": "organic",
+    "study": "trot",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-trot.mp4",
+    "joints": "organic\\guide-trot.json"
+  },
+  {
+    "mode": "organic",
+    "study": "run",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-run.mp4",
+    "joints": "organic\\guide-run.json"
+  },
+  {
+    "mode": "organic",
+    "study": "start-stop",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-start-stop.mp4",
+    "joints": "organic\\guide-start-stop.json"
+  },
+  {
+    "mode": "organic",
+    "study": "bark",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-bark.mp4",
+    "joints": "organic\\guide-bark.json"
+  },
+  {
+    "mode": "organic",
+    "study": "bite",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-bite.mp4",
+    "joints": "organic\\guide-bite.json"
+  },
+  {
+    "mode": "organic",
+    "study": "pounce",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-pounce.mp4",
+    "joints": "organic\\guide-pounce.json"
+  },
+  {
+    "mode": "organic",
+    "study": "flinch",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-flinch.mp4",
+    "joints": "organic\\guide-flinch.json"
+  },
+  {
+    "mode": "organic",
+    "study": "stagger",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-stagger.mp4",
+    "joints": "organic\\guide-stagger.json"
+  },
+  {
+    "mode": "organic",
+    "study": "stunned",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-stunned.mp4",
+    "joints": "organic\\guide-stunned.json"
+  },
+  {
+    "mode": "organic",
+    "study": "frozen",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-frozen.mp4",
+    "joints": "organic\\guide-frozen.json"
+  },
+  {
+    "mode": "organic",
+    "study": "search",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-search.mp4",
+    "joints": "organic\\guide-search.json"
+  },
+  {
+    "mode": "organic",
+    "study": "retreat",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-retreat.mp4",
+    "joints": "organic\\guide-retreat.json"
+  },
+  {
+    "mode": "organic",
+    "study": "collapse-front",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-collapse-front.mp4",
+    "joints": "organic\\guide-collapse-front.json"
+  },
+  {
+    "mode": "organic",
+    "study": "collapse-side",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-collapse-side.mp4",
+    "joints": "organic\\guide-collapse-side.json"
+  },
+  {
+    "mode": "organic",
+    "study": "collapse-front",
+    "small": true,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-collapse-front-small.mp4",
+    "joints": "organic\\guide-collapse-front-small.json"
+  },
+  {
+    "mode": "organic",
+    "study": "collapse-side",
+    "small": true,
+    "seconds": 5,
+    "fps": 24,
+    "video": "organic\\guide-collapse-side-small.mp4",
+    "joints": "organic\\guide-collapse-side-small.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "idle",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-idle.mp4",
+    "joints": "mechanical\\guide-idle.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "walk",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-walk.mp4",
+    "joints": "mechanical\\guide-walk.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "trot",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-trot.mp4",
+    "joints": "mechanical\\guide-trot.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "run",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-run.mp4",
+    "joints": "mechanical\\guide-run.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "start-stop",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-start-stop.mp4",
+    "joints": "mechanical\\guide-start-stop.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "bark",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-bark.mp4",
+    "joints": "mechanical\\guide-bark.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "bite",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-bite.mp4",
+    "joints": "mechanical\\guide-bite.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "pounce",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-pounce.mp4",
+    "joints": "mechanical\\guide-pounce.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "flinch",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-flinch.mp4",
+    "joints": "mechanical\\guide-flinch.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "stagger",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-stagger.mp4",
+    "joints": "mechanical\\guide-stagger.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "stunned",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-stunned.mp4",
+    "joints": "mechanical\\guide-stunned.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "frozen",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-frozen.mp4",
+    "joints": "mechanical\\guide-frozen.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "search",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-search.mp4",
+    "joints": "mechanical\\guide-search.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "retreat",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-retreat.mp4",
+    "joints": "mechanical\\guide-retreat.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "collapse-front",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-collapse-front.mp4",
+    "joints": "mechanical\\guide-collapse-front.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "collapse-side",
+    "small": false,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-collapse-side.mp4",
+    "joints": "mechanical\\guide-collapse-side.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "collapse-front",
+    "small": true,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-collapse-front-small.mp4",
+    "joints": "mechanical\\guide-collapse-front-small.json"
+  },
+  {
+    "mode": "mechanical",
+    "study": "collapse-side",
+    "small": true,
+    "seconds": 5,
+    "fps": 24,
+    "video": "mechanical\\guide-collapse-side-small.mp4",
+    "joints": "mechanical\\guide-collapse-side-small.json"
+  }
+]

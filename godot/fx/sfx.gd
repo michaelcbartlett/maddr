@@ -6,6 +6,7 @@ extends Node
 const RATE := 22050
 # name: [freq, dur, wave, vol, slide, throttle]
 const P := {
+	"arrival": [720, .5, "saw", .035, 2.0, false],
 	"break": [2400, .22, "saw", .045, .12, true],
 	"las": [900, .07, "saw", .018, .5, true], "bul": [300, .05, "square", .02, .5, true], "raz": [1400, .06, "tri", .02, .6, true],
 	"hum": [120, .12, "saw", .012, 1.1, true], "kill": [220, .06, "square", .03, .5, true], "bosskill": [80, .6, "square", .03, .5, false],

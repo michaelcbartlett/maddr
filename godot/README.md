@@ -3,17 +3,30 @@
 Open `project.godot` in **Godot 4.7** and press **F5**. The main scene is `game/main.tscn`.
 The game runs entirely in Godot: no browser, JavaScript runtime, sprite exporter, or local server is needed.
 
-Current default: a **rainy street with parked vehicles** for rebuilding the art, entered directly at startup.
+[Game progression plan](PROGRESSION_PLAN.md) records the mission-first opening, hybrid mission
+formats, clone wake-ups, walkable lab, successive endings and the one-time perception break. Normal startup now shows a
+basic title and four game slots. Each slot keeps its own unlocks, Intel and mission summary in
+`user://games/slot_1` through `slot_4`; Game 1 copies existing flat saves when first selected and
+leaves the originals intact. Selecting a slot begins a new mission with its saved progression;
+mid-mission resume is not implemented. The first wave opens with a short green teleport arrival.
+Keyboard/controller focus and Back work throughout. Pause → Title Screen allows switching games.
+`--practice` and explicit test/wave hooks retain their direct-entry workflows.
+
+Current playable mission: a **rainy street with parked vehicles** for rebuilding the art.
 The 3200×2200 map doubles the old width and height (four times the area), with asphalt, pavement,
-crosswalks, puddles, rain and 20 streetlights scaled for the 128px scientist. Enemies (including
-bosses and civilians), loot/crates, objectives, wave timers, the combat HUD and
-scratch music are disabled. Movement, independent aiming, equipped weapons, recoil and their
-effects remain live; testing cannot kill the character or advance the run. **Esc / Start → Weapon
-Lab** changes the loadout and returns directly to the studio without a difficulty screen.
+crosswalks, puddles, rain and 20 streetlights scaled for the 128px scientist. Selecting a game starts
+the current five-wave cops-only street prototype. `--practice` opens the enemy-free art studio;
+movement, independent aiming, equipped weapons, recoil and effects remain live there, while
+testing cannot kill the character or advance the run. **Esc / Start → Weapon Lab** changes
+the loadout and returns to the current mode without a difficulty screen.
+The bionic arm is an additional back-mounted mechanical limb. Both natural arms remain;
+**LT / right mouse** always shoves. **RT / left mouse** fires both equipped guns;
+**right-stick click / middle mouse** fires only the mechanical gun. Its articulated segments
+have generated normal maps and share the live sprite reflections, without a ComfyUI batch.
 The previous combat content is retained for rebuilding it one piece at a time. Explicit
 `-- --combat` runs it; `art/character_studio` in project settings controls the default. Existing
 combat test scripts use combat mode, while `game/tests/character_studio_test.gd` is run with
-`-- --character-studio` and checks the default empty-arena flow. `-- --blank-studio` opens the
+`-- --character-studio` and checks practice plus first-world waves. `-- --blank-studio` uses the
 neutral grid instead. **5 / controller Back** cycles night, dusk and daylight.
 
 Streetlights have dark hoods and cast light downward. One cached 800×550 water field supplies
@@ -21,7 +34,7 @@ the floor, lamp streaks, live laser/bolt reflections and character reflections. 
 the current Sprite2D textures and transforms, including the scientist's arm and gun layers; no
 extra animation rig, per-actor viewport or texture readback is involved. The same system accepts
 future Sprite2D actors and the existing enemy sheet renderer. Off-screen actors and dry regions
-are culled; rays are capped at 16. The opening remains enemy-free.
+are culled; rays are capped at 16. Practice mode remains enemy-free.
 `game/tests/wet_reflections_test.gd -- --character-studio` checks moving beams, bolt trails,
 reflection expiry/budget, shared textures, grounded transforms, actor cleanup and enemy sheets.
 Streetlight collision follows the small metal base at its actual rendered scale. It blocks
@@ -47,6 +60,10 @@ over the car's lower body; a character behind can be occluded normally. The grap
 using rendered overlapping pixels, as well as feet, scaling and muzzle alignment.
 At least two cruisers alternate double red/blue roof flashes, with staggered phases and real
 light/glow anchored to the lenses. The cars remain parked and contain no enemy spawns.
+Each lens flash uses a cached mask of its painted glass and a measured per-view center; the
+sideways and diagonal views keep their original lens shapes without rectangular spill onto
+the roof or trim. `police_lens_alignment_test.gd -- --render-check` verifies all eight views
+against the rendered unlit glass pixels.
 Roof lights use 235-unit PointLight2D falloff at a 60-unit light height, so nearby normal-mapped
 faces, coat folds, arm layers and weapons respond to red/blue flashes. Up to eight active roof
 reflections use the same mirrored foot plane as the vehicle and share the puddle mask, ripple
@@ -90,7 +107,7 @@ Rebuild the assets with `tools/pixelstudio/import_h3_scientist.py` in ComfyUI's 
 renderer to verify actual frame pixels, including the lit texture path. CanvasTexture frames use
 individual image textures because a nested AtlasTexture loses its region when rendered.
 
-Scratch level music: `audio/doctor_diabolical_scratch.mp3` loops during every wave, including the train heist,
+Scratch level music: `audio/doctor_diabolical_scratch.mp3` loops during gameplay in both street and practice modes, including the train heist,
 at −14 dB beneath the effects, continuing through the supply depot without restarting between waves.
 It pauses with the game and stops when the run ends. **M** mutes all audio.
 

@@ -40,6 +40,8 @@ func _run() -> void:
 	for wave in [1,2,3,5,10]:
 		run.wave = wave; var e = a.make_enemy("cop",900,550)
 		_check(is_equal_approx(e.max_hp,(3.0+2.0*(wave-1))*run.tough_mult()),"cop health on wave %d (%.1f)" % [wave,e.max_hp])
+		var d = a.make_enemy("det",900,550)
+		_check(is_equal_approx(d.max_hp,(8.0+1.0*(wave-1))*run.tough_mult()),"detective health on wave %d (%.1f)" % [wave,d.max_hp])
 	for tier in range(1,run.DIFFICULTY.size()+1):
 		run.difficulty = tier; run.wave = 1
 		_check(a.make_enemy("cop",900,550).max_hp<=run.D.dmg,"the starter blaster one-shots a wave 1 cop on difficulty %d" % tier)

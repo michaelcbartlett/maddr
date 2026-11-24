@@ -36,6 +36,11 @@ function Invoke-GodotCheck([string]$Name, [string[]]$EngineArguments) {
 Invoke-GodotCheck 'import' @('--headless', '--editor', '--import', '--quit')
 Invoke-GodotCheck 'wet-reflections' @('--headless', '--script', 'res://game/tests/wet_reflections_test.gd', '--', '--character-studio')
 Invoke-GodotCheck 'parked-vehicles' @('--headless', '--script', 'res://game/tests/parked_vehicle_test.gd', '--', '--character-studio')
+if ($Screenshots) {
+    Invoke-GodotCheck 'police-lenses' @('--script', 'res://game/tests/police_lens_alignment_test.gd', '--', '--render-check')
+} else {
+    Invoke-GodotCheck 'police-lenses' @('--headless', '--script', 'res://game/tests/police_lens_alignment_test.gd')
+}
 Invoke-GodotCheck 'streetlight-collision' @('--headless', '--script', 'res://game/tests/streetlight_collision_test.gd', '--', '--character-studio')
 if ($Screenshots) {
     Invoke-GodotCheck 'character-ground' @('--script', 'res://game/tests/character_ground_test.gd', '--', '--character-studio', '--render-check')
@@ -46,6 +51,7 @@ if ($Screenshots) {
     Invoke-GodotCheck 'police-lighting' @('--script', 'res://game/tests/police_lighting_test.gd', '--', '--character-studio')
 }
 Invoke-GodotCheck 'character' @('--headless', '--script', 'res://character/tests/art_test.gd')
+Invoke-GodotCheck 'movement-lean' @('--headless', '--script', 'res://game/tests/movement_lean_test.gd', '--', '--character-studio')
 Invoke-GodotCheck 'arena' @('--headless', '--script', 'res://game/tests/arena_test.gd')
 Invoke-GodotCheck 'selling' @('--headless', '--script', 'res://game/tests/sell_test.gd')
 Invoke-GodotCheck 'part-swaps' @('--headless', '--script', 'res://game/tests/swap_test.gd')
@@ -56,6 +62,8 @@ Invoke-GodotCheck 'bank-robbery' @('--headless', '--script', 'res://game/tests/b
 Invoke-GodotCheck 'combat-rules' @('--headless', '--script', 'res://game/tests/combat_rules_test.gd')
 Invoke-GodotCheck 'melee' @('--headless', '--script', 'res://game/tests/melee_test.gd')
 Invoke-GodotCheck 'controller-ui' @('--headless', '--script', 'res://game/tests/controller_ui_test.gd')
+Invoke-GodotCheck 'game-select' @('--headless', '--script', 'res://game/tests/game_select_test.gd', '--', '--character-studio')
+Invoke-GodotCheck 'teleport-arrival' @('--headless', '--script', 'res://game/tests/teleport_arrival_test.gd', '--', '--character-studio')
 Invoke-GodotCheck 'ebola' @('--headless', '--script', 'res://game/tests/ebola_test.gd')
 Invoke-GodotCheck 'shrink-ray' @('--headless', '--script', 'res://game/tests/shrink_test.gd')
 Invoke-GodotCheck 'freeze-ray' @('--headless', '--script', 'res://game/tests/freeze_test.gd')
@@ -84,12 +92,14 @@ if ($Screenshots) {
 Invoke-GodotCheck 'cop-edited-art' @('--headless', '--script', 'res://enemies/tests/cop_edited_art_test.gd')
 Invoke-GodotCheck 'cop-locomotion' @('--headless', '--script', 'res://enemies/tests/cop_locomotion_test.gd')
 Invoke-GodotCheck 'scientist-gear' @('--headless', '--script', 'res://character/tests/scientist_gear_test.gd')
+Invoke-GodotCheck 'aim-difficulty' @('--headless', '--script', 'res://game/tests/aim_difficulty_test.gd')
 Invoke-GodotCheck 'hitbox' @('--headless', '--script', 'res://game/tests/hitbox_test.gd')
 Invoke-GodotCheck 'shove' @('--headless', '--script', 'res://game/tests/shove_test.gd')
 Invoke-GodotCheck 'reactions' @('--headless', '--script', 'res://game/tests/reaction_test.gd', '--', '--character-studio')
 Invoke-GodotCheck 'detective' @('--headless', '--script', 'res://game/tests/detective_test.gd')
 Invoke-GodotCheck 'phase-dash' @('--headless', '--script', 'res://game/tests/phase_dash_test.gd', '--', '--character-studio')
 Invoke-GodotCheck 'cop-strike' @('--headless', '--script', 'res://game/tests/cop_strike_test.gd')
+Invoke-GodotCheck 'hit-protection' @('--headless', '--script', 'res://game/tests/hit_protection_test.gd')
 Invoke-GodotCheck 'edited-art' @('--headless', '--script', 'res://enemies/tests/edited_art_test.gd')
 if ($Screenshots) {
     Invoke-GodotCheck 'enemies' @('--rendering-method', 'gl_compatibility', '--script', 'res://enemies/tests/enemy_art_test.gd', '--', '--screenshots')

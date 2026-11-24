@@ -51,7 +51,7 @@ func weapon_context(spec = null) -> Dictionary:
 		counts[id] = counts.get(id, 0) + 1
 		for item in ITEMS:
 			if item.id == id: _apply_visual(stats, item); break
-	return {"cnt":counts,"ammo":ai,"frame":fi,"guns":[AMMO[ai].id] + stats.guns,"rangeAdd":stats.rangeAdd,"width":stats.width * (1.0 + stats.widthPct),"shots":min(9, stats.shots)}
+	return {"cnt":counts,"ammo":ai,"frame":fi,"guns":[AMMO[ai].id] + stats.guns,"rangeAdd":stats.rangeAdd,"width":stats.width * (1.0 + stats.widthPct * 0.3),"shots":min(9, stats.shots)}
 
 func _apply_visual(stats: Dictionary, definition: Dictionary) -> void:
 	for key in definition.get("set", {}):

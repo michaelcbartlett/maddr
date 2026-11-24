@@ -91,7 +91,7 @@ func _run() -> void:
 const BROWSER_VALUES := [["laser", "add", "dmg", 7], ["laser", "add", "atkSpd", null], ["razor", "add", "dmg", 7], ["razor", "add", "atkSpd", null], ["razor", "add", "bleed", 0.6], ["bullet", "add", "dmg", 10], ["rifle", "set", "dmgMul", 1.8],
 	["pistol", "set", "cd", 0.6], ["blunder", "set", "dmgMul", 0.8], ["rifle", "add", "pierce", null],
 	["bullet", "add", "pierce", null], ["bullet", "add", "crit", null],
-	["storm", "add", "chainMul", 0.4], ["clock", "add", "bomb", 0.15], ["virus", "add", "sick", 0.25], ["hive", "mul", "minionMul", 2]]
+	["storm", "add", "chainMul", 0.4], ["clock", "add", "bomb", 0.15], ["virus", "add", "sick", 0.25], ["hive", "mul", "minionMul", 2], ["flare", "add", "widthPct", 0.3], ["singular", "add", "widthPct", 0.5]]
 
 func _tuned_def(id: String) -> Dictionary:
 	for table in [run.AMMO, run.FRAMES]:
@@ -124,11 +124,13 @@ func _test_stats() -> void:
 		# Native-only stats (laser beam vs bolt, loot drop modifier); the prototype has no such keys.
 		# ...plus melee and damage-type amplifier stats, compared at their neutral defaults.
 		var native := {"beam":0.0,"dropPct":0.0,"burnSpread":0.0,"poisonSpread":0.0,"meleeSpd":0.0,"meleeReach":0.0,"meleeDmg":0.0,
-			"burnMul":1.0,"poisonMul":1.0,"lightningMul":1.0,"rad":0.0,"radMul":1.0,"ebola":0.0}
+			"burnMul":1.0,"poisonMul":1.0,"lightningMul":1.0,"rad":0.0,"radMul":1.0,"ebola":0.0,"hitProtection":0.0}
 		for key in native:
 			if not config.stats.S.has(key) and float(stats[key])==native[key]: stats.erase(key)
 		_check(_same(stats,config.stats.S),config.name+": base stats match browser")
 		var expected = config.stats.D.duplicate(); expected.maxHp = maxi(10,roundi(config.stats.S.maxHp-30.0)); expected.speed *= speed_k
+		# Hit Protection is native-only and has its own modifier/timing integration tests.
+		expected.hitProtection=1.0
 		_check(_same(run.D,expected),config.name+": derived stats match browser")
 		_check(_same(run.CNT,config.stats.CNT),config.name+": stack counts match browser")
 	tuned.reverse(); _swap_values(tuned)

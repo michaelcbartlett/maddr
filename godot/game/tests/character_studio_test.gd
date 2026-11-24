@@ -12,7 +12,7 @@ func _run() -> void:
 	var a = scene.arena; a.set_process(false)
 	_check(scene.character_studio and a.character_studio,"default entry opens the character studio")
 	_check(scene.state == "play" and a.state == "play","studio starts directly in the arena")
-	_check(not scene.hud.visible and not scene.level_music.playing,"wave HUD and scratch music are disabled")
+	_check(not scene.hud.visible and scene.level_music.playing,"practice hides the wave HUD while level music plays")
 	_check(a.level == "rainy_street" and a.arena_level.theme_id == "rainy_street","opening uses the rebuilt rainy street")
 	_check(a.AW==3200 and a.AH==2200 and a.cam.limit_right==3200 and a.cam.limit_bottom==2200,"map and camera bounds double in each dimension")
 	_check(a.arena_level.props.size()>=14 and a.arena_level.prop_nodes.size()==a.walls.size() and a.arena_level.lamps.size()==20,"parked vehicles and twenty solid street lights populate the opening")
@@ -50,17 +50,44 @@ func _run() -> void:
 	_check(a.P.size_scale>1.0 and a.enemies.is_empty(),"enlargement can be previewed in the blank studio")
 	scene._show("paused"); scene._studio_supply("tesla_coil")
 	_check(a.consumables.coils.size()==1 and a.enemies.is_empty(),"coil can be placed without enabling enemy spawns")
-	# Sparring partners: one of each, they come back, and he only flinches.
+	# Free practice: one cop, he comes back, and the villain only flinches.
 	a.studio_force = true; a.P.inv = 0.0; a.dash.reset()
 	for i in 150: a._update_sparring(1.0/60.0)
-	_check(a.enemies.size()==2 and a.enemies.any(func(e): return e.type=="cop") and a.enemies.any(func(e): return e.type=="det"),"a cop and a detective join the playtest")
-	for foe in a.enemies: _check(not a.in_wall(foe.x,foe.y,foe.r),"%s appears on open ground" % foe.type)
-	var health: float = a.P.hp; a.hurt_player(9.0); _check(a.P.hp==health and a.P.flinch_t>0.0,"their hits flinch him without costing health")
-	var cop = a.enemies.filter(func(e): return e.type=="cop")[0]; cop.hp = 0.0; a.kill(cop); a.enemies = a.enemies.filter(func(e): return not e.dead)
+	_check(a.enemies.size()==1 and a.enemies[0].type=="cop","one cop joins free practice")
+	_check(not a.in_wall(a.enemies[0].x,a.enemies[0].y,a.enemies[0].r),"he appears on open ground")
+	var health: float = a.P.hp; a.hurt_player(9.0); _check(a.P.hp==health and a.P.flinch_t>0.0,"his hits flinch without costing health")
+	var cop = a.enemies[0]; cop.hp = 0.0; a.kill(cop); a.enemies = a.enemies.filter(func(e): return not e.dead)
 	for i in 120: a._update_sparring(1.0/60.0)
-	_check(a.enemies.size()==1,"a fallen partner stays down a moment")
+	_check(a.enemies.is_empty(),"a fallen partner stays down a moment")
 	for i in 80: a._update_sparring(1.0/60.0)
-	_check(a.enemies.size()==2,"then returns")
+	_check(a.enemies.size()==1,"then returns")
 	a.studio_sparring = false; a.enemies.clear(); a._update_sparring(9.0); _check(a.enemies.is_empty(),"and can be switched off"); a.studio_force = false
+	# First-world waves: the real rules, cops only.
+	var run = root.get_node("Run")
+	for wave in [1,3,5]:
+		a.studio_mode(true); run.wave = wave; a.start_wave()
+		_check(a.wave_t==run.wave_len(wave) and a.level=="rainy_street","wave %d has its real length on the street" % wave)
+		var seen := {}; var peak := 0
+		for i in int(run.wave_len(wave)*20.0)-4:
+			a.P.hp = run.D.maxHp; a.P.inv = 1.0; a._process(0.05)
+			for e in a.enemies:
+				if seen.has(e): continue
+				seen[e] = e.type
+				if Vector2(e.x,e.y).distance_to(Vector2(a.P.x,a.P.y))>900.0: _check(false,"wave %d spawns near the fight" % wave)
+			peak = maxi(peak,a.enemies.filter(func(e): return not e.dead).size())
+		_check(seen.size()>15 and seen.values().all(func(t): return t=="cop"),"wave %d sends only cops (%d, peak %d)" % [wave,seen.size(),peak])
+		print("  wave %d: %d cops in %ds, health %.0f" % [wave,seen.size(),run.wave_len(wave),3.0+2.0*(wave-1)])
+		_check(a.state=="play","wave %d is still running" % wave)
+		for i in 8: a._process(0.05)
+		_check(a.state=="clear" and a.enemies.all(func(e): return e.dead),"wave %d ends on time" % wave)
+	for i in 80: a._process(0.05)
+	_check(scene.state=="over" and scene.over_title.text=="STREET CLEARED!","the world ends after wave 5")
+	a.studio_mode(true); scene._show("play")
+	_check(scene.hud.visible,"the wave HUD is back")
+	for i in 660: a.P.hp = run.D.maxHp; a.P.inv = 1.0; a._process(0.05)
+	_check(scene.state=="shop" and run.wave==2,"the shop opens between waves")
+	scene._start_wave(); a.P.inv = 0.0; a.dash.reset(); a.hurt_player(9999.0)
+	_check(scene.state=="over","he can be busted")
+	a.studio_mode(false); _check(a.sandbox() and a.enemies.is_empty() and a.wave_t==0.0,"8 returns to free practice")
 	print("CHARACTER STUDIO TESTS: %d checks, %d failures"%[checks,failures])
 	quit(1 if failures else 0)

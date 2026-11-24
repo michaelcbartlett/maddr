@@ -22,6 +22,26 @@ POLICE_BULBS=[[(227,113),(272,139)],[(630,138),(698,138)],[(1058,138),(1106,112)
  [(1554,141),(1554,178)],[(194,558),(241,582)],[(631,583),(696,584)],
  [(1126,557),(1087,584)],[(1531,576),(1531,619)]]
 
+def police_lenses(image, region, seeds):
+    """Measure the painted glass, using rough markers only to select components."""
+    x,y,w,h=region
+    pixels=np.asarray(image)[y:y+h,x:x+w]
+    red,green,blue=pixels[:,:,:3].astype(float).transpose(2,0,1)
+    masks=[(red>56)&(red>green*1.45)&(red>blue*1.2),
+           (blue>56)&(blue>red*1.35)&(blue>green*1.08)]
+    centers=[];regions=[]
+    for mask,seed in zip(masks,seeds):
+        count,labels,stats,centroids=cv2.connectedComponentsWithStats((mask&(pixels[:,:,3]>127)).astype(np.uint8),8)
+        sx,sy=int(seed[0]-x),int(seed[1]-y)
+        selected=int(labels[sy,sx])
+        if selected==0:
+            selected=min((i for i in range(1,count) if stats[i,4]>100),
+                         key=lambda i:(centroids[i][0]-sx)**2+(centroids[i][1]-sy)**2)
+        assert 300<stats[selected,4]<3000,(region,seed,stats[selected])
+        regions.append([int(v) for v in stats[selected,:4]])
+        centers.append([round(float(v),4) for v in centroids[selected]])
+    return centers,regions
+
 def main():
     catalog=[]
     for ident,name,token,length,width in SOURCES:
@@ -39,9 +59,7 @@ def main():
             x=max(x0,x+x0-2);y=max(y0,y+y0-2);w=min(w+4,x1-x);h=min(h+4,y1-y)
             frame={'region':[x,y,w,h],'opaque_pixels':area}
             if ident=='police-sedan':
-                frame['bulbs']=[[px-x,py-y] for px,py in POLICE_BULBS[i]]
-                red,blue=[image.getpixel(point) for point in POLICE_BULBS[i]]
-                assert red[0]>red[2]*1.3 and blue[2]>blue[0]*1.3,(view,red,blue)
+                frame['bulbs'],frame['lens_regions']=police_lenses(image,frame['region'],POLICE_BULBS[i])
             frames[view]=frame
         entry={'id':ident,'name':name,'sheet':f'res://art/vehicles/{ident}/{target.name}',
                'world_length':length,'world_width':width,'police':ident=='police-sedan','frames':frames}

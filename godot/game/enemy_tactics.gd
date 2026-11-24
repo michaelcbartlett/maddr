@@ -130,7 +130,7 @@ static func _revolver(e, wild: bool) -> void:
 	var muzzle := EnemyView.muzzle_world(e); var target := Vector2(e.A.P.x, e.A.P.y - 28.0)
 	if not e.A.nav.clear_segment(Vector2(e.x, e.y), muzzle, 0.0) or not e.A.nav.clear_segment(muzzle, target, 0.0): return
 	var shot := (target - muzzle).normalized().rotated(randf_range(-0.16, 0.16) if wild else 0.0)
-	e.A.ebul.append({"x":muzzle.x, "y":muzzle.y, "vx":shot.x * 255.0, "vy":shot.y * 255.0, "r":4.0, "dmg":e.dmg, "t":3.0})
+	e.A.ebul.append({"x":muzzle.x, "y":muzzle.y, "vx":shot.x * 400.0, "vy":shot.y * 400.0, "r":4.0, "dmg":e.dmg, "t":3.0})
 	e.gfx.shot_t = 0.0
 	EnemyView._fire_flash(e, e.gfx, shot)
 	e.A.snd("ebul")

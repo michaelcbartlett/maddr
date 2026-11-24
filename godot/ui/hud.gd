@@ -23,9 +23,9 @@ func _txt(p: Vector2, s: String, size: int, col: Color, align := HORIZONTAL_ALIG
 
 func _draw() -> void:
 	if A == null: return
-	if A.character_studio:
+	if A.sandbox():
 		var id: String = Run.selected_consumable
-		var text := "X / Q: %s ×%d   D-UP / E: switch    B / SHIFT: dash, hold to sprint    1-4 / D-PAD: reactions    5 / BACK: time of day    LT / RMB: push    6 cop  7 detective  8 enemies on/off" % [Run.CONSUMABLE_NAMES[id],Run.consumable_charges[id]]
+		var text := "X / Q: %s ×%d   D-UP / E: switch    B / SHIFT: dash, hold to sprint    1-4 / D-PAD: reactions    5 / BACK: time of day    LT / RMB: push    6 cop  7 detective  8 start waves" % [Run.CONSUMABLE_NAMES[id],Run.consumable_charges[id]]
 		_txt(Vector2(16,size.y-14),text,11,Color("#b8cad9"))
 		if A.P.size_t>0.0:
 			_txt(Vector2(16,size.y-32),"%s · %.1fs" % [Run.CONSUMABLE_NAMES[A.P.size_effect],A.P.size_t],12,Color("#c8abff"))
@@ -61,10 +61,10 @@ func _draw() -> void:
 	_txt(Vector2(pad,pad+92),arm_text,11,arm_color)
 	var id: String = Run.selected_consumable
 	var text := "X / Q  %s ×%d" % [Run.CONSUMABLE_NAMES[id].to_upper(),Run.consumable_charges[id]]
-	if Run.consumable_charges.values().all(func(n): return n == 0): text = "X / Q  NO CONSUMABLES"
+	if Run.consumable_charges.values().all(func(n): return n == 0): text = ""
 	if A.consumables.pads.size() == 1: text = "Y / F  PLACE SECOND PAD"
 	elif P.disguise_t > 0.0: text = "DISGUISED · %.1fs" % P.disguise_t
-	_txt(Vector2(pad,pad+110),text,11,Color("#a4e8c4"))
+	if text != "": _txt(Vector2(pad,pad+110),text,11,Color("#a4e8c4"))
 	if P.size_t>0.0: _txt(Vector2(pad+220,pad+110),"%s · %.1fs"%[Run.CONSUMABLE_NAMES[P.size_effect],P.size_t],11,Color("#c8abff"))
 	if A.consumables.pads.size() == 2: _txt(Vector2(pad,pad+126),"STEP ON A PAD · ONE TRIP",10,Color("#bf9aff"))
 	else:
@@ -76,10 +76,8 @@ func _draw() -> void:
 	if action != "":
 		_txt(Vector2(pad,pad+144),"Y / F  " + Run.ITEM[action].name.to_upper() + (" · READY" if A.action_cooldown <= 0.0 else " · %.1fs" % A.action_cooldown),11,Color("#ffb2d8"))
 	# wave / timer
-	_txt(Vector2(W / 2, pad + 10), "WAVE %d / %d" % [Run.wave, int(Run.RULES.waves.last)], 14, UiKit.NEON, HORIZONTAL_ALIGNMENT_CENTER)
+	_txt(Vector2(W / 2, pad + 10), "WAVE %d / %d" % [Run.wave, int((A.WORLD_WAVES if A.studio_waves else int(Run.RULES.waves.last)))], 14, UiKit.NEON, HORIZONTAL_ALIGNMENT_CENTER)
 	_txt(Vector2(W / 2, pad + 42), str(ceili(A.wave_t)), 32, BAD_if(A.wave_t <= 5 and A.state == "play"), HORIZONTAL_ALIGNMENT_CENTER)
-	_txt(Vector2(W - pad, pad + 10), A.arena_level.theme.name, 11, Color(0.86, 0.9, 0.86, 0.6), HORIZONTAL_ALIGNMENT_RIGHT)
-	_txt(Vector2(W - pad, pad + 24), "⭐".repeat(Run.difficulty) + " " + Run.difficulty_name(), 11, UiKit.GOLD, HORIZONTAL_ALIGNMENT_RIGHT)
 	var b := A.boss
 	if b != null and not b.dead:
 		var bw := minf(420.0, W * 0.5)
@@ -92,15 +90,13 @@ func _draw() -> void:
 		_txt(Vector2(W / 2, pad + 98), bv.objective(), 12, UiKit.GOLD if bv.opened else Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER)
 		if not bv.opened and Run.ITEM.has(Run.bank_reward()):
 			_txt(Vector2(W / 2, pad + 113), "VAULT REWARD: " + Run.ITEM[Run.bank_reward()].name.to_upper(), 10, Color(1, 0.86, 0.4, 0.8), HORIZONTAL_ALIGNMENT_CENTER)
-	# weapon name / kills
+	# Capacitor charge
 	if Run.CNT.get("capacitor",0)>0 and Run.has_laser():
 		var charge := maxf(A.laser_charge_display(),A.laser_charge_display(true))
 		var col := Color("#ffe7a0") if charge>=0.999 else Color("#bd9f70")
 		_txt(Vector2(pad,H-pad-24),"CAPACITOR %d%% · ×%.2f" % [roundi(charge*100),1.0+A.CAPACITOR_BONUS*charge],10,col)
 		draw_rect(Rect2(pad,H-pad-19,110,3),Color("#3d342b"))
 		draw_rect(Rect2(pad,H-pad-19,110*charge,3),col)
-	_txt(Vector2(pad, H - pad), Run.display_name(), 12, Color(0.7, 1, 0.24, 0.7))
-	_txt(Vector2(W - pad, H - pad), "kills %d   %s M   START / ESC pause" % [Run.kills, "🔇" if Controls.muted else "🔊"], 12, Color(0.86, 0.9, 0.86, 0.5), HORIZONTAL_ALIGNMENT_RIGHT)
 	if A.banner_t > 0:
 		var al := minf(1.0, A.banner_t * 2)
 		_txt(Vector2(W / 2, H * 0.32), A.banner_txt, 38, Color(UiKit.NEON, al), HORIZONTAL_ALIGNMENT_CENTER)

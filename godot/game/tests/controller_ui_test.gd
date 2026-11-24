@@ -38,7 +38,10 @@ func _run() -> void:
 	await _tap(JOY_BUTTON_B)
 	_check(scene.state == "title", "B returns from the weapon design menu to the title")
 	await _tap(JOY_BUTTON_A); await process_frame
-	_check(scene.state == "design", "A re-enters the Lab after backing out")
+	_check(scene.state == "game_select", "A opens the four-game selector from the title")
+	await _tap(JOY_BUTTON_A); await process_frame
+	_check(scene.state == "play" and run.save_slots.active_slot==1, "A starts a mission in the focused game slot")
+	scene._enter_lab();await process_frame
 	scene.design_s.begin_btn.grab_focus(); await _tap(JOY_BUTTON_A)
 	await process_frame
 	await _tap(JOY_BUTTON_A)

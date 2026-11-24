@@ -19,6 +19,9 @@ const UnlocksT = preload("res://game/unlocks.gd")
 var unlocks: RefCounted          # persistent starting-part unlocks (game/unlocks.gd)
 const IntelT = preload("res://game/intel.gd")
 var intel: RefCounted            # persistent Intel points assigned to modules to rig offer rolls (game/intel.gd)
+const SaveSlotsT=preload("res://game/save_slots.gd")
+var save_slots: RefCounted
+var _slot_memory:={}
 
 # ---- run state ----
 ## ammo/frame = the main gun's current parts (indices into AMMO/FRAMES). start = the parts the run began with;
@@ -90,7 +93,23 @@ func _ready() -> void:
 	unlocks = UnlocksT.new(RULES.get("unlocks", []), is_test_process())
 	unlocks.difficulty_names = DIFFICULTY
 	intel = IntelT.new(RULES.get("intel", {}), is_test_process())
+	save_slots=SaveSlotsT.new(is_test_process())
 	recompute()
+
+func select_save_slot(slot: int) -> bool:
+	if save_slots.active_slot>0:
+		if not unlocks.save() or not intel.save():save_slots.error="Could not save the current game.";return false
+		_slot_memory[save_slots.active_slot]={"unlocks":unlocks,"intel":intel}
+	if not save_slots.activate(slot):return false
+	if not save_slots.persist and _slot_memory.has(slot):
+		unlocks=_slot_memory[slot].unlocks;intel=_slot_memory[slot].intel
+	else:
+		unlocks=UnlocksT.new(RULES.get("unlocks",[]),true);unlocks.difficulty_names=DIFFICULTY
+		intel=IntelT.new(RULES.get("intel",{}),true)
+		unlocks.path=save_slots.slot_path(slot,"unlocks.json");intel.path=save_slots.slot_path(slot,"intel.json")
+		unlocks.persist=save_slots.persist;intel.persist=save_slots.persist
+		if save_slots.persist:unlocks.load_save();intel.load_save()
+	return true
 
 ## Headless test scripts and the --autoplay/--wave hooks must not write the player's unlock save.
 static func is_test_process() -> bool:
@@ -109,7 +128,7 @@ static func base_stats() -> Dictionary:
 		"shots": 1, "spread": 0.0, "pierce": 0, "drill": 0,
 		"burn": 0.0, "acid": 0.0, "poison": 0.0, "bleed": 0.0, "sick": 0.0, "freeze": 0.0, "mind": 0.0, "mindDur": 6.0, "minionMul": 1.0,
 		"chain": 0, "chainMul": 1.0, "execute": 0.0, "explode": 0.0, "bomb": 0.0, "remote": 0.0, "boomMul": 1.0, "lifesuck": 0.0, "frozenMul": 1.0,
-		"sustain": 0, "maxHp": 30.0, "regen": 0.0, "armor": 0.0, "speed": 210.0, "speedPct": 0.0, "pickup": 70.0, "pickupPct": 0.0,
+		"sustain": 0, "maxHp": 30.0, "regen": 0.0, "armor": 0.0, "hitProtection": 0.0, "speed": 210.0, "speedPct": 0.0, "pickup": 70.0, "pickupPct": 0.0,
 		"scrapPct": 0.0, "dropPct": 0.0, "burnSpread": 0.0, "poisonSpread": 0.0, "orbs": 0, "moon": 0, "crit": 0.05, "meleeSpd": 0.0, "meleeReach": 0.0, "meleeDmg": 0.0, "burnMul": 1.0, "poisonMul": 1.0, "lightningMul": 1.0, "rad": 0.0, "radMul": 1.0, "ebola":0.0, "aimGuide": 0, "beam": 0, "guns": []}
 
 static func apply_def(s: Dictionary, def: Dictionary) -> void:
@@ -214,9 +233,21 @@ func recompute(emit := true) -> void:
 		"speed": S.speed * (1.0 + S.speedPct),
 		"pickup": S.pickup * (1.0 + S.pickupPct),
 		"maxHp": maxi(10, roundi(S.maxHp)),
+		"hitProtection": maxf(0.0,1.0+float(S.hitProtection)),
 	}
 	D.pf = clampf(D.cd / 0.6, 0.3, 1.5) / sqrt(D.shots)   # proc scaling for fast / multi-shot weapons
 	if emit: build_changed.emit()
+
+## Brotato's normal-mode hit grace, scaled by the build's Hit Protection stat.
+## Use damage after armor, as a fraction of maximum (not current) health.
+func hit_protection_duration(damage_taken: float) -> float:
+	var base := clampf(0.4 * maxf(0.0,damage_taken) / maxf(1.0,float(D.maxHp)) / 0.15,0.2,0.4)
+	return base * float(D.hitProtection)
+
+## Half-width of a fired shot. Upgrades scale the frame's own size, so the floor never swallows one.
+func shot_radius(type: String) -> float:
+	var base := maxf(6.0, float(S.width) / 2.2) if type == "razor" else maxf(3.0, float(S.width) / 3.5)
+	return base * (1.0 + float(S.widthPct))
 
 ## Main gun's direct damage per second (every pellet hits, crits averaged in; no DOTs or procs).
 func main_gun_dps() -> float:
@@ -652,6 +683,8 @@ func stats_rows() -> Array:
 	r.append(["Max HP", str(D.maxHp), false])
 	if S.regen: r.append(["Regen", "%.1f/s" % S.regen, false])
 	if S.armor: r.append(["Armor", str(S.armor), false])
+	var protection_pct := roundi((float(D.hitProtection)-1.0)*100.0)
+	r.append(["Hit protection", "%s%d%% · %.2f–%.2fs" % ["+" if protection_pct>0 else "",protection_pct,0.2*float(D.hitProtection),0.4*float(D.hitProtection)], false])
 	r.append(["Speed", str(roundi(D.speed)), false])
 	if S.scrapPct: r.append(["Scrap bonus", "+" + pct.call(S.scrapPct), false])
 	return r

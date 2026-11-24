@@ -1,0 +1,25 @@
+subject_definitions:
+<Subject 1> is the one robot dog shown in <Picture 1>, exactly as designed.
+<Picture 2> is a calibration swatch only; its object must NOT appear.
+<Video 1> is mechanical quadruped motion reference only. Do not render its colored mannequin.
+
+summary:
+[reference generation] Apply the selected mechanical quadruped action to the robot dog reference.
+
+retention_analysis:
+<Picture 1>: fully_preserved - chassis proportions, four articulated legs, feet, panels, pistons, sensors, surface materials, colors, outlines and reference view. Preserve only equipment actually present in the reference.
+<Picture 2>: not_preserved - never show the calibration object.
+<Video 1>: partially_preserved - joint motion, four-leg contact sequence, timing, mechanical stiffness and framing only. Ignore appearance, ears, tail or jaw if absent from Picture 1.
+
+detailed_description:
+One robot dog, original three-quarter SCREEN-RIGHT-facing view. Fixed shoulder and hip sockets. Four legs, distinct near/far front/hind pairs; linked solid segments, fixed length, no elastic pistons, clipping legs or extra feet. Chassis rigid, joints rotate at their sockets. Feet plant and lift in the guide's order. Follow the selected mechanical guide's action and timing; for locomotion, match starting and ending gait phase. Root stays horizontally fixed; game supplies travel. For a pounce, vertical lift follows the guide, horizontal attack displacement belongs to gameplay.
+
+No human stance, flesh, fur, panting, organic spine bending, invented ears or tail. No weapon fire, muzzle flash, spark, smoke, projectile, enemy or loose particles. Keep every reference panel, sensor and accessory consistent. Use original feet and leg construction rather than copying guide thicknesses. If the reference has no movable jaw, do not invent one.
+
+Locked camera position, identical size and zoom, no pan, orbit, reframing, cuts, crossfades or scale drift. Complete chassis, all four feet and actual appendages remain in frame with margin. Uniform flat dark blue-gray background. Crisp pixel clusters, no motion blur, frame blending, ghost trails, extra texture or crawling colors. The colored calibration figure never appears in the result.
+
+overall_soundscape:
+Silent. No speech, sound effects or music.
+
+non_diegetic_music:
+N/A

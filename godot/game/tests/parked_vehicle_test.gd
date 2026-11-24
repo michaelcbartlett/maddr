@@ -42,7 +42,7 @@ func _run() -> void:
 		_check(cruiser.wet_emissions().size()==cruiser.glows().size(),"puddle light emissions follow the same flash timing")
 	cruiser.update_visual(0.05)
 	var light: Dictionary=cruiser.glows()[0]
-	_check(light.pos.distance_to(cruiser.lens_red.global_position)<0.01,"the red light is anchored to its roof lens")
+	_check(light.pos.distance_to(cruiser.lens_red.to_global(cruiser.lens_red.get_meta("emitter_pixel")))<0.01,"the red light is anchored to its painted roof lens")
 	var reflection: Dictionary=cruiser.wet_emissions()[0]
 	_check(absf(reflection.pos.y-(cruiser.global_position.y*1.65-light.pos.y*0.65))<0.01,"water reflections use the same mirrored foot plane as the vehicle")
 	_check(light.r>=200.0 and light.height>=50.0,"the light reaches nearby normal-mapped characters at roof height")

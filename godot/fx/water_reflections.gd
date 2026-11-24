@@ -51,6 +51,7 @@ func sync(actor_layer: Node2D, view: Rect2, clock: float) -> void:
 		else: foot+=Vector2(actor.get_meta("reflection_foot_offset",Vector2.ZERO))
 		var mirror:=Transform2D(Vector2(1,0),Vector2(0,-FLATTEN),Vector2(0,foot.y*(1.0+FLATTEN)))
 		entry.material.set_shader_parameter("ground_y",foot.y)
+		entry.material.set_shader_parameter("arrival_reveal_height",float(actor.get_meta("arrival_reveal_height",-1.0)))
 		entry.material.set_shader_parameter("clock",clock)
 		entry.material.set_shader_parameter("water_map",water_texture)
 		entry.material.set_shader_parameter("use_water_map",water_texture!=null)

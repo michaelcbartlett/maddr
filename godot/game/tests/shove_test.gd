@@ -43,7 +43,18 @@ func _run() -> void:
 	front = _foe("cop",880,550); _push(); _check(absf(front.x-880.0)<0.1,"no pushing through a wall")
 	a.walls = []; a.nav.configure([],Vector2(a.AW,a.AH))
 	_fresh(); front = _foe("cop",860,550); var pin = _foe("cop",945,550); _push()
-	_check(pin.hp<500.0 and front.hp<500.0 and pin.x>950.0,"driven into another enemy: both hurt, both move")
+	_check(pin.hp==500.0 and front.hp==500.0 and pin.x>950.0,"driven into another enemy: both move without taking damage")
+	_fresh();front=_foe("cop",860,550);pin=_foe("cop",945,550);var third=_foe("cop",1005,550);_push()
+	_check(front.hp==500.0 and pin.hp==500.0 and third.hp==500.0,"a chain of crowd collisions causes no damage")
+	_fresh();front=_foe("cop",860,550);pin=_foe("boss",945,550);_push()
+	_check(front.hp==500.0 and pin.hp==500.0,"bumping a boss does not damage either enemy")
+	_fresh();a.walls=[{"rect":Rect2(1020,450,40,200),"open":false}];a.nav.configure(a.walls,Vector2(a.AW,a.AH))
+	front=_foe("cop",860,550);pin=_foe("cop",945,550);_push()
+	_check(front.hp==500.0,"the enemy causing a crowd bump is not charged collision damage")
+	# A farther wall remains a damaging solid impact when a transferred push reaches it.
+	_fresh();a.walls=[{"rect":Rect2(982,450,40,200),"open":false}];a.nav.configure(a.walls,Vector2(a.AW,a.AH))
+	front=_foe("cop",860,550);pin=_foe("cop",945,550);_push()
+	_check(pin.hp<500.0 and front.hp==500.0,"a transferred push still damages the enemy that actually hits a solid object")
 	_fresh(); a.P.x = a.AW-120.0; front = _foe("cop",a.AW-60.0,550); _push(); _check(front.x<=a.AW and front.hp<500.0,"the arena edge counts as a wall")
 	_fresh(); front = _foe("cop",840,550); front.action_phase = "swing"; front.action_t = 1.0; _push(60,0.2)
 	_check(front.action_phase == "" and front.stun_t>0.0,"breaks a wind-up")
@@ -56,7 +67,7 @@ func _run() -> void:
 	for i in 40: a.shove.update(a,1.0/60.0,run,false)
 	a.shove.press(); a.shove.update(a,0.016,run,false); _check(a.shove.active(),"ready again after a second")
 	_fresh(); run.build.off = {"kind":"gun","ammo":0,"frame":0,"items":[]}; a.shove.press(); a.shove.update(a,0.016,run,false)
-	_check(not a.shove.active(),"a full off hand keeps its own LT action"); run.build.off = null
+	_check(a.shove.active(),"an equipped third arm leaves the natural shove available"); run.build.off = null
 	_fresh(); a.shove.press(); a.shove.update(a,0.016,run,true); _check(not a.shove.active(),"not while dashing")
 	_fresh(); front = _foe("cop",860,550); front.ally = true; _push(); _check(absf(_gap(front)-60.0)<0.1,"allies are left alone")
 	# The stick decides, even mid-swing, and the arm, wave and hit agree.
@@ -88,4 +99,17 @@ func _run() -> void:
 		var front_of: bool = rig.rest_pivot.get_index()>rig.body_root.get_index()
 		_check(front_of == (facing != 0.0),"on the correct side of his body")
 		rig.set_state({"shove":-1.0})
+	# Installing equipment never consumes either natural hand or its input.
+	for equipment in [null,{"kind":"gun","ammo":0,"frame":0,"items":[]},{"kind":"katana"}]:
+		rig.set_items(["bionic_arm"],"laser","pistol",equipment)
+		for angle in [0.0,PI]:
+			rig.set_state({"aim":angle,"off_aim":angle,"shove":-1.,"time":10.0}); rig.set_state({"time":11.0})
+			rig.set_state({"shove":.45,"shove_aim":angle})
+			_check(rig.is_shoving() and rig.rest_pivot.visible and rig.off_pivot.visible,"the natural hand shoves independently of third-arm equipment")
+			_check(rig.rest_pivot.position.distance_to(rig.natural_off_socket)<12 and rig.off_pivot.position.distance_to(rig.natural_off_socket)>5,"palm stays at the human shoulder rather than the mechanical mount")
+			rig.set_state({"shove":-1.})
+	_fresh(); run.build.off = {"kind":"gun","ammo":0,"frame":0,"items":[]}; run.recompute(); a.villain.set_items()
+	a.P.firing2_t=0.; a.projs.clear(); a.beams.clear()
+	Input.action_press("shove"); a._update_play(1.0/60.0); Input.action_release("shove")
+	_check(a.shove.active() and a.P.firing2_t<=0.,"LT/right mouse pushes without firing the mechanical gun")
 	print("SHOVE TESTS: %d checks, %d failures" % [checks,failures]); quit(1 if failures else 0)

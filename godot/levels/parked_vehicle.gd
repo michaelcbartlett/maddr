@@ -4,7 +4,7 @@ const CATALOG_PATH := "res://art/vehicles/catalog.json"
 const LightPoolScript = preload("res://fx/light_pool.gd")
 static var _catalog: Array=[]
 static var _textures: Dictionary={}
-static var _lens_texture: Texture2D
+static var _lens_masks: Dictionary={}
 const BODY_HEIGHT := 38.0
 const BUMPER_CLEARANCE := 8.0
 var record: Dictionary={}
@@ -59,21 +59,36 @@ func setup(data: Dictionary) -> void:
 	add_child(sprite)
 	_police=entry.police; _phase=float(data.get("siren_phase",0.0))
 	if _police:
-		if _lens_texture==null:
-			var image:=Image.create(1,1,false,Image.FORMAT_RGBA8); image.fill(Color.WHITE)
-			_lens_texture=ImageTexture.create_from_image(image)
 		for point in frame.bulbs: _bulbs.append(sprite.position+Vector2(point[0],point[1])*_scale)
-		var axis:=_bulbs[1]-_bulbs[0]
 		var material:=CanvasItemMaterial.new(); material.light_mode=CanvasItemMaterial.LIGHT_MODE_UNSHADED; material.blend_mode=CanvasItemMaterial.BLEND_MODE_ADD
 		for i in 2:
-			var lens:=Sprite2D.new(); lens.texture=_lens_texture; lens.material=material
-			lens.position=_bulbs[i]; lens.rotation=axis.angle()
-			lens.scale=Vector2(axis.length()*0.75,8.0*_scale)
+			var region: Array=frame.lens_regions[i]
+			var lens:=Sprite2D.new(); lens.texture=_lens_mask(entry,frame,String(data.view),i); lens.material=material
+			# Share the base sprite's origin, scale and source-pixel offset. This
+			# avoids independently snapped rectangles drifting off the roof glass.
+			lens.centered=false; lens.position=sprite.position; lens.scale=sprite.scale
+			lens.offset=Vector2(region[0],region[1]); lens.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST
+			lens.set_meta("emitter_pixel",Vector2(frame.bulbs[i][0],frame.bulbs[i][1]))
 			lens.modulate=Color("#ff4433") if i==0 else Color("#398bff")
 			add_child(lens)
 			if i==0: lens_red=lens
 			else: lens_blue=lens
 	update_visual(0.0); queue_redraw()
+
+static func _lens_mask(entry: Dictionary, frame: Dictionary, view: String, index: int) -> Texture2D:
+	var key:=String(entry.id)+"/"+view+"/"+str(index)
+	if not _lens_masks.has(key):
+		var source: Image=(_textures[entry.id] as CanvasTexture).diffuse_texture.get_image()
+		if source.is_compressed(): source.decompress()
+		var region: Array=frame.lens_regions[index]
+		var image:=Image.create(region[2],region[3],false,Image.FORMAT_RGBA8); image.fill(Color.TRANSPARENT)
+		for y in image.get_height():
+			for x in image.get_width():
+				var color:=source.get_pixel(frame.region[0]+region[0]+x,frame.region[1]+region[1]+y)
+				var colored: bool=(color.r>56.0/255.0 and color.r>color.g*1.45 and color.r>color.b*1.2) if index==0 else (color.b>56.0/255.0 and color.b>color.r*1.35 and color.b>color.g*1.08)
+				if colored and color.a>0.5: image.set_pixel(x,y,Color(1,1,1,color.a*(0.25+0.55*maxf(color.r,maxf(color.g,color.b)))))
+		_lens_masks[key]=ImageTexture.create_from_image(image)
+	return _lens_masks[key]
 
 func siren_on(red: bool) -> bool:
 	if not _police or record.get("broken",false): return false

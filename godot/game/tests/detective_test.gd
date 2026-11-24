@@ -10,7 +10,7 @@ func _check(ok: bool, label: String) -> void:
 func _spawn(at: Vector2):
 	for e in a.enemies: e.queue_free()
 	a.enemies.clear(); a.ebul.clear(); a.walls = []
-	var e = a.make_enemy("det",at.x,at.y); e.shoot_cd = 2.0; e.action_cd = 0.0; e.action_phase = ""; e.spd = 104.0
+	var e = a.make_enemy("det",at.x,at.y); e.shoot_cd = 2.0; e.action_cd = 0.0; e.action_phase = ""; e.spd = 132.0
 	return e
 func _tick(e, dt: float) -> void:
 	var before := Vector2(e.x,e.y); e.tick(dt)

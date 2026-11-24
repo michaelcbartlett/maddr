@@ -8,6 +8,10 @@ signal cleared
 signal died
 
 var character_studio := false
+## Playtest of the opening waves: the real wave, loot, health and shop rules on the rainy street, cops only.
+var studio_waves := false
+const WORLD_WAVES := 5
+func sandbox() -> bool: return character_studio and not studio_waves
 var studio_outdoors := true
 var water_reflections: Node2D
 
@@ -48,6 +52,7 @@ class PlayerState:
 	var inv := 0.0
 	var aim := 0.0
 	var moving := false
+	var move_velocity := Vector2.ZERO
 	var walk := 0.0
 	var idle_t := 0.0
 	var recoil := 0.0
@@ -81,6 +86,7 @@ class PlayerState:
 
 var P := PlayerState.new()
 var state := "done"           # play | clear | done | over
+var teleport_arrival: Node2D
 var time := 0.0
 var wave_t := 0.0
 var wave_dur := 60.0
@@ -184,6 +190,7 @@ func _apply_zoom() -> void:
 
 # =============== FLOW ===============
 func start_wave() -> void:
+	if teleport_arrival!=null:teleport_arrival.reset(self)
 	Run.recompute()
 	# Uncollected blueprints survive wave changes, but never carry into a different run.
 	var carried := pickups.filter(func(p): return p.has("blueprint") and _pickup_run_serial == Run.run_serial)
@@ -213,10 +220,10 @@ func start_wave() -> void:
 	P.x = arena_level.spawn.x; P.y = arena_level.spawn.y
 	heist.reset(self)
 	bank_vault.reset(self)
-	if character_studio:
+	if sandbox():
 		wave_dur = 0.0; wave_t = 0.0; banner_txt = ""; banner_t = 0.0; siren_t = 0.0
 	else:
-		var B = Run.boss_for(Run.wave)
+		var B = Run.boss_for(Run.wave) if not studio_waves else null
 		banner_txt = "WAVE %d · %s" % [Run.wave, arena_level.theme.name]
 		if B != null: banner_txt += " · %s INCOMING" % B.name
 		banner_t = 2.4; siren_t = 1.2; Sfx.play("siren")
@@ -227,6 +234,11 @@ func start_wave() -> void:
 	villain.prepare_for_play()
 	_sync_villain()
 	_primary_blade_previous = villain.rig.melee_sample(true)
+
+func begin_arrival() -> void:
+	if teleport_arrival==null:
+		teleport_arrival=preload("res://fx/teleport_arrival.gd").new();add_child(teleport_arrival)
+	teleport_arrival.begin(self)
 
 func _setup_level() -> void:
 	level = ("rainy_street" if studio_outdoors else "blank") if character_studio else Run.theme_for_wave(Run.wave)
@@ -244,13 +256,13 @@ func _setup_level() -> void:
 	ground.queue_redraw()
 
 func make_enemy(type: String, x: float, y: float) -> Enemy:
-	if character_studio and not _studio_allow: return null
+	if sandbox() and not _studio_allow: return null
 	var e := Enemy.new(); e.setup(self, type, x, y)
 	enemies.append(e); actors.add_child(e)
 	return e
 
 func end_wave() -> void:
-	if character_studio: return
+	if sandbox(): return
 	# Unused Teleport Pads (B action) vanish with this wave's arena; the action cooldown only starts on a trip.
 	consumables.pads.clear(); consumables.pads_armed = false
 	P.burn_t = 0.0; P.burn_dps = 0.0; P.flinch_t = 0.0; P.cackle_t = 1.6; P.moving = false
@@ -314,7 +326,7 @@ func _update_reactions(dt: float) -> void:
 	if randf() < dt*26.0: part(P.x+randf_range(-10,10),P.y-randf_range(0,34),randf_range(-8,8),-randf_range(30,60),0.35,[Color("#ff7a2a"),Color("#ffc84a"),Color("#ff4a1a")].pick_random(),3.0)
 	if P.burn_tick <= 0.0:
 		P.burn_tick += BURN_TICK
-		if not character_studio:
+		if not sandbox():
 			# Burn damage ignores the hit grace and never grants one.
 			var d := maxi(1,roundi(P.burn_dps*BURN_TICK)); P.hp -= d
 			add_num(P.x,P.y-24,"-"+str(d),Color("#ff8a30"),false)
@@ -330,10 +342,10 @@ func _reaction() -> Array:
 var studio_time := 0
 var _studio_allow := false
 var studio_force := false             # tests switch sparring on
-var studio_sparring := true          # 8 switches the cop and detective off and on
-var _studio_wait := {"cop":1.0,"det":2.0}
+var studio_sparring := true          # 8 switches between waves and free practice
+var _studio_wait := {"cop":1.0}
 
-## Playtest scene: one cop and one detective, back a few seconds after they fall.
+## Free practice: one cop, back a few seconds after he falls.
 func _update_sparring(dt: float) -> void:
 	if not studio_sparring or (Run.is_test_process() and not studio_force): return
 	for kind in _studio_wait:
@@ -341,7 +353,7 @@ func _update_sparring(dt: float) -> void:
 		_studio_wait[kind] -= dt
 		if _studio_wait[kind] <= 0.0: _studio_wait[kind] = 3.0; studio_target(kind,0.0,360.0)
 
-## Practice targets for the studio: 6 cop, 7 detective, 8 clear. He takes no damage there.
+## Practice targets for free practice: 6 cop, 7 detective. He takes no damage there.
 func studio_target(kind: String, health := 0.0, distance := 150.0) -> void:
 	var at := Vector2(P.x,P.y); var facing := P.aim
 	for i in 24:
@@ -360,29 +372,38 @@ func _unhandled_input(e: InputEvent) -> void:
 	if not character_studio or state != "play" or not e.is_pressed() or e.is_echo(): return
 	var key: int = e.physical_keycode if e is InputEventKey else 0
 	var button: int = e.button_index if e is InputEventJoypadButton else -1
-	if key == KEY_1 or button == JOY_BUTTON_DPAD_LEFT: P.flinch_t = FLINCH; P.inv = 0.4
+	if key == KEY_8: studio_mode(not studio_waves); return
+	if key == KEY_9 and studio_waves: wave_t = 0.0; return
+	if studio_waves and key != KEY_5 and button != JOY_BUTTON_BACK: return
+	if key == KEY_1 or button == JOY_BUTTON_DPAD_LEFT: P.flinch_t = FLINCH; P.inv = Run.hit_protection_duration(3.0)
 	elif key == KEY_2 or button == JOY_BUTTON_DPAD_RIGHT: P.cackle_t = 1.6
 	elif key == KEY_3 or button == JOY_BUTTON_DPAD_DOWN: ignite_player()
 	elif key == KEY_4: P.zap_t = 0.8
 	elif key == KEY_6: studio_target("cop")
 	elif key == KEY_7: studio_target("det")
-	elif key == KEY_8:
-		studio_sparring = not studio_sparring; _studio_wait = {"cop":0.5,"det":0.5}
-		for foe in enemies: foe.gfx.skip_corpse = true; foe.queue_free()
-		enemies.clear(); ebul.clear(); shove.reset()
 	elif key == KEY_5 or button == JOY_BUTTON_BACK:
 		studio_time = (studio_time+1)%arena_level.STUDIO_TIMES.size(); ambient.color = arena_level.STUDIO_TIMES[studio_time]
 
-func hurt_player(a: float) -> void:
-	if P.inv > 0 or dash.safe() or state != "play": return
-	if character_studio:   # sparring: he reacts but never loses health
+## Waves start over from wave 1; free practice empties the street.
+func studio_mode(waves: bool) -> void:
+	studio_waves = waves
+	if waves: Run.new_run()
+	start_wave()
+
+func hurt_player(a: float) -> bool:
+	# All attackers share the same damage grace. Tolerance avoids float residue
+	# swallowing a contact that lands exactly when the window expires.
+	if P.inv > 0.000001 or dash.safe() or state != "play": return false
+	if sandbox():   # sparring: he reacts but never loses health
 		if not Run.is_test_process() or studio_force:
-			P.inv = 0.4; P.flinch_t = FLINCH; P.cackle_t = 0.0; shake = maxf(shake, 4); Controls.rumble(0.2, 0.4, 110); snd("hurt")
-		return
+			P.inv = Run.hit_protection_duration(a); P.flinch_t = FLINCH; P.cackle_t = 0.0; shake = maxf(shake, 4); Controls.rumble(0.2, 0.4, 110); snd("hurt")
+			return true
+		return false
 	var d := maxi(1, roundi(a * 15.0 / (15.0 + maxf(0.0, Run.S.armor))))
-	P.hp -= d; P.inv = 0.4; P.flinch_t = FLINCH; P.cackle_t = 0.0; shake = maxf(shake, 6); Controls.rumble(0.3, 0.7, 160)
+	P.hp -= d; P.inv = Run.hit_protection_duration(d); P.flinch_t = FLINCH; P.cackle_t = 0.0; shake = maxf(shake, 6); Controls.rumble(0.3, 0.7, 160)
 	add_num(P.x, P.y - 24, "-" + str(d), Color("#ff4a4a"), true); snd("hurt")
 	if P.hp <= 0: P.hp = 0; state = "over"; died.emit()
+	return true
 
 func live_foes() -> Array:
 	return enemies.filter(func(e): return not e.dead and not e.ally)
@@ -652,7 +673,7 @@ func kill(e: Enemy) -> void:
 		var v: float = 40.0 + Run.wave * 5.0 if e.boss else e.scrap * Run.kill_scrap_mult() * Run.drop_value_mult()
 		var n := 24 if e.boss else clampi(int(e.scrap), 1, 4)
 		for i in n: pickups.append({"x": e.x + randf_range(-8, 8), "y": e.y + randf_range(-8, 8), "v": v / n, "vx": randf_range(-60, 60), "vy": randf_range(-60, 60), "mag": false})
-	if not e.civ and not e.ally:
+	if not e.civ and not e.ally and not character_studio:
 		for i in Run.intel_drops(e.boss, randf()): drop_intel(Vector2(e.x, e.y))
 	if e.boss:
 		if e.hero == "vex": preload("res://game/rival_scientist.gd").cleanup(e)
@@ -779,7 +800,7 @@ func fire_gun(type: String, ang: float, mul: float, ox: float, oy: float, sus, b
 		else:
 			var ptype := "bolt" if type == "laser" else type   # laser bolt: fastest projectile, red, no ricochet
 			var sp := 620.0 if type == "bullet" else (900.0 if ptype == "bolt" else 380.0)
-			var r: float = maxf(3.0, D.width / 3.5) if type != "razor" else maxf(6.0, D.width / 2.2)
+			var r := Run.shot_radius(type)
 			var pr := {"type": ptype, "x": ox, "y": oy, "vx": cx * sp, "vy": sy * sp, "r": r, "dmg": dmg, "mul": mul, "pierce": int(S.pierce),
 				"life": D.range / sp * (1.6 if type == "razor" else 1.0), "hit": {}, "spin": 0.0, "bounces": 2 if type == "razor" else 0,
 				"trail":PackedVector2Array([Vector2(ox,oy)]),"color":color,"source":source,"shot":i}
@@ -1059,6 +1080,7 @@ func _update_helmet(dt: float) -> void:
 	var candidates := enemies.filter(func(e): return not e.dead and not e.ally and not e.civ and Vector2(e.x - P.x, e.y - P.y).length_squared() <= 110.0 * 110.0)
 	var origin := Vector2(P.x, P.y)
 	var source := villain.anchor("helmet")
+	var previous: Enemy = null
 	var used := false
 	for jump in 3:
 		var target: Enemy = null; var distance := INF
@@ -1067,10 +1089,24 @@ func _update_helmet(dt: float) -> void:
 			if d < distance and (jump == 0 or d <= 80) and nav.clear_segment(origin, point, 0): target = e; distance = d
 		if target == null: break
 		candidates.erase(target)
-		arcs.append({"x1":source.x, "y1":source.y, "x2":target.x, "y2":target.y - 10, "t":0.18, "col":Color("#90dfff")})
+		arcs.append({"x1":source.x, "y1":source.y, "x2":target.x, "y2":target.y - 10, "t":0.18, "col":Color("#90dfff"),
+			"helmet":jump == 0, "from_enemy":weakref(previous) if previous != null else null, "to_enemy":weakref(target)})
 		hit(target, 3.0, {"col":Color("#9cdeff"), "element":"lightning"})
-		origin = Vector2(target.x, target.y); source = origin - Vector2(0, 10); used = true
+		origin = Vector2(target.x, target.y); source = origin - Vector2(0, 10); previous = target; used = true
 	if used: P.helmet_cd = 1.5; snd("zap")
+
+## Only the visual endpoints follow their actors; damage is applied once at discharge.
+func _refresh_helmet_arcs() -> void:
+	for arc in arcs:
+		if not arc.has("helmet"): continue
+		if arc.helmet:
+			var source := villain.anchor("helmet")
+			arc.x1 = source.x; arc.y1 = source.y
+		elif arc.from_enemy != null:
+			var source = arc.from_enemy.get_ref()
+			if is_instance_valid(source): arc.x1 = source.x; arc.y1 = source.y - 10.0
+		var target = arc.to_enemy.get_ref()
+		if is_instance_valid(target): arc.x2 = target.x; arc.y2 = target.y - 10.0
 
 func _update_utility(dt: float) -> void:
 	for kind in Run.arm_cooldowns: Run.arm_cooldowns[kind] = maxf(0.0,Run.arm_cooldowns[kind]-dt)
@@ -1127,13 +1163,21 @@ func _outside_spawn(radius_min: float = 260.0) -> Vector2:
 		if point.distance_squared_to(Vector2(P.x, P.y)) >= radius_min * radius_min and not in_wall(point.x, point.y, 28): return point
 	return point
 
+## The street is far larger than the view: keep the fight near the villain instead of across the map.
+func _street_spawn() -> Vector2:
+	for attempt in 40:
+		var point := Vector2(P.x, P.y) + Vector2.from_angle(randf() * TAU) * randf_range(340.0, 720.0)
+		if point.x < 60 or point.y < 60 or point.x > AW - 60 or point.y > AH - 60 or in_wall(point.x, point.y, 28): continue
+		return point
+	return _outside_spawn()
+
 func spawn_group() -> void:
-	if character_studio: return
+	if sandbox(): return
 	var cap := 30 + Run.wave * 5
 	if enemies.filter(func(enemy): return not enemy.dead).size() >= cap: return
-	var point := _outside_spawn()
+	var point := _outside_spawn() if not studio_waves else _street_spawn()
 	var count := randi_range(1, 3) + floori(Run.wave / 4.0)
-	var type := pick_type()
+	var type := pick_type() if not studio_waves else "cop"
 	count = mini(count, int(Run.ET[type].get("group_size", 99)))
 	count = mini(count, cap - enemies.filter(func(e): return not e.dead).size() - markers.size())
 	for i in count:
@@ -1182,11 +1226,13 @@ func _process(dt: float) -> void:
 	_sync(dt)
 
 func _update_play(dt: float) -> void:
+	if teleport_arrival!=null and teleport_arrival.active:
+		teleport_arrival.tick(self,dt);return
 	var S := Run.S; var D := Run.D
-	if character_studio: _update_sparring(dt)
-	if not character_studio: wave_t -= dt
+	if sandbox(): _update_sparring(dt)
+	if not sandbox(): wave_t -= dt
 	if siren_t > 0: siren_t -= dt
-	if not character_studio and wave_t <= 0: wave_t = 0; end_wave(); heist.timeout(self); return
+	if not sandbox() and wave_t <= 0: wave_t = 0; end_wave(); heist.timeout(self); return
 	if heist.update(self, dt): return
 	bank_vault.update(self, dt)
 	SceneryDamage.tick(self, dt)
@@ -1207,13 +1253,14 @@ func _update_play(dt: float) -> void:
 	var aim_step := clampf(da,-MeleeMotion.TURN_SPEED*dt,MeleeMotion.TURN_SPEED*dt) if primary_melee else da * minf(1.0,dt*20.0)
 	P.primary_swinging = primary_melee and absf(aim_step) / maxf(dt,0.00001) >= MeleeMotion.CUT_SPEED
 	var mv := Controls.move_vec()
+	var move_from := Vector2(P.x,P.y)
 	var ml := minf(1.0, mv.length()); P.moving = ml > 0.0
 	var action := Run.equipped_action()
 	if action != "" and Input.is_action_just_pressed("boss_action"): BossAbilities.start_action(self,action)
 	var acting := not boss_move.is_empty()
 	BossAbilities.update_action(self,dt)
 	if Input.is_action_just_pressed("dash"): dash.press()
-	if Input.is_action_just_pressed("fire_off"): shove.press()
+	if Input.is_action_just_pressed("shove"): shove.press()
 	var dashing: bool = dash.update(self,dt,mv,P.aim,Input.is_action_pressed("dash"),firing or rear_firing)
 	if dashing: firing = false; rear_firing = false; P.primary_swinging = false
 	if ml > 0.0 and not acting and not dashing:
@@ -1225,6 +1272,7 @@ func _update_play(dt: float) -> void:
 	else: P.idle_t += dt
 	P.x = clampf(P.x, 28, AW - 28); P.y = clampf(P.y, 28, AH - 28)
 	if not walls.is_empty(): collide_walls(P, P.r)
+	P.move_velocity=(Vector2(P.x,P.y)-move_from)/maxf(dt,0.00001)
 	if P.inv > 0: P.inv -= dt
 	if P.slow_t > 0: P.slow_t -= dt
 	P.hp = minf(D.maxHp, P.hp + S.regen * dt)
@@ -1277,17 +1325,17 @@ func _update_play(dt: float) -> void:
 	if mines.size() > 0: mine_t += dt
 	else: mine_t = 0.0
 	if Input.is_action_just_pressed("detonate") and mines.size() > 0: detonate()
-	if not character_studio:
+	if not sandbox():
 		# ---- spawning ----
 		spawn_t -= dt
 		if spawn_t <= 0:
 			spawn_t = maxf(0.5, 1.7 - Run.wave * 0.06) * randf_range(0.7, 1.3) / Run.spawn_mult()
 			spawn_group()
-		if Run.boss_for(Run.wave) != null and boss == null and wave_t < wave_dur - 3 and not enemies.any(func(e): return e.boss) and not P.boss_spawned:
+		if not studio_waves and Run.boss_for(Run.wave) != null and boss == null and wave_t < wave_dur - 3 and not enemies.any(func(e): return e.boss) and not P.boss_spawned:
 			P.boss_spawned = true
 			markers.append({"x": AW - 150.0 if P.x < AW / 2.0 else 150.0, "y": AH / 2.0, "t": 1.4, "type": "boss"})
 		# ---- civilians wander in, panic, drop cash when hit and escape at the edges ----
-		if true:
+		if not studio_waves:
 			civ_t -= dt
 			if civ_t <= 0:
 				civ_t = randf_range(4, 8)
@@ -1302,7 +1350,7 @@ func _update_play(dt: float) -> void:
 		if not nv.hit and absf(Vector2(P.x - nv.x, P.y - nv.y).length() - nv.r) < 16:
 			nv.hit = true; hurt_player(nv.dmg); P.slow_t = 2.5; add_num(P.x, P.y - 36, "FROZEN!", Color("#9ef0ff"), true)
 	novas = novas.filter(func(nv): return nv.r < nv.max)
-	if not character_studio:
+	if not sandbox():
 		for m in markers:
 			m.t -= dt
 			if m.t <= 0:
@@ -1311,7 +1359,7 @@ func _update_play(dt: float) -> void:
 				poof(m.x, m.y, Color("#4a6ad8"), 6, 60)
 		markers = markers.filter(func(m): return m.t > 0)
 	# ---- plutonium crates ----
-	if not character_studio:
+	if not sandbox():
 		crate_t -= dt
 		if crate_t <= 0:
 			crate_t = randf_range(10, 16); var x := 0.0; var y := 0.0; var tr := 0
@@ -1398,6 +1446,7 @@ func _update_enemies(dt: float) -> void:
 		e.x = clampf(e.x, 20, AW - 20); e.y = clampf(e.y, 20, AH - 20)
 		if not walls.is_empty() and not e.fly: collide_walls(e, e.r, Vector2(e.px, e.py))
 
+const WALL_SHOT_R := 6.0     # wide shots still slip past cars and lamps
 func _update_projs(dt: float) -> void:
 	for projectile in projs:
 		if projectile.type == "rocket": BossAbilities.update_rocket(self,projectile,dt); continue
@@ -1410,7 +1459,7 @@ func _update_projs(dt: float) -> void:
 			var start = Vector2(projectile.x,projectile.y)
 			var velocity = Vector2(projectile.vx,projectile.vy)
 			var finish = start+velocity*remaining
-			var wall = _projectile_wall_hit(start,finish,projectile.r)
+			var wall = _projectile_wall_hit(start,finish,minf(projectile.r,WALL_SHOT_R))
 			if not wall.is_empty(): finish = start.lerp(finish,wall.fraction)
 			var contacts: Array = []
 			for enemy in enemies:
@@ -1507,11 +1556,14 @@ func _sync(dt: float) -> void:
 		else: alive.append(e); e.sync()
 	enemies = alive
 	_sync_villain()
+	_refresh_helmet_arcs()
 	_refresh_beams()
 	_sync_beam_views()
 	for prop in arena_level.prop_nodes:
 		if prop.has_method("update_visual"): prop.update_visual(time)
 	var wet_emitters: Array=[]
+	if teleport_arrival!=null and teleport_arrival.active:
+		wet_emitters.append({"pos":Vector2(P.x,P.y+8.),"col":teleport_arrival.COLOR,"e":teleport_arrival.strength()*2.0})
 	for prop in arena_level.prop_nodes:
 		if prop.has_method("wet_emissions") and prop.global_position.distance_squared_to(Vector2(P.x,P.y))<800.0*800.0:
 			wet_emitters.append_array(prop.wet_emissions())
@@ -1535,15 +1587,18 @@ func _sync_villain() -> void:
 	villain.set_ground_lift(lift)
 	villain.visible = P.disguise_t <= 0.0
 	var react := _reaction()
-	villain.set_state({"reaction":react[0],"reaction_time":react[1],"aim": P.aim, "off_aim": P.aim+PI, "moving": P.moving, "walk_phase": fposmod(P.walk / 8.0, 1.0), "recoil": P.recoil, "flash": P.flash_t,
+	villain.set_state({"reaction":react[0],"reaction_time":react[1],"aim": P.aim, "off_aim": P.aim+PI, "moving": P.moving, "move_velocity":P.move_velocity,"move_speed":float(Run.D.speed), "walk_phase": fposmod(P.walk / 8.0, 1.0), "recoil": P.recoil, "flash": P.flash_t,
 		"recoil2": P.recoil2, "flash2": P.flash_t2, "firing": P.firing_t > 0, "firing2": P.firing2_t > 0,
-		"white": P.inv > 0.3, "zap": P.zap_t > 0,"gun_flashes":gun_flashes,"time":time,"melee_extension":_melee_extension(),"melee_aim":_melee_pose_aim(),"melee_active":P.melee_t>0.0,"hook_out":grapple.is_out(),
+		"white": P.flinch_t > FLINCH-0.1, "zap": P.zap_t > 0,"gun_flashes":gun_flashes,"time":time,"melee_extension":_melee_extension(),"melee_aim":_melee_pose_aim(),"melee_active":P.melee_t>0.0,"hook_out":grapple.is_out(),
 		"shove":shove.progress() if shove.active() and not dash.active() else -1.0,"shove_aim":shove.aim,"dash_dir":dash.dir if dash.active() else Vector2.ZERO,"dash_progress":dash.progress(),"sprinting":dash.sprinting and P.moving,"sprint_dir":-1 if Controls.move_vec().x<0.0 else 1,
 		"capacitor_charge":laser_charge_display(),"capacitor_charge_off":laser_charge_display(true)})
-	villain.modulate.a = 0.5 if P.inv > 0 and P.inv < 0.28 and sin(time * 50) > 0 else 1.0
+	villain.modulate.a = 0.5 if P.inv > 0 and P.flinch_t <= FLINCH-0.1 and sin(time * 50) > 0 else 1.0
+	if teleport_arrival!=null:teleport_arrival.apply(self)
 
 func _add_lights() -> void:
 	var S := Run.S
+	if teleport_arrival!=null and teleport_arrival.active:
+		lights.add(Vector2(P.x,P.y-30),teleport_arrival.COLOR,teleport_arrival.strength()*2.2,170,60)
 	# Keep the player readable even when many projectiles request lights.
 	lights.add(Vector2(P.x-40,P.y-60),Color.WHITE if character_studio else Color("#fff2dc"),0.25 if character_studio else 0.55,140,60)
 	if P.burn_t > 0.0: lights.add(Vector2(P.x,P.y-24),Color("#ff8a3a"),0.8+randf()*0.3,80,30)
@@ -1833,7 +1888,7 @@ func _draw_fx_top(g: Node2D) -> void:
 		if p.type == "rocket": Viper.draw_missile(g,p,true)
 		elif p.type == "bullet":
 			if p.trail.size()>1: g.draw_polyline(p.trail,Color(1,0.84,0.42,0.7),maxf(1.0,p.r*0.7))
-			g.draw_rect(Rect2(p.x - p.r / 2, p.y - p.r / 2, p.r, p.r), Color("#ffe9a0"))
+			g.draw_rect(Rect2(p.x - p.r * 0.8, p.y - p.r * 0.8, p.r * 1.6, p.r * 1.6), Color("#ffe9a0"))
 		elif p.type == "freeze":
 			# a spinning ice crystal with a frosty trail
 			if p.trail.size()>1: g.draw_polyline(p.trail,Color(0.7,0.95,1.0,0.55),maxf(1.0,p.r*0.9))
@@ -1851,7 +1906,7 @@ func _draw_fx_top(g: Node2D) -> void:
 		elif p.type == "bolt":
 			# short red dash: glow streak behind a white-hot core
 			var dir := Vector2(p.vx, p.vy).normalized(); var head := Vector2(p.x, p.y)
-			g.draw_line(head - dir * 26.0, head, Color(1, 0.29, 0.29, 0.55), p.r * 1.6)
+			g.draw_line(head - dir * 26.0, head, Color(1, 0.29, 0.29, 0.55), p.r * 2.0)
 			g.draw_line(head - dir * 16.0, head, Color("#ffb0b0"), maxf(1.5, p.r * 0.7))
 			g.draw_circle(head, p.r * 0.6, Color("#fff0f0"))
 		else:

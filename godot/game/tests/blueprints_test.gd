@@ -116,6 +116,20 @@ func _run() -> void:
 	a.P.helmet_cd = 0; a._update_helmet(0.01)
 	_check(targets[0].hp == 97 and targets[1].hp == 97 and targets[2].hp == 97 and targets[3].hp == 100, "helmet chains 3 light hits inside 110 proximity only")
 	_check(civ.hp == 100 and a.arcs.size() == 3, "helmet ignores civilians and draws a chain from the helmet")
+	var old_source := Vector2(a.arcs[0].x1,a.arcs[0].y1)
+	var old_hp: float = targets[0].hp
+	a.P.x += 18; a.P.y += 7; targets[0].x += 6; targets[1].y += 9
+	a._sync_villain(); a._refresh_helmet_arcs()
+	var live_source := Vector2(a.arcs[0].x1,a.arcs[0].y1)
+	_check(live_source.distance_to(a.villain.anchor("helmet"))<0.001 and live_source.distance_to(old_source)>10,"the visible discharge follows the moving helmet")
+	_check(Vector2(a.arcs[0].x2,a.arcs[0].y2).distance_to(Vector2(targets[0].x,targets[0].y-10))<0.001,"helmet lightning stays attached to its moving target")
+	_check(Vector2(a.arcs[1].x1,a.arcs[1].y1).distance_to(Vector2(a.arcs[0].x2,a.arcs[0].y2))<0.001,"chain links share the same live enemy endpoint")
+	_check(targets[0].hp == old_hp,"moving lightning does not deal additional damage")
+	# A killed/freed target leaves its last endpoint without dereferencing a freed node.
+	var doomed = targets[2]; a.enemies.erase(doomed); doomed.free()
+	a._refresh_helmet_arcs()
+	_check(a.arcs.size()==3,"lightning can finish fading after its target is freed")
+	a.P.x -= 18; a.P.y -= 7; a._sync_villain()
 	a._update_helmet(0.1)
 	_check(targets[0].hp == 97, "helmet obeys its 1.5 second cooldown")
 	a.walls = [{"rect":Rect2(a.P.x + 20, a.P.y - 30, 10, 60), "open":false}]; a.nav.configure(a.walls, Vector2(Levels.AW, Levels.AH))
@@ -130,7 +144,7 @@ func _run() -> void:
 	for pos in a.arena_level.lamps:
 		var base := Rect2(pos - Vector2(5,5), Vector2(10,6))
 		_check(a.arena_level.STREET_SIDEWALKS.any(func(side): return Rect2(side).encloses(base)), "lamp %s has its whole base on concrete" % pos)
-		_check(a.arena_level.prop_nodes.any(func(n): return n.kind == "lamp_post" and n.position == pos + Vector2(0, 1)), "sidewalk lamp %s has a visible post" % pos)
+		_check(a.arena_level.prop_nodes.any(func(n): return n.kind == "lamp_post" and n.position == pos), "sidewalk lamp %s has a visible post" % pos)
 	if OS.get_cmdline_user_args().has("--screenshots"):
 		await _screenshots()
 	scene.queue_free(); await process_frame; await process_frame

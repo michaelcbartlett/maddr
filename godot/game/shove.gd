@@ -1,6 +1,6 @@
 extends RefCounted
-## LT / right mouse with an empty off hand: a palm shove in the direction he faces.
-## It does no damage itself. Enemies driven into a wall, a car or each other are slammed: hurt and stunned.
+## LT / right mouse: the natural off hand shoves even with a third arm equipped.
+## It does no damage itself. Solid-object impacts hurt; enemy bumps only stagger and transfer the push.
 
 const RANGE := 118.0           # reach from his centre, plus the enemy's radius
 const HALF_ANGLE := 0.87       # about 50 degrees either side of the aim
@@ -30,7 +30,7 @@ func reset() -> void:
 func active() -> bool: return t > 0.0
 func progress() -> float: return clampf(1.0 - t / SWING, 0.0, 1.0)
 func press() -> void: buffer_t = BUFFER
-static func available(run) -> bool: return run.build.off == null
+static func available(_run) -> bool: return true
 
 ## `pointing` is the raw right-stick (or mouse) direction; without it the current aim is used.
 func update(a, dt: float, run, blocked: bool, pointing := NAN) -> void:
@@ -98,7 +98,11 @@ func _slide(a, dt: float, run) -> void:
 			if o == e or o.dead or o.ally or o.civ or s.hit.has(o) or sliding.any(func(q): return q.e == o): continue
 			if Vector2(o.x - e.x, o.y - e.y).length() > o.r + e.r: continue
 			s.hit.append(o)
-			_slam(a, e, run, 0.5, BUMP_STUN); _slam(a, o, run, 0.5, BUMP_STUN)
+			# Crowd displacement is non-damaging, including either participant.
+			# Only the solid-wall/prop collision above invokes _slam.
+			for bumped in [e,o]:
+				if not bumped.boss and not bumped.vehicle: bumped.stun_t=maxf(bumped.stun_t,BUMP_STUN)
+			a.snd("thud")
 			if not o.dead and not o.boss and not o.vehicle: _send(o, s.dir, s.total * 0.4 * (HEAVY_SHARE if o.heavy else 1.0), [e])
 			s.total *= 0.6
 			if e.dead: break

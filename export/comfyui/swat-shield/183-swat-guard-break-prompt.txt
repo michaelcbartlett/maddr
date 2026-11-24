@@ -1,0 +1,26 @@
+subject_definitions:
+<Subject 1> is the one armored riot officer in <Picture 1>, exactly as drawn.
+<Picture 2> is a calibration color swatch only; its object must NOT appear.
+
+summary:
+[reference generation] The shield guard opens and recovers, twice.
+
+retention_analysis:
+<Picture 1>: fully_preserved - stocky proportions, oversized navy helmet, clear rigid visor, eyebrows and eyes, black face mask, navy armor and pouches, NYPD chest and shoulder patches, black gloves and boots, short straight black baton, tall rigid slate-gray riot shield with its existing NYPD panel, chunky pixel clusters, thick black outlines and palette.
+<Picture 2>: not_preserved - never show the calibration object.
+
+detailed_description:
+One full-body riot officer in the original three-quarter SCREEN-RIGHT-facing view. Fixed equipment handedness: the near arm, originating on screen-left of the torso, holds the baton; the far arm, originating on screen-right, holds the shield. These are the same physical hands in every frame. Do not mirror him, exchange hands, turn his body or hide the head inside the shield. Shoulder joints stay attached to the same places on the torso. The rigid shield moves as one solid object and does not bend, shrink, dissolve into his body or grow another hand.
+
+His root stays in place; the game supplies horizontal movement. Shield held upright in the far/screen-right hand, covering chest and abdomen, top just below his eyes; visor and eyes remain visible. Baton stays in the near/screen-left hand. At 0.4 and 2.7 mime losing balance: shield arm flung outward and low, chest exposed, head jerks back, front boot lifts. Hold the exposed pose 0.35, wobble, then pull shield back to guard by 1.8 after each start. Do not drop shield or baton.
+
+No sparks, stars, smoke, dust, speed lines, flashes, impact marks or loose particles; the game adds effects. No other character or target.
+
+Keep face, armor panels, helmet, visor, shield size, baton length, limb lengths and body scale consistent throughout. Do not add a rifle, pistol, second shield, second baton or extra limbs. Preserve existing NYPD markings without adding new lettering. Both props stay held unless the action explicitly releases or stows them. The shield can occlude his far forearm but cannot cut through his face or near baton arm.
+Locked orthographic-style camera: identical position, zoom and size, no orbit, pan, cuts, crossfades or reframing. Whole helmet, feet and all held or dropped props remain inside the frame with margin. Uniform flat dark blue-gray background, no ground shadow, scenery or floor texture. Crisp separate pixel-art frames; no motion blur, ghosting, frame blending, texture crawling or smoothing.
+
+overall_soundscape:
+Silent. No speech, sound effects or music.
+
+non_diegetic_music:
+N/A
