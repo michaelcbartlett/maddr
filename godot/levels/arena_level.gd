@@ -147,7 +147,7 @@ func build_blank() -> void:
 	_spawn_streetlight(post,STUDIO_LAMP_SCALE)
 	navigation.configure(walls,size); queue_redraw()
 
-func build_rainy_street() -> void:
+func build_rainy_street(mission := false) -> void:
 	if _floor_sprite == null: _ready()
 	theme_id = "rainy_street"
 	theme = {"name":"RAINY STREETS","ambient":STUDIO_TIMES[0],"wall":Color("#303944"),
@@ -171,10 +171,33 @@ func build_rainy_street() -> void:
 		tile.texture = textures[i]; tile.position = Vector2(i*FLOOR_TILE_WIDTH,0)
 		var material := ShaderMaterial.new(); material.shader = FLOOR_SHADER; tile.material = material
 	lamps = RainyStreet.lamp_positions()
+	if mission:
+		lamps.clear()
+		for x in range(200,3200,520):
+			lamps.append(Vector2(x,1005))
+			lamps.append(Vector2(x+110,1328))
 	for post in lamps:
 		_spawn_streetlight(post,STUDIO_LAMP_SCALE)
 	if parking_seed<0: parking_seed=randi()
-	for parking in RainyStreet.parking_layout(parking_seed):
+	var parking_slots: Array = RainyStreet.parking_layout(parking_seed)
+	if mission:
+		spawn = Vector2(95,1100)
+		walls.append({"rect":Rect2(0,0,size.x,991), "open":false})
+		walls.append({"rect":Rect2(0,1300,size.x,size.y-1300), "open":false})
+		parking_slots.clear()
+		# Diner turnout, delivery chicane, split crossing, alley throat, final cordon.
+		var formations := [
+			["police-sedan","left",480,1042],
+			["cargo-van","left",826,1034], ["police-sedan","front_left",1152,1247],
+			["police-sedan","right",1595,1146],
+			["compact-hatchback","left",2180,1255], ["police-sedan","right",2180,1037],
+			["police-sedan","front_right",2724,1043], ["police-sedan","rear_left",3048,1256]
+		]
+		for slot in formations:
+			var body := ParkedVehicle.footprint(slot[0],slot[1])
+			var center := Vector2(slot[2],slot[3])
+			parking_slots.append({"vehicle_id":slot[0], "view":slot[1], "rect":Rect2(center-body/2,body), "siren_phase":parking_slots.size()*0.21})
+	for parking in parking_slots:
 		var data: Dictionary=parking.duplicate(true)
 		data.merge({"kind":"car","color":Color.WHITE,"police":data.vehicle_id=="police-sedan","h":ParkedVehicle.BODY_HEIGHT,
 			"hp":160.0,"max_hp":160.0,"material":"metal","flammable":true,"broken":false,

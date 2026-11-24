@@ -63,6 +63,7 @@ Invoke-GodotCheck 'combat-rules' @('--headless', '--script', 'res://game/tests/c
 Invoke-GodotCheck 'melee' @('--headless', '--script', 'res://game/tests/melee_test.gd')
 Invoke-GodotCheck 'controller-ui' @('--headless', '--script', 'res://game/tests/controller_ui_test.gd')
 Invoke-GodotCheck 'game-select' @('--headless', '--script', 'res://game/tests/game_select_test.gd', '--', '--character-studio')
+Invoke-GodotCheck 'opening-mission' @('--headless', '--script', 'res://game/tests/opening_mission_test.gd', '--', '--character-studio', '--mission', '--wave', '1')
 Invoke-GodotCheck 'teleport-arrival' @('--headless', '--script', 'res://game/tests/teleport_arrival_test.gd', '--', '--character-studio')
 Invoke-GodotCheck 'ebola' @('--headless', '--script', 'res://game/tests/ebola_test.gd')
 Invoke-GodotCheck 'shrink-ray' @('--headless', '--script', 'res://game/tests/shrink_test.gd')

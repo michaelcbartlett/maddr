@@ -47,6 +47,8 @@ func _ready() -> void:
 	add_child(level_music)
 	arena = Arena.new(); arena.character_studio = character_studio
 	arena.studio_waves = character_studio and not args.has("--practice") and not Run.is_test_process()
+	arena.campaign_entry = character_studio and not args.has("--practice") and (not Run.is_test_process() or args.has("--mission"))
+	if args.has("--mission"): arena.studio_waves = character_studio
 	arena.studio_outdoors = not args.has("--blank-studio")
 	arena.process_mode = Node.PROCESS_MODE_PAUSABLE; add_child(arena)
 	arena.cleared.connect(_on_cleared); arena.died.connect(func(): _game_over(false))
@@ -166,6 +168,7 @@ func _select_game(slot: int) -> void:
 	if not Run.select_save_slot(slot):game_select_s.message.text=Run.save_slots.error;return
 	Run.new_run()
 	# The first mission precedes the Lab reveal. Keep the current street prototype.
+	arena.campaign_entry = character_studio
 	arena.studio_waves=character_studio
 	_start_wave()
 	if Run.is_test_process():arena.begin_arrival()  # Exercise real menu entry without changing direct test hooks.
@@ -194,6 +197,8 @@ func _start_wave() -> void:
 	_show("play")
 
 func _on_cleared() -> void:
+	if arena.opening_mission and _auto >= 0:
+		print("Opening mission cleared at %.1fs with %.1f HP" % [_t, arena.P.hp])
 	if Run.wave >= (Arena.WORLD_WAVES if character_studio else int(Run.RULES.waves.last)): _game_over(true); return
 	Run.open_shop_for_next_wave(); shop_s.refresh(); _show("shop")
 
@@ -242,6 +247,8 @@ func _process(dt: float) -> void:
 	if arena.sandbox() and state == "play":
 		hud.visible = arena.P.size_t>0.0 or not arena.consumables.coils.is_empty() or Run.consumable_charges.values().any(func(n): return n>0)
 	if _auto < 0: return
+	if arena.opening_mission and state in ["shop", "over"] and OS.get_cmdline_user_args().has("--mission"):
+		_finish(); return
 	_t += dt
 	if state == "title": _enter_lab()
 	elif state == "design" and _t > 0.5: _open_difficulty()
@@ -257,10 +264,24 @@ func _bot(_dt: float) -> void:
 	# a dumb bot: circle the arena centre, aim at the nearest cop, hold fire (via the input actions)
 	var P := arena.P
 	var c: Vector2 = arena.arena_level.spawn + Vector2(cos(_t * 0.7), sin(_t * 0.7)) * 220
+	if arena.opening_mission:
+		c = arena.opening_mission.bot_target(arena, _t)
+		var here := Vector2(P.x,P.y)
+		if not arena.nav.clear_segment(here,c,P.r + 2):
+			var path: PackedVector2Array = arena.nav.path(here,c)
+			for i in range(path.size()-1,-1,-1):
+				if here.distance_to(path[i]) > 12 and arena.nav.clear_segment(here,path[i],P.r + 1):
+					c = path[i]
+					break
 	var mv := (c - Vector2(P.x, P.y)).limit_length(60) / 60.0
 	_axis("move_right", maxf(0, mv.x)); _axis("move_left", maxf(0, -mv.x)); _axis("move_down", maxf(0, mv.y)); _axis("move_up", maxf(0, -mv.y))
 	var e := arena.nearest_foe(P.x, P.y)
-	if e: P.aim = atan2(e.y - P.y, e.x - P.x)
+	if e:
+		if arena.opening_mission:
+			var hitbox := EnemyView.hurt_shape(e)
+			var target: Vector2 = (hitbox.high + hitbox.low) / 2
+			P.aim = (target - arena.villain.shoulder_global()).angle()
+		else: P.aim = atan2(e.y - P.y, e.x - P.x)
 	Controls.aim_src = "pad"
 	if e: Input.action_press("fire")
 	else: Input.action_release("fire")
@@ -273,6 +294,8 @@ func _axis(a: String, v: float) -> void:
 	else: Input.action_release(a)
 
 func _finish() -> void:
+	if arena.opening_mission:
+		print("Mission progress: %d roadblocks, room=%s, player=(%d,%d)" % [arena.opening_mission.block, arena.opening_mission.bank.room, arena.P.x, arena.P.y])
 	_auto = -1
 	print("AUTOPLAY done: state=%s wave=%d kills=%d scrap=%d hp=%.1f enemies=%d lights=%d" % [state, Run.wave, Run.kills, Run.scrap, arena.P.hp, arena.enemies.size(), arena.lights.count()])
 	if _shot != "":

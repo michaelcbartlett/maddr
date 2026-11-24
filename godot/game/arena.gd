@@ -10,6 +10,9 @@ signal died
 var character_studio := false
 ## Playtest of the opening waves: the real wave, loot, health and shop rules on the rainy street, cops only.
 var studio_waves := false
+const OpeningMission = preload("res://levels/opening_mission.gd")
+var opening_mission: OpeningMission
+var campaign_entry := false
 const WORLD_WAVES := 5
 func sandbox() -> bool: return character_studio and not studio_waves
 var studio_outdoors := true
@@ -220,7 +223,9 @@ func start_wave() -> void:
 	P.x = arena_level.spawn.x; P.y = arena_level.spawn.y
 	heist.reset(self)
 	bank_vault.reset(self)
-	if sandbox():
+	if opening_mission:
+		wave_dur = 0; wave_t = 0; banner_txt = "MERCANTILE DISTRICT"; banner_t = 2; siren_t = 1
+	elif sandbox():
 		wave_dur = 0.0; wave_t = 0.0; banner_txt = ""; banner_t = 0.0; siren_t = 0.0
 	else:
 		var B = Run.boss_for(Run.wave) if not studio_waves else null
@@ -242,7 +247,10 @@ func begin_arrival() -> void:
 
 func _setup_level() -> void:
 	level = ("rainy_street" if studio_outdoors else "blank") if character_studio else Run.theme_for_wave(Run.wave)
-	if character_studio and studio_outdoors: arena_level.build_rainy_street()
+	cam.limit_left = 0
+	cam.limit_top = 0
+	opening_mission = OpeningMission.new() if campaign_entry and studio_waves and studio_outdoors and Run.wave == 1 else null
+	if character_studio and studio_outdoors: arena_level.build_rainy_street(opening_mission != null)
 	elif character_studio: arena_level.build_blank()
 	else: arena_level.build(level)
 	bg.visible = false
@@ -253,6 +261,8 @@ func _setup_level() -> void:
 	walls = arena_level.walls
 	AW = int(arena_level.size.x); AH = int(arena_level.size.y)
 	cam.limit_right = AW; cam.limit_bottom = AH
+	if opening_mission:
+		cam.limit_top = 795; cam.limit_bottom = 1335
 	ground.queue_redraw()
 
 func make_enemy(type: String, x: float, y: float) -> Enemy:
@@ -1230,9 +1240,9 @@ func _update_play(dt: float) -> void:
 		teleport_arrival.tick(self,dt);return
 	var S := Run.S; var D := Run.D
 	if sandbox(): _update_sparring(dt)
-	if not sandbox(): wave_t -= dt
+	if not sandbox() and not opening_mission: wave_t -= dt
 	if siren_t > 0: siren_t -= dt
-	if not sandbox() and wave_t <= 0: wave_t = 0; end_wave(); heist.timeout(self); return
+	if not sandbox() and not opening_mission and wave_t <= 0: wave_t = 0; end_wave(); heist.timeout(self); return
 	if heist.update(self, dt): return
 	bank_vault.update(self, dt)
 	SceneryDamage.tick(self, dt)
@@ -1325,7 +1335,10 @@ func _update_play(dt: float) -> void:
 	if mines.size() > 0: mine_t += dt
 	else: mine_t = 0.0
 	if Input.is_action_just_pressed("detonate") and mines.size() > 0: detonate()
-	if not sandbox():
+	if opening_mission:
+		opening_mission.update(self,dt)
+		if state != "play": return
+	elif not sandbox():
 		# ---- spawning ----
 		spawn_t -= dt
 		if spawn_t <= 0:
@@ -1359,7 +1372,7 @@ func _update_play(dt: float) -> void:
 				poof(m.x, m.y, Color("#4a6ad8"), 6, 60)
 		markers = markers.filter(func(m): return m.t > 0)
 	# ---- plutonium crates ----
-	if not sandbox():
+	if not sandbox() and not opening_mission:
 		crate_t -= dt
 		if crate_t <= 0:
 			crate_t = randf_range(10, 16); var x := 0.0; var y := 0.0; var tr := 0
@@ -1572,7 +1585,7 @@ func _sync(dt: float) -> void:
 	water_reflections.water_texture=arena_level.water_texture
 	water_reflections.sync(actors,Rect2(cam.get_screen_center_position()-get_viewport_rect().size/cam.zoom/2.0,get_viewport_rect().size/cam.zoom),time)
 	# camera
-	cam.position = Vector2(P.x, P.y)
+	if not opening_mission or opening_mission.bank.room.is_empty(): cam.position = Vector2(P.x, P.y)
 	cam.offset = Vector2(randf_range(-shake, shake), randf_range(-shake, shake))
 	_add_lights()
 	if ambient_fx.visible: ambient_fx.update(dt, cam.get_screen_center_position(), get_viewport_rect().size / cam.zoom / 2.0)
@@ -1677,6 +1690,9 @@ func _add_lights() -> void:
 	if Run.CNT.has("reactor"): lights.add(villain.anchor("chest"), Color("#7dff3a"), 0.9 + sin(time * 5) * 0.25, 40, 20)
 # =============== DRAW ===============
 func _draw_ground(g: Node2D) -> void:
+	if opening_mission:
+		if opening_mission.bank.room.is_empty(): opening_mission.draw_street(self, g)
+		else: opening_mission.bank.draw(g, font)
 	var t := time
 	consumables.draw_ground(self, g)
 	bank_vault.draw_door(self, g)
@@ -1761,13 +1777,15 @@ func _gear_icon(g: Node2D, x: float, y: float, v: float, p := {}) -> void:
 	g.draw_circle(Vector2(x, y + s * 0.6), s * 0.9, Color(0, 0, 0, 0.28 - hop * 0.01))
 	var c := Vector2(x, y - hop - 1.0 - sin(time * 3.0 + x) * 1.0)
 	var rot := time * 1.6 + x * 0.05
+	g.draw_set_transform(c, rot)
 	var pts := PackedVector2Array(); var outline := PackedVector2Array()
 	for i in 32:
 		var r := s * (1.32 if (i / 2) % 2 == 0 else 1.0)
-		var dir := Vector2.from_angle(rot + i * TAU / 32.0)
-		pts.append(c + dir * r); outline.append(c + dir * (r + 1.2))
+		var dir := Vector2.from_angle(i * TAU / 32.0)
+		pts.append(dir * r); outline.append(dir * (r + 1.2))
 	g.draw_colored_polygon(outline, Color("#5a4808"))
 	g.draw_colored_polygon(pts, Color("#ffd23c"))
+	g.draw_set_transform(Vector2.ZERO)
 	g.draw_circle(c + Vector2(-s * 0.15, -s * 0.15), s * 0.7, Color("#ffe680"))
 	g.draw_circle(c, s * 0.55, Color("#d8a820"))
 	g.draw_circle(c, s * 0.32, Color("#3a2c06"))

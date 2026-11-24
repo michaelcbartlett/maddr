@@ -76,8 +76,12 @@ func _draw() -> void:
 	if action != "":
 		_txt(Vector2(pad,pad+144),"Y / F  " + Run.ITEM[action].name.to_upper() + (" · READY" if A.action_cooldown <= 0.0 else " · %.1fs" % A.action_cooldown),11,Color("#ffb2d8"))
 	# wave / timer
-	_txt(Vector2(W / 2, pad + 10), "WAVE %d / %d" % [Run.wave, int((A.WORLD_WAVES if A.studio_waves else int(Run.RULES.waves.last)))], 14, UiKit.NEON, HORIZONTAL_ALIGNMENT_CENTER)
-	_txt(Vector2(W / 2, pad + 42), str(ceili(A.wave_t)), 32, BAD_if(A.wave_t <= 5 and A.state == "play"), HORIZONTAL_ALIGNMENT_CENTER)
+	if A.opening_mission:
+		_txt(Vector2(W / 2, pad + 10), "MERCANTILE DISTRICT", 14, UiKit.NEON, HORIZONTAL_ALIGNMENT_CENTER)
+		_txt(Vector2(W / 2, pad + 38), A.opening_mission.objective(), 18, UiKit.GOLD, HORIZONTAL_ALIGNMENT_CENTER)
+	else:
+		_txt(Vector2(W / 2, pad + 10), "WAVE %d / %d" % [Run.wave, int((A.WORLD_WAVES if A.studio_waves else int(Run.RULES.waves.last)))], 14, UiKit.NEON, HORIZONTAL_ALIGNMENT_CENTER)
+		_txt(Vector2(W / 2, pad + 42), str(ceili(A.wave_t)), 32, BAD_if(A.wave_t <= 5 and A.state == "play"), HORIZONTAL_ALIGNMENT_CENTER)
 	var b := A.boss
 	if b != null and not b.dead:
 		var bw := minf(420.0, W * 0.5)
