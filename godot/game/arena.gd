@@ -29,11 +29,13 @@ const WallIndex = preload("res://levels/wall_index.gd")
 const BeamView = preload("res://fx/laser_beam.gd")
 const Grapple = preload("res://game/grapple.gd")
 const PhaseDash = preload("res://game/phase_dash.gd")
+const Shove = preload("res://game/shove.gd")
 const Consumables = preload("res://game/consumables.gd")
 const Viper = preload("res://game/viper_boss.gd")
 const BossAbilities = preload("res://game/boss_abilities.gd")
 var boss_move: Dictionary = {}
 var dash = PhaseDash.new()   # B / Shift phase dash and sprint
+var shove = Shove.new()      # LT / right mouse palm shove while the off hand is empty
 var action_cooldown := 0.0
 
 const SceneryDamage = preload("res://game/scenery_damage.gd")
@@ -186,10 +188,12 @@ func start_wave() -> void:
 	# Uncollected blueprints survive wave changes, but never carry into a different run.
 	var carried := pickups.filter(func(p): return p.has("blueprint") and _pickup_run_serial == Run.run_serial)
 	if character_studio: carried.clear()
+	if character_studio and not Run.is_test_process():
+		for kind in _studio_wait: EnemyArt.sheet(kind)   # load their art before the first one appears
 	_pickup_run_serial = Run.run_serial
 	var D := Run.D; var S := Run.S
 	P = PlayerState.new(); P.x = Levels.SPAWN.x; P.y = Levels.SPAWN.y; P.hp = D.maxHp
-	consumables.reset(); boss_move = {}; action_cooldown = 0.0; dash.reset()
+	consumables.reset(); boss_move = {}; action_cooldown = 0.0; dash.reset(); shove.reset()
 	for e in enemies: e.gfx.skip_corpse = true; e.queue_free()
 	for child in actors.get_children():
 		if child.is_in_group("enemy_corpses"): child.queue_free()
@@ -240,7 +244,7 @@ func _setup_level() -> void:
 	ground.queue_redraw()
 
 func make_enemy(type: String, x: float, y: float) -> Enemy:
-	if character_studio: return null
+	if character_studio and not _studio_allow: return null
 	var e := Enemy.new(); e.setup(self, type, x, y)
 	enemies.append(e); actors.add_child(e)
 	return e
@@ -253,7 +257,7 @@ func end_wave() -> void:
 	state = "clear"; clear_t = 1.6; banner_txt = "WAVE CLEARED!"; banner_t = 1.6
 	for e in enemies:
 		if not e.dead: poof(e.x, e.y, Color("#88aabb"), 10); e.dead = true
-	ebul.clear(); markers.clear(); projs.clear(); mines.clear(); novas.clear(); boss = null; grapple.reset(); boss_move = {}; dash.reset()
+	ebul.clear(); markers.clear(); projs.clear(); mines.clear(); novas.clear(); boss = null; grapple.reset(); boss_move = {}; dash.reset(); shove.reset()
 	Sfx.play("clear1"); get_tree().create_timer(0.11).timeout.connect(Sfx.play.bind("clear2"))
 	_seize_leftovers()
 
@@ -324,6 +328,32 @@ func _reaction() -> Array:
 	return ["",0.0]
 
 var studio_time := 0
+var _studio_allow := false
+var studio_force := false             # tests switch sparring on
+var studio_sparring := true          # 8 switches the cop and detective off and on
+var _studio_wait := {"cop":1.0,"det":2.0}
+
+## Playtest scene: one cop and one detective, back a few seconds after they fall.
+func _update_sparring(dt: float) -> void:
+	if not studio_sparring or (Run.is_test_process() and not studio_force): return
+	for kind in _studio_wait:
+		if enemies.any(func(e): return e.type == kind and not e.dead): continue
+		_studio_wait[kind] -= dt
+		if _studio_wait[kind] <= 0.0: _studio_wait[kind] = 3.0; studio_target(kind,Run.ET[kind].hp*3.0,360.0)
+
+## Practice targets for the studio: 6 cop, 7 detective, 8 clear. He takes no damage there.
+func studio_target(kind: String, health := 60.0, distance := 150.0) -> void:
+	var at := Vector2(P.x,P.y); var facing := P.aim
+	for i in 24:
+		# Straight ahead first, then further round until there is room.
+		var spot := Vector2(P.x,P.y)+Vector2.from_angle(facing+(i/2)*0.26*(1 if i%2 == 0 else -1))*distance
+		if spot.x<70 or spot.y<70 or spot.x>AW-70 or spot.y>AH-70 or in_wall(spot.x,spot.y,18.0): continue
+		at = spot; break
+	_studio_allow = true
+	var e = make_enemy(kind,at.x,at.y)
+	_studio_allow = false
+	if e != null: e.hp = health; e.max_hp = health; poof(at.x,at.y,Color("#b8c8e0"),8,70,3.0)
+
 ## Studio previews: 1 hurt, 2 cackle, 3 burn, 4 tazed (D-pad left, right, down on a pad); 5 / Back: time of day.
 func _unhandled_input(e: InputEvent) -> void:
 	if not character_studio or state != "play" or not e.is_pressed() or e.is_echo(): return
@@ -333,11 +363,21 @@ func _unhandled_input(e: InputEvent) -> void:
 	elif key == KEY_2 or button == JOY_BUTTON_DPAD_RIGHT: P.cackle_t = 1.6
 	elif key == KEY_3 or button == JOY_BUTTON_DPAD_DOWN: ignite_player()
 	elif key == KEY_4: P.zap_t = 0.8
+	elif key == KEY_6: studio_target("cop")
+	elif key == KEY_7: studio_target("det")
+	elif key == KEY_8:
+		studio_sparring = not studio_sparring; _studio_wait = {"cop":0.5,"det":0.5}
+		for foe in enemies: foe.gfx.skip_corpse = true; foe.queue_free()
+		enemies.clear(); ebul.clear(); shove.reset()
 	elif key == KEY_5 or button == JOY_BUTTON_BACK:
 		studio_time = (studio_time+1)%arena_level.STUDIO_TIMES.size(); ambient.color = arena_level.STUDIO_TIMES[studio_time]
 
 func hurt_player(a: float) -> void:
-	if character_studio or P.inv > 0 or dash.safe() or state != "play": return
+	if P.inv > 0 or dash.safe() or state != "play": return
+	if character_studio:   # sparring: he reacts but never loses health
+		if not Run.is_test_process() or studio_force:
+			P.inv = 0.4; P.flinch_t = FLINCH; P.cackle_t = 0.0; shake = maxf(shake, 4); Controls.rumble(0.2, 0.4, 110); snd("hurt")
+		return
 	var d := maxi(1, roundi(a * 15.0 / (15.0 + maxf(0.0, Run.S.armor))))
 	P.hp -= d; P.inv = 0.4; P.flinch_t = FLINCH; P.cackle_t = 0.0; shake = maxf(shake, 6); Controls.rumble(0.3, 0.7, 160)
 	add_num(P.x, P.y - 24, "-" + str(d), Color("#ff4a4a"), true); snd("hurt")
@@ -1128,6 +1168,7 @@ func _process(dt: float) -> void:
 
 func _update_play(dt: float) -> void:
 	var S := Run.S; var D := Run.D
+	if character_studio: _update_sparring(dt)
 	if not character_studio: wave_t -= dt
 	if siren_t > 0: siren_t -= dt
 	if not character_studio and wave_t <= 0: wave_t = 0; end_wave(); heist.timeout(self); return
@@ -1157,6 +1198,7 @@ func _update_play(dt: float) -> void:
 	var acting := not boss_move.is_empty()
 	BossAbilities.update_action(self,dt)
 	if Input.is_action_just_pressed("dash"): dash.press()
+	if Input.is_action_just_pressed("fire_off"): shove.press()
 	var dashing: bool = dash.update(self,dt,mv,P.aim,Input.is_action_pressed("dash"),firing or rear_firing)
 	if dashing: firing = false; rear_firing = false; P.primary_swinging = false
 	if ml > 0.0 and not acting and not dashing:
@@ -1174,12 +1216,16 @@ func _update_play(dt: float) -> void:
 	consumables.tick(self, dt, firing or rear_firing or P.primary_swinging)
 	P.firing_t = 0.2 if firing or P.primary_swinging else P.firing_t - dt
 	P.aim += aim_step
+	shove.update(self,dt,Run,dashing or acting or P.disguise_t > 0.0,ang)
+	# Shove or shoot, never both. Holding fire resumes when the arm is back.
+	var shoving: bool = shove.active()
+	if shoving: firing = false; rear_firing = false; P.firing_t = 0.0; P.primary_swinging = false
 	P.recoil = maxf(0.0, P.recoil - dt * 9.0); P.flash_t -= dt
 	if P.zap_t > 0: P.zap_t -= dt
 	_update_reactions(dt)
 	if state != "play": return
 	P.recoil2 = maxf(0.0,P.recoil2-dt*9.0); P.flash_t2 -= dt
-	var firing2 = Run.build.off!=null and Run.build.off.get("kind","gun")=="gun" and (Controls.firing_off() or firing) and not dashing
+	var firing2 = Run.build.off!=null and Run.build.off.get("kind","gun")=="gun" and (Controls.firing_off() or firing) and not dashing and not shoving
 	P.firing2_t = 0.2 if firing2 else P.firing2_t-dt
 	_fire_weapons(dt,firing,firing2)
 	_update_primary_melee(dt)
@@ -1477,7 +1523,7 @@ func _sync_villain() -> void:
 	villain.set_state({"reaction":react[0],"reaction_time":react[1],"aim": P.aim, "off_aim": P.aim+PI, "moving": P.moving, "walk_phase": fposmod(P.walk / 8.0, 1.0), "recoil": P.recoil, "flash": P.flash_t,
 		"recoil2": P.recoil2, "flash2": P.flash_t2, "firing": P.firing_t > 0, "firing2": P.firing2_t > 0,
 		"white": P.inv > 0.3, "zap": P.zap_t > 0,"gun_flashes":gun_flashes,"time":time,"melee_extension":_melee_extension(),"melee_aim":_melee_pose_aim(),"melee_active":P.melee_t>0.0,"hook_out":grapple.is_out(),
-		"dash_dir":dash.dir if dash.active() else Vector2.ZERO,"dash_progress":dash.progress(),"sprinting":dash.sprinting and P.moving,"sprint_dir":-1 if Controls.move_vec().x<0.0 else 1,
+		"shove":shove.progress() if shove.active() and not dash.active() else -1.0,"shove_aim":shove.aim,"dash_dir":dash.dir if dash.active() else Vector2.ZERO,"dash_progress":dash.progress(),"sprinting":dash.sprinting and P.moving,"sprint_dir":-1 if Controls.move_vec().x<0.0 else 1,
 		"capacitor_charge":laser_charge_display(),"capacitor_charge_off":laser_charge_display(true)})
 	villain.modulate.a = 0.5 if P.inv > 0 and P.inv < 0.28 and sin(time * 50) > 0 else 1.0
 
@@ -1690,6 +1736,7 @@ func _draw_fx_add(g: Node2D) -> void:
 	blaster_fx.draw_glow(g)
 	grapple.draw_glow(g,villain.muzzle_global(0),time)
 	dash.draw(g,self)
+	shove.draw(g,self)
 	if boss_move.get("kind","") == "iron_slam":
 		var landing: Vector2 = boss_move.points[0]
 		g.draw_arc(landing,115.0 * sqrt(S.boomMul),0,TAU,48,Color("#ffd890",0.6),2.0)

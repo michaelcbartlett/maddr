@@ -137,7 +137,7 @@ func _show(st: String) -> void:
 		level_music.stop()
 	if st == "paused":
 		var controls: Label = pause_s.get_meta("controls")
-		controls.text = "L / R sticks · Move / Aim\nRT / LT · Fire / Arm\nB · Dash (hold to sprint)\nX · Consumable    Y · Ability\nLB / RB · Detonate\nStart · Resume" if Controls.aim_src == "pad" else "WASD · Move    Mouse · Aim\nLMB / RMB · Fire / Arm\nShift · Dash (hold to sprint)\nQ · Consumable    F · Ability\nSpace · Detonate    M · Mute\nEsc · Resume"
+		controls.text = "L / R sticks · Move / Aim\nRT · Fire    LT · Push / Arm\nB · Dash (hold to sprint)\nX · Consumable    Y · Ability\nLB / RB · Detonate\nStart · Resume" if Controls.aim_src == "pad" else "WASD · Move    Mouse · Aim\nLMB · Fire    RMB · Push / Arm\nShift · Dash (hold to sprint)\nQ · Consumable    F · Ability\nSpace · Detonate    M · Mute\nEsc · Resume"
 		if Run.has_primary_melee():
 			controls.text = "L stick · Move    R stick · Swing\nLT · Rear gun (if equipped)\nSecondary melee swings automatically\nA · Highlighted button    Start · Resume" if Controls.aim_src == "pad" else "WASD · Move    Sweep mouse · Swing\nRMB · Rear gun (if equipped)\nSecondary melee swings automatically\nEsc · Resume"
 	match st:

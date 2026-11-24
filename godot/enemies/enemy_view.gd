@@ -133,7 +133,7 @@ static func _pick_native(e, g: Dictionary) -> void:
 	elif calm and e.ally and moving and has.call("hypnotized"): st = "hypnotized"
 	elif calm and g.speed < 22.0 and (e.sick_t > 0.0 or e.poison_t > 0.0 or e.ebola_t > 0.0) and has.call("sick"): st = "sick"
 	if e.frozen_t > 0.0: st = "frozen"; fixed = 0
-	elif e.time_lock > 0.0: st = "stunned"
+	elif e.time_lock > 0.0 or (e.stun_t > 0.0 and g.get("hurt_t", 9.0) > 0.2): st = "stunned"; fixed = -1
 	else:
 		if e.flash > 0.0 and g.get("hurt_t", 9.0) > 0.35: g.hurt_t = 0.0
 		else: g.hurt_t = g.get("hurt_t", 9.0) + g.get("dt", 0.0)
@@ -194,7 +194,7 @@ static func _pick(e, g: Dictionary, t: float) -> void:
 	# status overrides
 	var tint := Color(0, 0, 0, 0)
 	if e.frozen_t > 0.0: st = "frozen"; fi = 0
-	elif e.time_lock > 0.0: st = "stunned"; fi = int(t * 4.0)
+	elif e.time_lock > 0.0 or e.stun_t > 0.0: st = "stunned"; fi = int(t * 4.0)
 	elif e.flash > 0.0: st = "hurt"; fi = 0
 	if st not in ["idle", "walk", "walk_start", "walk_stop", "run", "run_start", "run_stop"]:
 		g.move_phase = "idle"; g.move_time = 0.0

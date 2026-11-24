@@ -50,5 +50,17 @@ func _run() -> void:
 	_check(a.P.size_scale>1.0 and a.enemies.is_empty(),"enlargement can be previewed in the blank studio")
 	scene._show("paused"); scene._studio_supply("tesla_coil")
 	_check(a.consumables.coils.size()==1 and a.enemies.is_empty(),"coil can be placed without enabling enemy spawns")
+	# Sparring partners: one of each, they come back, and he only flinches.
+	a.studio_force = true; a.P.inv = 0.0; a.dash.reset()
+	for i in 150: a._update_sparring(1.0/60.0)
+	_check(a.enemies.size()==2 and a.enemies.any(func(e): return e.type=="cop") and a.enemies.any(func(e): return e.type=="det"),"a cop and a detective join the playtest")
+	for foe in a.enemies: _check(not a.in_wall(foe.x,foe.y,foe.r),"%s appears on open ground" % foe.type)
+	var health: float = a.P.hp; a.hurt_player(9.0); _check(a.P.hp==health and a.P.flinch_t>0.0,"their hits flinch him without costing health")
+	var cop = a.enemies.filter(func(e): return e.type=="cop")[0]; cop.hp = 0.0; a.kill(cop); a.enemies = a.enemies.filter(func(e): return not e.dead)
+	for i in 120: a._update_sparring(1.0/60.0)
+	_check(a.enemies.size()==1,"a fallen partner stays down a moment")
+	for i in 80: a._update_sparring(1.0/60.0)
+	_check(a.enemies.size()==2,"then returns")
+	a.studio_sparring = false; a.enemies.clear(); a._update_sparring(9.0); _check(a.enemies.is_empty(),"and can be switched off"); a.studio_force = false
 	print("CHARACTER STUDIO TESTS: %d checks, %d failures"%[checks,failures])
 	quit(1 if failures else 0)

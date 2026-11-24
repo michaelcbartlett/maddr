@@ -1,0 +1,23 @@
+subject_definitions:
+<Subject 1> is one isolated white laboratory-coat sleeve with its cuff and one EMPTY open bare hand, exactly as shown in <Picture 1>. <Picture 1> is a complete, finished isolated sprite layer, not a cropped person. <Picture 2> is a color swatch only; its object must NOT appear. <Video 1> defines motion and timing only; never render the colored guide.
+
+summary:
+[reference generation] Isolated game-sprite layer animation of one isolated white laboratory-coat sleeve with its cuff and one EMPTY open bare hand. Nothing else exists in the frame.
+
+retention_analysis:
+<Picture 1>: fully_preserved - exact parts present, shapes, colors, outlines, pixel-art style and scale. Add no body parts.
+<Picture 2>: not_preserved - never show it.
+<Video 1>: partially_preserved - joint motion, timing, position and scale. Ignore its appearance.
+
+detailed_description:
+The rounded shoulder end stays pinned at one fixed point. The arm hangs relaxed with a soft elbow. Three times, at 0.50, 2.00 and 3.50 seconds, it performs a sharp cartoon palm push toward screen-right: the elbow folds and draws back, then the whole arm snaps straight and level to screen-right with the wrist cocked up and the open hand flat and upright, showing the thumb-side edge of the hand, palm facing screen-right, fingers together pointing up, held for a moment before swinging back down to the exact relaxed start. Cloth folds bunch at the elbow on the draw and stretch on the push. The hand is empty at all times. It pushes empty air; nothing is there.
+
+There is NO head, hair, face, neck, torso, coat body, legs or second arm. Do not draw a person attached to the sleeve. No gun, block, tool or object of any kind. This is a detached puppet part, a clean cartoon costume layer with a smooth rounded cloth end. It never becomes a full person. Empty flat background everywhere else, in every frame from first to last.
+
+Fixed camera, position, scale and framing. Flat uniform dark blue-gray background. Crisp pixel edges, stable colors, fully opaque. No motion blur, ghosting, shadows, effects, flashes, particles, added texture, text or logos.
+
+overall_soundscape:
+Silent. No speech, sound effects or music.
+
+non_diegetic_music:
+N/A

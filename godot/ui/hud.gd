@@ -25,7 +25,7 @@ func _draw() -> void:
 	if A == null: return
 	if A.character_studio:
 		var id: String = Run.selected_consumable
-		var text := "X / Q: %s ×%d   D-UP / E: switch    B / SHIFT: dash, hold to sprint    1-4 / D-PAD: reactions    5 / BACK: time of day" % [Run.CONSUMABLE_NAMES[id],Run.consumable_charges[id]]
+		var text := "X / Q: %s ×%d   D-UP / E: switch    B / SHIFT: dash, hold to sprint    1-4 / D-PAD: reactions    5 / BACK: time of day    LT / RMB: push    6 cop  7 detective  8 enemies on/off" % [Run.CONSUMABLE_NAMES[id],Run.consumable_charges[id]]
 		_txt(Vector2(16,size.y-14),text,11,Color("#b8cad9"))
 		if A.P.size_t>0.0:
 			_txt(Vector2(16,size.y-32),"%s · %.1fs" % [Run.CONSUMABLE_NAMES[A.P.size_effect],A.P.size_t],12,Color("#c8abff"))

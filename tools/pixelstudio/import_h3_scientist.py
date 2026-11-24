@@ -256,6 +256,41 @@ def save_reactions():
     return counts
 
 
+# The palm lands at 0.10 s of the 0.34 s swing: the fourth of these ten frames.
+SHOVE_FRAMES=[18,20,22,24,24,25,26,28,30,33]
+SHOVE_SOCKET=np.array([36.,66.])
+
+
+def save_shove():
+    """Isolated open-palm push for the empty off hand, aimed along +x."""
+    result={}
+    for side,name in [('near','157-near-palm-push'),('far','158-far-palm-push')]:
+        video=clip(name)
+        if not video:return {}
+        chosen=[video[i] for i in SHOVE_FRAMES];estimated=moge_normals.estimate(chosen)
+        # The clip's arm is drawn 242 px long from the relaxed arm; return it to that arm's size.
+        reference=clip('38-far-straight-sweep')[50]
+        region=polygon(REST_POLYGON)&(np.asarray(matte(reference))>0);ys,xs=np.where(region)
+        hand=np.array([xs[ys>ys.max()-30].mean(),ys.max()-30.]);factor=1.14*np.linalg.norm(hand-REST_SHOULDER)/242.
+        matrix=np.array([[factor,0,0],[0,factor,0]],float);matrix[:,2]=SHOVE_SOCKET*6-factor*ISOLATED_SHOULDER
+        rows=(len(chosen)+7)//8;atlas=Image.new('RGBA',(1024,128*rows));normals=Image.new('RGBA',atlas.size)
+        for j,frame in enumerate(chosen):
+            alpha=(np.asarray(matte(frame))>0).astype(np.uint8)
+            count,labels,stats,_=cv2.connectedComponentsWithStats(alpha,8);alpha=labels==max(range(1,count),key=lambda i:stats[i,cv2.CC_STAT_AREA])
+            # Drop the thin grey fringe H3 leaves outside the dark outline.
+            rgb=np.asarray(frame).astype(int);rim=alpha&~(cv2.erode(alpha.astype(np.uint8),np.ones((9,9),np.uint8))>0)
+            grey=(rgb.max(axis=2)-rgb.min(axis=2)<34)&(rgb.sum(axis=2)>150)&(rgb.sum(axis=2)<420)
+            alpha=alpha&~(rim&grey)
+            rgba=np.dstack((np.asarray(frame),alpha.astype(np.uint8)*255))
+            tile=native(Image.fromarray(cv2.warpAffine(rgba,matrix,(768,768),flags=cv2.INTER_NEAREST)))
+            if estimated is None:lit=normal(tile)
+            else:lit=moge_normals.encode(cv2.warpAffine(solid_normals(estimated[j],frame),matrix,(768,768),flags=cv2.INTER_LINEAR,borderMode=cv2.BORDER_REPLICATE),np.asarray(tile.getchannel('A')))
+            at=(j%8*128,j//8*128);atlas.paste(tile,at);normals.paste(lit,at)
+        atlas.save(OUT/(side+'_shove_poses.png'));normals.save(OUT/(side+'_shove_poses_n.png'))
+        result[side]=[{'shoulder':SHOVE_SOCKET.tolist(),'source':name,'source_frame':i} for i in SHOVE_FRAMES]
+    return result
+
+
 def solid_normals(n,frame):
     """Extend normals past the matte so a redrawn outline is lit like its edge."""
     inside=cv2.erode((np.asarray(matte(frame))>0).astype(np.uint8),np.ones((5,5),np.uint8))>0
@@ -548,7 +583,7 @@ def armless_layer(frame):
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
-    save_rest_arm();reactions=save_reactions()
+    save_rest_arm();reactions=save_reactions();shove=save_shove()
     walk=load(next((DEFAULT_BATCH/'11-walk').glob('*_audio.mp4')))
     idle=load(next((DEFAULT_BATCH/'09-idle').glob('*_audio.mp4')))
     shoulder=load(next((DEFAULT_BATCH/'06-far-shoulder').glob('*_audio.mp4')))
@@ -706,7 +741,7 @@ def main():
     data={'version':1,'cell':[128,128],'columns':columns,'rows_per_variant':rows,
         'origin':[64,102],'world_scale':0.75,'clips':clips,
         'arms':{'near':{'shoulder':[39,53],'grip':[88,53]},'far':{'shoulder':[72,50],'grip':[103,52]}},
-        'poses':poses,'reactions':reactions,'frames':[{k:v for k,v in frame.items() if k not in ['free','armed','rgb','clip','n']} for frame in frames],
+        'poses':poses,'reactions':reactions,'shove':shove,'frames':[{k:v for k,v in frame.items() if k not in ['free','armed','rgb','clip','n']} for frame in frames],
         'sources':{'walk':'58-armless-walk' if armless else '11-walk','idle':'64-armless-idle' if armless_idle else '09-idle','torso_far_arm':'06-far-shoulder','near_arm':'18-near-recoil'},
         'notes':['128px native layers; weapons and shot effects come from gameplay',
             'Near and far arm poses rotate independently around their own shoulders',

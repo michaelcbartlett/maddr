@@ -43,6 +43,7 @@ var chill := 0.0
 var slow_t := 0.0
 var frozen_t := 0.0
 var time_lock := 0.0
+var stun_t := 0.0         # knocked silly by a shove or slam; status damage still ticks
 var burn_t := 0.0
 var burn_dps := 0.0
 var acid_t := 0.0
@@ -231,6 +232,7 @@ func tick(dt: float) -> void:
 	x += kx * dt; y += ky * dt; kx *= 0.85; ky *= 0.85
 	if ally: _ally_ai(dt); return
 	if frozen_t > 0.0: frozen_t -= dt; return
+	if stun_t > 0.0: stun_t = maxf(0.0, stun_t - dt); return
 	if civ: _civ_ai(dt); return
 	if A.P.disguise_t > 0.0:
 		# Search the last area without acquiring, firing at, or charging the disguised villain.

@@ -25,6 +25,8 @@ var near_hand: Sprite2D
 var far_arm: Sprite2D
 var far_hand: Sprite2D
 var rest_pivot: Node2D
+var shove := -1.0            # 0..1 while the empty off hand pushes
+var shove_aim := 0.0
 var dash_dir := Vector2.ZERO    # non-zero only while phased
 var dash_progress := 0.0
 var sprinting := false
@@ -194,6 +196,8 @@ func set_state(state: Dictionary) -> void:
 			"capacitor_charge": capacitor_charge = float(state[key])
 			"capacitor_charge_off": capacitor_charge_off = float(state[key])
 			"time": t = float(state[key]); _external_clock = true
+			"shove": shove = float(state[key])
+			"shove_aim": shove_aim = float(state[key])
 			"dash_dir": dash_dir = state[key]
 			"dash_progress": dash_progress = float(state[key])
 			"reaction": reaction = String(state[key])
@@ -333,7 +337,7 @@ func _update() -> void:
 			clip = dash_clip()
 			if not Scientist.has_clip(clip): clip = "idle"
 			index = mini(int(dash_progress*Scientist.data().clips[clip].count),int(Scientist.data().clips[clip].count)-1)
-		_body_frame = Scientist.frame(_body_frame,clip,index,has_bionic or face<0 or is_dashing(),gear)
+		_body_frame = Scientist.frame(_body_frame,clip,index,has_bionic or face<0 or is_dashing() or is_shoving(),gear)
 		if turn_progress>=1.0/3.0 and turn_progress<2.0/3.0 and not is_dashing():
 			_body_frame = Scientist.front_frame(_body_frame,moving)
 		_last_native_time = t
@@ -395,7 +399,7 @@ func _update() -> void:
 		if _xray_on(): bionic.texture = art.tinted_texture(_bionic_frame,Color("#3a68ff"),0.65,"blue")
 		off_fx.position = Vector2.ZERO
 	_update_native_arm(far_arm,far_hand,secondary_arm_view,native and armed,recoil2)
-	rest_pivot.visible = native and face<0 and not has_bionic
+	rest_pivot.visible = native and (face<0 or is_shoving()) and not has_bionic
 	if rest_pivot.visible:
 		# Empty off hand: the relaxed drawn arm, never the gun pose without its gun.
 		rest_pivot.z_index = 0; rest_hand.visible = false; rest_arm.visible = true
@@ -405,6 +409,7 @@ func _update() -> void:
 		rest_arm.texture = Scientist.worn_part("rest_near",-1,gear)
 		rest_arm.scale = Vector2.ONE*Scientist.WORLD_SCALE; rest_arm.rotation = 0.0
 		rest_arm.position = -Scientist.arm_point("near","shoulder")*Scientist.WORLD_SCALE
+		if is_shoving(): _pose_shove()
 		var tint := Color("#7c9bff") if _xray_on() else (Color("#fff36b") if zap else Color.WHITE)
 		if white and int(t*20.0)%3 == 0: tint = Color(2,2,2)
 		rest_arm.modulate = tint
@@ -433,6 +438,38 @@ func _shoulder_travel(angle: float) -> Vector2:
 	var up := -sin(angle)
 	return Vector2(cos(angle)*0.8,-1.6*maxf(up,0.0)+0.6*maxf(-up,0.0))
 
+## World position of the pushing palm (the shockwave starts here).
+func palm_global() -> Vector2:
+	var view := "near" if face<0 else "far"
+	var poses: Array = Scientist.data().get("shove",{}).get(view,[])
+	if poses.is_empty(): return off_pivot.global_position+Vector2.from_angle(shove_aim)*30.0*global_scale.x
+	var at: Rect2 = Scientist.part_bounds(view+"_shove",4); var socket: Array = poses[4].shoulder
+	var local := Vector2(at.end.x-socket[0]-2.0,-5.0)*Scientist.WORLD_SCALE
+	var thrust := Vector2.from_angle(shove_aim)*(11.0 if view == "near" else 3.0)
+	return to_global(off_pivot.position+thrust+Vector2(local.x,local.y*face).rotated(shove_aim))
+
+func is_shoving() -> bool: return shove >= 0.0 and not has_bionic and _native_skin()
+
+## Draw back, thrust, hold, return. Uses the drawn palm clip when it exists, else the relaxed open arm.
+func _pose_shove() -> void:
+	var view := "near" if face<0 else "far"
+	var poses: Array = Scientist.data().get("shove",{}).get(view,[])
+	if not poses.is_empty():
+		var index := clampi(int(shove*poses.size()),0,poses.size()-1)
+		rest_arm.texture = Scientist.worn_part(view+"_shove",index,gear)
+		rest_pivot.rotation = shove_aim if face>0 else shove_aim+PI
+		var socket: Array = poses[index].shoulder
+		rest_arm.position = -Vector2(socket[0],socket[1])*Scientist.WORLD_SCALE
+		# He leans his shoulder into it; the near arm starts farther back, so it travels more.
+		var lean := smoothstep(0.16,0.30,shove)*(1.0-smoothstep(0.62,1.0,shove))
+		rest_pivot.position += Vector2.from_angle(shove_aim)*lean*(11.0 if view == "near" else 3.0)
+		return
+	# The arm hangs along +y: turn it to the aim, then push it out along that line.
+	var out := smoothstep(0.12,0.30,shove)*(1.0-smoothstep(0.62,1.0,shove))
+	var draw_back := smoothstep(0.0,0.12,shove)*(1.0-smoothstep(0.12,0.30,shove))
+	rest_pivot.rotation = wrapf(shove_aim-PI/2.0,-PI,PI)*clampf(out+draw_back*0.45,0.0,1.0)
+	rest_pivot.position += Vector2.from_angle(shove_aim)*(out*7.0-draw_back*5.0)
+
 func is_dashing() -> bool: return dash_dir != Vector2.ZERO
 
 func dash_clip() -> String:
@@ -447,6 +484,7 @@ func _order_arm_layers(native: bool) -> void:
 	# hiding the rear gun behind UI backgrounds or breaking arena actor y-sorting.
 	var order: Array = [off_pivot,body_root,gun_pivot,rest_pivot]
 	if native and face<0: order = [gun_pivot,body_root,off_pivot,rest_pivot]
+	elif native and is_shoving(): order = [rest_pivot,off_pivot,body_root,gun_pivot]   # his far arm
 	for i in order.size():
 		order[i].z_index = 0
 		if order[i].get_index()!=i: move_child(order[i],i)
@@ -499,7 +537,7 @@ func _xray_on() -> bool: return zap and int(t*14.0)%2 == 0
 func _draw_rear_fx() -> void:
 	if _body_frame.is_empty(): return
 	var p = Pen.new(emissive,-BODY_ORIGIN.x,-BODY_ORIGIN.y)
-	if not has_bionic and (not _native_skin() or face>0) and not is_dashing():
+	if not has_bionic and (not _native_skin() or face>0) and not is_dashing() and not is_shoving():
 		var hand: Dictionary = _body_frame.hand; var color = "#"+AMMO_COL.get(ammo,Color.WHITE).to_html(false)
 		var pulse = 1.0+0.2*sin(t*8.0)+(0.35 if firing else 0.0)
 		p.alpha = 0.22; p.ell(hand.x,hand.y+1,roundf(4*pulse),roundf(4*pulse),color)
