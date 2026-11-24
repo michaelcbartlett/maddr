@@ -1,0 +1,4450 @@
+{
+  "fps": 24,
+  "native_cell": [
+    128,
+    128
+  ],
+  "walk_loop": {
+    "start": 45,
+    "length": 34,
+    "seam_score": 5.270675770308124
+  },
+  "gun_source": "godot/character/art/weapon_albedo.png",
+  "limitations": [
+    "Diagnostic composite, not imported into game",
+    "Upper body is flattened source recoil footage",
+    "Original flashes retained",
+    "Rough matte and torso patch beneath proxy",
+    "Existing game gun has lower detail than the new scientist"
+  ],
+  "variants": [
+    {
+      "shot": "18-near-recoil",
+      "label": "Walk + single fire",
+      "frames": [
+        {
+          "frame": 0,
+          "recoil_source_frame": 12,
+          "walk_frame": 45,
+          "upper_offset": [
+            10,
+            -1
+          ],
+          "belt_confidence": 0.949,
+          "guns": [
+            {
+              "origin": [
+                433.41679522060525,
+                190.88993539400792
+              ],
+              "scale": 7.882420595366344,
+              "angle": -6.250077275553272
+            }
+          ]
+        },
+        {
+          "frame": 1,
+          "recoil_source_frame": 13,
+          "walk_frame": 46,
+          "upper_offset": [
+            10,
+            -1
+          ],
+          "belt_confidence": 0.959,
+          "guns": [
+            {
+              "origin": [
+                430.1478952101557,
+                189.92039312946702
+              ],
+              "scale": 7.935836407036563,
+              "angle": -6.799673095488178
+            }
+          ]
+        },
+        {
+          "frame": 2,
+          "recoil_source_frame": 14,
+          "walk_frame": 47,
+          "upper_offset": [
+            5,
+            -1
+          ],
+          "belt_confidence": 0.961,
+          "guns": [
+            {
+              "origin": [
+                449.36786032026504,
+                189.3666100569597
+              ],
+              "scale": 8.137730145359553,
+              "angle": -3.0356450666497383
+            }
+          ]
+        },
+        {
+          "frame": 3,
+          "recoil_source_frame": 15,
+          "walk_frame": 48,
+          "upper_offset": [
+            1,
+            0
+          ],
+          "belt_confidence": 0.957,
+          "guns": [
+            {
+              "origin": [
+                487.243762143783,
+                193.16121134511036
+              ],
+              "scale": 8.00585069995935,
+              "angle": 0.2594123485783528
+            }
+          ]
+        },
+        {
+          "frame": 4,
+          "recoil_source_frame": 16,
+          "walk_frame": 49,
+          "upper_offset": [
+            0,
+            1
+          ],
+          "belt_confidence": 0.953,
+          "guns": [
+            {
+              "origin": [
+                491.2574553360761,
+                193.55731700055622
+              ],
+              "scale": 7.978132202605385,
+              "angle": 0.39395872629526624
+            }
+          ]
+        },
+        {
+          "frame": 5,
+          "recoil_source_frame": 17,
+          "walk_frame": 50,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.944,
+          "guns": [
+            {
+              "origin": [
+                491.242640224091,
+                193.1239148914424
+              ],
+              "scale": 8.003370209597026,
+              "angle": 0.3670408535533683
+            }
+          ]
+        },
+        {
+          "frame": 6,
+          "recoil_source_frame": 18,
+          "walk_frame": 51,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.949,
+          "guns": [
+            {
+              "origin": [
+                491.2222260769064,
+                193.31351485281243
+              ],
+              "scale": 8.003356205243815,
+              "angle": 0.2727238965093082
+            }
+          ]
+        },
+        {
+          "frame": 7,
+          "recoil_source_frame": 19,
+          "walk_frame": 52,
+          "upper_offset": [
+            0,
+            3
+          ],
+          "belt_confidence": 0.952,
+          "guns": [
+            {
+              "origin": [
+                491.1770656538256,
+                193.20811956458778
+              ],
+              "scale": 8.004481117982621,
+              "angle": 0.2615249400434676
+            }
+          ]
+        },
+        {
+          "frame": 8,
+          "recoil_source_frame": 20,
+          "walk_frame": 53,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.956,
+          "guns": [
+            {
+              "origin": [
+                491.22548808259614,
+                193.0401611526282
+              ],
+              "scale": 7.975761613415375,
+              "angle": 0.3316074088359514
+            }
+          ]
+        },
+        {
+          "frame": 9,
+          "recoil_source_frame": 21,
+          "walk_frame": 54,
+          "upper_offset": [
+            5,
+            -1
+          ],
+          "belt_confidence": 0.971,
+          "guns": [
+            {
+              "origin": [
+                467.0172617774893,
+                192.11193986124354
+              ],
+              "scale": 8.030004530798402,
+              "angle": -1.3126474073816141
+            }
+          ]
+        },
+        {
+          "frame": 10,
+          "recoil_source_frame": 22,
+          "walk_frame": 55,
+          "upper_offset": [
+            12,
+            -1
+          ],
+          "belt_confidence": 0.94,
+          "guns": [
+            {
+              "origin": [
+                425.5203293632384,
+                188.32573638417625
+              ],
+              "scale": 8.050422943598573,
+              "angle": -6.758830945359384
+            }
+          ]
+        },
+        {
+          "frame": 11,
+          "recoil_source_frame": 23,
+          "walk_frame": 56,
+          "upper_offset": [
+            10,
+            0
+          ],
+          "belt_confidence": 0.965,
+          "guns": [
+            {
+              "origin": [
+                428.9127876355715,
+                189.0093417303838
+              ],
+              "scale": 8.03084079579299,
+              "angle": -6.62813536699286
+            }
+          ]
+        },
+        {
+          "frame": 12,
+          "recoil_source_frame": 24,
+          "walk_frame": 57,
+          "upper_offset": [
+            6,
+            2
+          ],
+          "belt_confidence": 0.971,
+          "guns": [
+            {
+              "origin": [
+                454.08727109139824,
+                189.45301222871782
+              ],
+              "scale": 8.020173436050868,
+              "angle": -2.4047021340590944
+            }
+          ]
+        },
+        {
+          "frame": 13,
+          "recoil_source_frame": 25,
+          "walk_frame": 58,
+          "upper_offset": [
+            1,
+            2
+          ],
+          "belt_confidence": 0.947,
+          "guns": [
+            {
+              "origin": [
+                488.2373216516502,
+                193.71674828436025
+              ],
+              "scale": 7.976693362456284,
+              "angle": 0.3551776362317661
+            }
+          ]
+        },
+        {
+          "frame": 14,
+          "recoil_source_frame": 26,
+          "walk_frame": 59,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.967,
+          "guns": [
+            {
+              "origin": [
+                490.15573004564834,
+                193.48155691823027
+              ],
+              "scale": 8.000213442694188,
+              "angle": 0.23164554507947424
+            }
+          ]
+        },
+        {
+          "frame": 15,
+          "recoil_source_frame": 27,
+          "walk_frame": 60,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.96,
+          "guns": [
+            {
+              "origin": [
+                491.2333409141927,
+                193.76600421693945
+              ],
+              "scale": 7.977029958223748,
+              "angle": 0.35906096756647427
+            }
+          ]
+        },
+        {
+          "frame": 16,
+          "recoil_source_frame": 28,
+          "walk_frame": 61,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.96,
+          "guns": [
+            {
+              "origin": [
+                491.2421012196605,
+                193.34364476397494
+              ],
+              "scale": 7.977324034229692,
+              "angle": 0.3683624422780909
+            }
+          ]
+        },
+        {
+          "frame": 17,
+          "recoil_source_frame": 29,
+          "walk_frame": 62,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.96,
+          "guns": [
+            {
+              "origin": [
+                491.24409198474467,
+                193.3711957262829
+              ],
+              "scale": 7.977428342810036,
+              "angle": 0.3716632683101635
+            }
+          ]
+        },
+        {
+          "frame": 18,
+          "recoil_source_frame": 30,
+          "walk_frame": 63,
+          "upper_offset": [
+            4,
+            -1
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                470.99874045822725,
+                192.65615679965057
+              ],
+              "scale": 7.964403659495876,
+              "angle": -1.237683767043154
+            }
+          ]
+        },
+        {
+          "frame": 19,
+          "recoil_source_frame": 31,
+          "walk_frame": 64,
+          "upper_offset": [
+            10,
+            -1
+          ],
+          "belt_confidence": 0.953,
+          "guns": [
+            {
+              "origin": [
+                432.17046904471425,
+                189.49728594220804
+              ],
+              "scale": 7.984968377634318,
+              "angle": -5.78877481426939
+            }
+          ]
+        },
+        {
+          "frame": 20,
+          "recoil_source_frame": 32,
+          "walk_frame": 65,
+          "upper_offset": [
+            10,
+            1
+          ],
+          "belt_confidence": 0.945,
+          "guns": [
+            {
+              "origin": [
+                431.68288826115855,
+                189.68112554860406
+              ],
+              "scale": 7.991740652886972,
+              "angle": -6.18218601535736
+            }
+          ]
+        },
+        {
+          "frame": 21,
+          "recoil_source_frame": 33,
+          "walk_frame": 66,
+          "upper_offset": [
+            4,
+            3
+          ],
+          "belt_confidence": 0.973,
+          "guns": [
+            {
+              "origin": [
+                465.3509519345913,
+                192.6147990015237
+              ],
+              "scale": 7.878823961978781,
+              "angle": -1.71673367208264
+            }
+          ]
+        },
+        {
+          "frame": 22,
+          "recoil_source_frame": 34,
+          "walk_frame": 67,
+          "upper_offset": [
+            0,
+            3
+          ],
+          "belt_confidence": 0.953,
+          "guns": [
+            {
+              "origin": [
+                488.1916983003264,
+                194.3067745663682
+              ],
+              "scale": 7.968290900188773,
+              "angle": 0.2993305574263157
+            }
+          ]
+        },
+        {
+          "frame": 23,
+          "recoil_source_frame": 35,
+          "walk_frame": 68,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.955,
+          "guns": [
+            {
+              "origin": [
+                488.1822956849795,
+                194.053828783386
+              ],
+              "scale": 7.974205057473473,
+              "angle": 0.27525024758477634
+            }
+          ]
+        },
+        {
+          "frame": 24,
+          "recoil_source_frame": 36,
+          "walk_frame": 69,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.959,
+          "guns": [
+            {
+              "origin": [
+                490.1814353842404,
+                194.05114303137117
+              ],
+              "scale": 7.974328746452074,
+              "angle": 0.2739319018970322
+            }
+          ]
+        },
+        {
+          "frame": 25,
+          "recoil_source_frame": 37,
+          "walk_frame": 70,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.955,
+          "guns": [
+            {
+              "origin": [
+                491.17704809371355,
+                194.06164214586596
+              ],
+              "scale": 7.974350667316969,
+              "angle": 0.27462051507073026
+            }
+          ]
+        },
+        {
+          "frame": 26,
+          "recoil_source_frame": 38,
+          "walk_frame": 71,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.954,
+          "guns": [
+            {
+              "origin": [
+                491.21641826457216,
+                193.312288918641
+              ],
+              "scale": 8.001452189008434,
+              "angle": 0.32901220372086004
+            }
+          ]
+        },
+        {
+          "frame": 27,
+          "recoil_source_frame": 39,
+          "walk_frame": 72,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.954,
+          "guns": [
+            {
+              "origin": [
+                490.17939197625884,
+                192.95217747943533
+              ],
+              "scale": 8.037724741808361,
+              "angle": 0.2632241733985259
+            }
+          ]
+        },
+        {
+          "frame": 28,
+          "recoil_source_frame": 40,
+          "walk_frame": 73,
+          "upper_offset": [
+            0,
+            1
+          ],
+          "belt_confidence": 0.946,
+          "guns": [
+            {
+              "origin": [
+                490.11930030242166,
+                193.25173034760465
+              ],
+              "scale": 8.037276097603575,
+              "angle": 0.1810779971796132
+            }
+          ]
+        },
+        {
+          "frame": 29,
+          "recoil_source_frame": 41,
+          "walk_frame": 74,
+          "upper_offset": [
+            5,
+            3
+          ],
+          "belt_confidence": 0.97,
+          "guns": [
+            {
+              "origin": [
+                468.8632285751868,
+                192.82476016618227
+              ],
+              "scale": 7.889039420514587,
+              "angle": -1.5439494678293681
+            }
+          ]
+        },
+        {
+          "frame": 30,
+          "recoil_source_frame": 42,
+          "walk_frame": 75,
+          "upper_offset": [
+            10,
+            4
+          ],
+          "belt_confidence": 0.952,
+          "guns": [
+            {
+              "origin": [
+                432.03690055796807,
+                191.88761983194735
+              ],
+              "scale": 7.910596645590415,
+              "angle": -5.960650885089246
+            }
+          ]
+        },
+        {
+          "frame": 31,
+          "recoil_source_frame": 43,
+          "walk_frame": 76,
+          "upper_offset": [
+            10,
+            4
+          ],
+          "belt_confidence": 0.943,
+          "guns": [
+            {
+              "origin": [
+                432.33069376912204,
+                191.11669187980894
+              ],
+              "scale": 7.902963682768106,
+              "angle": -5.792781391544109
+            }
+          ]
+        },
+        {
+          "frame": 32,
+          "recoil_source_frame": 44,
+          "walk_frame": 77,
+          "upper_offset": [
+            7,
+            1
+          ],
+          "belt_confidence": 0.97,
+          "guns": [
+            {
+              "origin": [
+                449.22736771683526,
+                190.22046146432427
+              ],
+              "scale": 8.101803868222852,
+              "angle": -2.8975176421295967
+            }
+          ]
+        },
+        {
+          "frame": 33,
+          "recoil_source_frame": 45,
+          "walk_frame": 78,
+          "upper_offset": [
+            1,
+            -1
+          ],
+          "belt_confidence": 0.963,
+          "guns": [
+            {
+              "origin": [
+                487.1972883733189,
+                193.42599152521075
+              ],
+              "scale": 8.008537066650387,
+              "angle": 0.29303909609395756
+            }
+          ]
+        },
+        {
+          "frame": 34,
+          "recoil_source_frame": 46,
+          "walk_frame": 45,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.959,
+          "guns": [
+            {
+              "origin": [
+                490.1842026682444,
+                193.30342535067496
+              ],
+              "scale": 8.00401292140276,
+              "angle": 0.27273617487949486
+            }
+          ]
+        },
+        {
+          "frame": 35,
+          "recoil_source_frame": 47,
+          "walk_frame": 46,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.961,
+          "guns": [
+            {
+              "origin": [
+                491.22408244216774,
+                193.56011856935422
+              ],
+              "scale": 7.97583448806687,
+              "angle": 0.33399772038986436
+            }
+          ]
+        },
+        {
+          "frame": 36,
+          "recoil_source_frame": 48,
+          "walk_frame": 47,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.96,
+          "guns": [
+            {
+              "origin": [
+                490.2261934880566,
+                192.60568731471403
+              ],
+              "scale": 8.009490161390616,
+              "angle": 0.31308173488832824
+            }
+          ]
+        },
+        {
+          "frame": 37,
+          "recoil_source_frame": 49,
+          "walk_frame": 48,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.958,
+          "guns": [
+            {
+              "origin": [
+                490.329071612133,
+                192.496810515364
+              ],
+              "scale": 8.011786529483308,
+              "angle": 0.47727737113377894
+            }
+          ]
+        },
+        {
+          "frame": 38,
+          "recoil_source_frame": 50,
+          "walk_frame": 49,
+          "upper_offset": [
+            3,
+            2
+          ],
+          "belt_confidence": 0.974,
+          "guns": [
+            {
+              "origin": [
+                478.30857153026915,
+                192.9363073398874
+              ],
+              "scale": 7.903639855002578,
+              "angle": -0.7608681281178682
+            }
+          ]
+        },
+        {
+          "frame": 39,
+          "recoil_source_frame": 51,
+          "walk_frame": 50,
+          "upper_offset": [
+            10,
+            4
+          ],
+          "belt_confidence": 0.963,
+          "guns": [
+            {
+              "origin": [
+                444.427407678924,
+                189.1399245109164
+              ],
+              "scale": 7.94761236665519,
+              "angle": -4.098373907766594
+            }
+          ]
+        },
+        {
+          "frame": 40,
+          "recoil_source_frame": 52,
+          "walk_frame": 51,
+          "upper_offset": [
+            12,
+            4
+          ],
+          "belt_confidence": 0.95,
+          "guns": [
+            {
+              "origin": [
+                427.7653544344534,
+                188.82634869014313
+              ],
+              "scale": 7.954829489947601,
+              "angle": -6.333268615503486
+            }
+          ]
+        },
+        {
+          "frame": 41,
+          "recoil_source_frame": 53,
+          "walk_frame": 52,
+          "upper_offset": [
+            11,
+            4
+          ],
+          "belt_confidence": 0.956,
+          "guns": [
+            {
+              "origin": [
+                419.53708322018576,
+                186.70978451547737
+              ],
+              "scale": 7.938672748403349,
+              "angle": -7.73698648287082
+            }
+          ]
+        },
+        {
+          "frame": 42,
+          "recoil_source_frame": 54,
+          "walk_frame": 53,
+          "upper_offset": [
+            11,
+            1
+          ],
+          "belt_confidence": 0.954,
+          "guns": [
+            {
+              "origin": [
+                420.1275932111017,
+                187.32280932480091
+              ],
+              "scale": 7.924552454758329,
+              "angle": -7.799421608363325
+            }
+          ]
+        },
+        {
+          "frame": 43,
+          "recoil_source_frame": 55,
+          "walk_frame": 54,
+          "upper_offset": [
+            6,
+            -1
+          ],
+          "belt_confidence": 0.965,
+          "guns": [
+            {
+              "origin": [
+                451.2283683095083,
+                189.77302930907777
+              ],
+              "scale": 8.014621445454068,
+              "angle": -3.358692173186277
+            }
+          ]
+        },
+        {
+          "frame": 44,
+          "recoil_source_frame": 56,
+          "walk_frame": 55,
+          "upper_offset": [
+            1,
+            -2
+          ],
+          "belt_confidence": 0.95,
+          "guns": [
+            {
+              "origin": [
+                485.03472095463013,
+                194.26834889104546
+              ],
+              "scale": 8.000561184309165,
+              "angle": 0.03222599615365108
+            }
+          ]
+        },
+        {
+          "frame": 45,
+          "recoil_source_frame": 57,
+          "walk_frame": 56,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.952,
+          "guns": [
+            {
+              "origin": [
+                490.09220975053313,
+                193.64515964798457
+              ],
+              "scale": 8.004204808950119,
+              "angle": 0.137745830992039
+            }
+          ]
+        },
+        {
+          "frame": 46,
+          "recoil_source_frame": 58,
+          "walk_frame": 57,
+          "upper_offset": [
+            0,
+            1
+          ],
+          "belt_confidence": 0.952,
+          "guns": [
+            {
+              "origin": [
+                490.1203864457675,
+                193.28712105165218
+              ],
+              "scale": 8.004148902020535,
+              "angle": 0.15426469392992465
+            }
+          ]
+        },
+        {
+          "frame": 47,
+          "recoil_source_frame": 59,
+          "walk_frame": 58,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.952,
+          "guns": [
+            {
+              "origin": [
+                490.1385435134486,
+                193.48816282026715
+              ],
+              "scale": 8.004790982055805,
+              "angle": 0.17833307877310262
+            }
+          ]
+        },
+        {
+          "frame": 48,
+          "recoil_source_frame": 60,
+          "walk_frame": 59,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.958,
+          "guns": [
+            {
+              "origin": [
+                491.1988203696232,
+                193.29067745388602
+              ],
+              "scale": 7.9752240499760365,
+              "angle": 0.3020861085900404
+            }
+          ]
+        },
+        {
+          "frame": 49,
+          "recoil_source_frame": 61,
+          "walk_frame": 60,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.956,
+          "guns": [
+            {
+              "origin": [
+                491.2035216188137,
+                193.35463297459359
+              ],
+              "scale": 7.9754675663212735,
+              "angle": 0.3097543499454536
+            }
+          ]
+        },
+        {
+          "frame": 50,
+          "recoil_source_frame": 62,
+          "walk_frame": 61,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.953,
+          "guns": [
+            {
+              "origin": [
+                491.1970209321409,
+                193.2662610622003
+              ],
+              "scale": 7.975131038862579,
+              "angle": 0.2991584089743127
+            }
+          ]
+        },
+        {
+          "frame": 51,
+          "recoil_source_frame": 63,
+          "walk_frame": 62,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.953,
+          "guns": [
+            {
+              "origin": [
+                491.20436954325237,
+                193.36619359762017
+              ],
+              "scale": 7.975511566816459,
+              "angle": 0.3111403896108238
+            }
+          ]
+        },
+        {
+          "frame": 52,
+          "recoil_source_frame": 64,
+          "walk_frame": 63,
+          "upper_offset": [
+            3,
+            -1
+          ],
+          "belt_confidence": 0.959,
+          "guns": [
+            {
+              "origin": [
+                468.25507235842065,
+                192.68893435367045
+              ],
+              "scale": 7.909866732117717,
+              "angle": -1.604062887184011
+            }
+          ]
+        },
+        {
+          "frame": 53,
+          "recoil_source_frame": 65,
+          "walk_frame": 64,
+          "upper_offset": [
+            8,
+            -1
+          ],
+          "belt_confidence": 0.964,
+          "guns": [
+            {
+              "origin": [
+                439.90613392644747,
+                194.32080587197063
+              ],
+              "scale": 7.759382578324234,
+              "angle": -6.025538900165424
+            }
+          ]
+        },
+        {
+          "frame": 54,
+          "recoil_source_frame": 66,
+          "walk_frame": 65,
+          "upper_offset": [
+            7,
+            1
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                455.28406221693393,
+                190.93001431970066
+              ],
+              "scale": 7.994880610513964,
+              "angle": -2.427324798790783
+            }
+          ]
+        },
+        {
+          "frame": 55,
+          "recoil_source_frame": 67,
+          "walk_frame": 66,
+          "upper_offset": [
+            1,
+            3
+          ],
+          "belt_confidence": 0.954,
+          "guns": [
+            {
+              "origin": [
+                484.9841083402758,
+                194.64439851319403
+              ],
+              "scale": 7.965720066308673,
+              "angle": -0.015340169876106003
+            }
+          ]
+        },
+        {
+          "frame": 56,
+          "recoil_source_frame": 68,
+          "walk_frame": 67,
+          "upper_offset": [
+            1,
+            3
+          ],
+          "belt_confidence": 0.948,
+          "guns": [
+            {
+              "origin": [
+                486.1506505034398,
+                193.62913778618343
+              ],
+              "scale": 7.972631206298604,
+              "angle": 0.2249517779728034
+            }
+          ]
+        },
+        {
+          "frame": 57,
+          "recoil_source_frame": 69,
+          "walk_frame": 68,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.955,
+          "guns": [
+            {
+              "origin": [
+                490.216080319683,
+                193.4714468563986
+              ],
+              "scale": 8.038399556811322,
+              "angle": 0.2660818038537588
+            }
+          ]
+        },
+        {
+          "frame": 58,
+          "recoil_source_frame": 70,
+          "walk_frame": 69,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.953,
+          "guns": [
+            {
+              "origin": [
+                491.0673688287,
+                193.84156862102498
+              ],
+              "scale": 8.003214136100437,
+              "angle": 0.10115577096026639
+            }
+          ]
+        },
+        {
+          "frame": 59,
+          "recoil_source_frame": 71,
+          "walk_frame": 70,
+          "upper_offset": [
+            1,
+            0
+          ],
+          "belt_confidence": 0.954,
+          "guns": [
+            {
+              "origin": [
+                488.6500902946827,
+                194.1767697536247
+              ],
+              "scale": 7.799970825210051,
+              "angle": -0.22570948570278718
+            }
+          ]
+        },
+        {
+          "frame": 60,
+          "recoil_source_frame": 72,
+          "walk_frame": 71,
+          "upper_offset": [
+            3,
+            -1
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                466.6844585188415,
+                192.8334142850345
+              ],
+              "scale": 7.966266334986278,
+              "angle": -1.597644543261902
+            }
+          ]
+        },
+        {
+          "frame": 61,
+          "recoil_source_frame": 73,
+          "walk_frame": 72,
+          "upper_offset": [
+            10,
+            -1
+          ],
+          "belt_confidence": 0.963,
+          "guns": [
+            {
+              "origin": [
+                433.0197371710064,
+                191.79322469760865
+              ],
+              "scale": 7.979287149380578,
+              "angle": -6.022364589293594
+            }
+          ]
+        },
+        {
+          "frame": 62,
+          "recoil_source_frame": 74,
+          "walk_frame": 73,
+          "upper_offset": [
+            5,
+            2
+          ],
+          "belt_confidence": 0.964,
+          "guns": [
+            {
+              "origin": [
+                452.09044197399095,
+                190.00947496358927
+              ],
+              "scale": 8.190805155532617,
+              "angle": -2.2321511675609322
+            }
+          ]
+        },
+        {
+          "frame": 63,
+          "recoil_source_frame": 75,
+          "walk_frame": 74,
+          "upper_offset": [
+            1,
+            2
+          ],
+          "belt_confidence": 0.947,
+          "guns": [
+            {
+              "origin": [
+                486.36018161494985,
+                193.2915360549955
+              ],
+              "scale": 7.976263638452974,
+              "angle": 0.42367401041179764
+            }
+          ]
+        },
+        {
+          "frame": 64,
+          "recoil_source_frame": 76,
+          "walk_frame": 75,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.953,
+          "guns": [
+            {
+              "origin": [
+                491.2648422126298,
+                193.41257985124093
+              ],
+              "scale": 7.944200450528556,
+              "angle": 0.4037012875569967
+            }
+          ]
+        },
+        {
+          "frame": 65,
+          "recoil_source_frame": 77,
+          "walk_frame": 76,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.956,
+          "guns": [
+            {
+              "origin": [
+                491.23667266836713,
+                193.73366022541214
+              ],
+              "scale": 7.976028274334798,
+              "angle": 0.3543629257636824
+            }
+          ]
+        },
+        {
+          "frame": 66,
+          "recoil_source_frame": 78,
+          "walk_frame": 77,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.951,
+          "guns": [
+            {
+              "origin": [
+                491.2280156123318,
+                193.08232403815586
+              ],
+              "scale": 7.9748758595506635,
+              "angle": 0.3356876391929261
+            }
+          ]
+        },
+        {
+          "frame": 67,
+          "recoil_source_frame": 79,
+          "walk_frame": 78,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.943,
+          "guns": [
+            {
+              "origin": [
+                491.1926432700335,
+                193.18537481649065
+              ],
+              "scale": 7.969355388353332,
+              "angle": 0.2843658967114707
+            }
+          ]
+        },
+        {
+          "frame": 68,
+          "recoil_source_frame": 80,
+          "walk_frame": 45,
+          "upper_offset": [
+            4,
+            -1
+          ],
+          "belt_confidence": 0.97,
+          "guns": [
+            {
+              "origin": [
+                466.84525327355095,
+                192.69614739749565
+              ],
+              "scale": 7.9656204508143125,
+              "angle": -1.4285723375996442
+            }
+          ]
+        },
+        {
+          "frame": 69,
+          "recoil_source_frame": 81,
+          "walk_frame": 46,
+          "upper_offset": [
+            9,
+            -1
+          ],
+          "belt_confidence": 0.966,
+          "guns": [
+            {
+              "origin": [
+                436.06645679679076,
+                192.62956546862546
+              ],
+              "scale": 7.936245089766908,
+              "angle": -5.5651180743764845
+            }
+          ]
+        },
+        {
+          "frame": 70,
+          "recoil_source_frame": 82,
+          "walk_frame": 47,
+          "upper_offset": [
+            2,
+            -1
+          ],
+          "belt_confidence": 0.951,
+          "guns": [
+            {
+              "origin": [
+                479.74155561887454,
+                193.8665350922018
+              ],
+              "scale": 7.969834943894296,
+              "angle": -0.16428672425927288
+            }
+          ]
+        },
+        {
+          "frame": 71,
+          "recoil_source_frame": 83,
+          "walk_frame": 48,
+          "upper_offset": [
+            2,
+            0
+          ],
+          "belt_confidence": 0.956,
+          "guns": [
+            {
+              "origin": [
+                479.7436075245313,
+                193.8759939242337
+              ],
+              "scale": 7.969997566315565,
+              "angle": -0.16299949094589272
+            }
+          ]
+        },
+        {
+          "frame": 72,
+          "recoil_source_frame": 84,
+          "walk_frame": 49,
+          "upper_offset": [
+            0,
+            1
+          ],
+          "belt_confidence": 0.946,
+          "guns": [
+            {
+              "origin": [
+                487.16022676306613,
+                193.4683232974938
+              ],
+              "scale": 8.00738705512909,
+              "angle": 0.23825239805030807
+            }
+          ]
+        },
+        {
+          "frame": 73,
+          "recoil_source_frame": 85,
+          "walk_frame": 50,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.951,
+          "guns": [
+            {
+              "origin": [
+                491.19865305476605,
+                192.9771535195106
+              ],
+              "scale": 8.003231575442273,
+              "angle": 0.29167229794550176
+            }
+          ]
+        },
+        {
+          "frame": 74,
+          "recoil_source_frame": 86,
+          "walk_frame": 51,
+          "upper_offset": [
+            0,
+            3
+          ],
+          "belt_confidence": 0.954,
+          "guns": [
+            {
+              "origin": [
+                490.1694887216907,
+                192.9231720943248
+              ],
+              "scale": 8.006602207747214,
+              "angle": 0.2307905892678527
+            }
+          ]
+        },
+        {
+          "frame": 75,
+          "recoil_source_frame": 87,
+          "walk_frame": 52,
+          "upper_offset": [
+            4,
+            3
+          ],
+          "belt_confidence": 0.977,
+          "guns": [
+            {
+              "origin": [
+                466.8222960576001,
+                192.97671665420089
+              ],
+              "scale": 7.893085511019482,
+              "angle": -1.4658394171151785
+            }
+          ]
+        },
+        {
+          "frame": 76,
+          "recoil_source_frame": 88,
+          "walk_frame": 53,
+          "upper_offset": [
+            5,
+            0
+          ],
+          "belt_confidence": 0.971,
+          "guns": [
+            {
+              "origin": [
+                466.72629833815535,
+                192.95711831423117
+              ],
+              "scale": 7.870008762727378,
+              "angle": -1.4294370844052167
+            }
+          ]
+        },
+        {
+          "frame": 77,
+          "recoil_source_frame": 89,
+          "walk_frame": 54,
+          "upper_offset": [
+            10,
+            -1
+          ],
+          "belt_confidence": 0.966,
+          "guns": [
+            {
+              "origin": [
+                431.91533221860925,
+                192.73440125769173
+              ],
+              "scale": 7.877871148928461,
+              "angle": -5.6718007981283804
+            }
+          ]
+        },
+        {
+          "frame": 78,
+          "recoil_source_frame": 90,
+          "walk_frame": 55,
+          "upper_offset": [
+            5,
+            -1
+          ],
+          "belt_confidence": 0.975,
+          "guns": [
+            {
+              "origin": [
+                455.6610198635253,
+                192.95302341235714
+              ],
+              "scale": 7.959960845816033,
+              "angle": -2.9078697057225247
+            }
+          ]
+        },
+        {
+          "frame": 79,
+          "recoil_source_frame": 91,
+          "walk_frame": 56,
+          "upper_offset": [
+            1,
+            -1
+          ],
+          "belt_confidence": 0.944,
+          "guns": [
+            {
+              "origin": [
+                485.32745115122026,
+                194.61316626237743
+              ],
+              "scale": 7.965982844304553,
+              "angle": 0.21717984436888713
+            }
+          ]
+        },
+        {
+          "frame": 80,
+          "recoil_source_frame": 92,
+          "walk_frame": 57,
+          "upper_offset": [
+            1,
+            1
+          ],
+          "belt_confidence": 0.952,
+          "guns": [
+            {
+              "origin": [
+                486.16643812440407,
+                194.12643310791393
+              ],
+              "scale": 7.938989282745615,
+              "angle": 0.2517888193039862
+            }
+          ]
+        },
+        {
+          "frame": 81,
+          "recoil_source_frame": 93,
+          "walk_frame": 58,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.958,
+          "guns": [
+            {
+              "origin": [
+                491.19022517425435,
+                194.18326564675866
+              ],
+              "scale": 7.973742186805033,
+              "angle": 0.2882059464925463
+            }
+          ]
+        },
+        {
+          "frame": 82,
+          "recoil_source_frame": 94,
+          "walk_frame": 59,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.961,
+          "guns": [
+            {
+              "origin": [
+                491.19955070044966,
+                193.76674151453747
+              ],
+              "scale": 7.974947332870155,
+              "angle": 0.29904092849657693
+            }
+          ]
+        },
+        {
+          "frame": 83,
+          "recoil_source_frame": 95,
+          "walk_frame": 60,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.96,
+          "guns": [
+            {
+              "origin": [
+                491.1759838792053,
+                193.9847136191812
+              ],
+              "scale": 7.973892231267392,
+              "angle": 0.2652370262945002
+            }
+          ]
+        },
+        {
+          "frame": 84,
+          "recoil_source_frame": 96,
+          "walk_frame": 61,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.954,
+          "guns": [
+            {
+              "origin": [
+                491.17529504003153,
+                193.9836226949145
+              ],
+              "scale": 7.97290554808575,
+              "angle": 0.2641912642523125
+            }
+          ]
+        },
+        {
+          "frame": 85,
+          "recoil_source_frame": 97,
+          "walk_frame": 62,
+          "upper_offset": [
+            2,
+            0
+          ],
+          "belt_confidence": 0.959,
+          "guns": [
+            {
+              "origin": [
+                479.825298319614,
+                193.66346250083407
+              ],
+              "scale": 7.862323662583273,
+              "angle": -0.11204437154925213
+            }
+          ]
+        },
+        {
+          "frame": 86,
+          "recoil_source_frame": 98,
+          "walk_frame": 63,
+          "upper_offset": [
+            9,
+            -1
+          ],
+          "belt_confidence": 0.967,
+          "guns": [
+            {
+              "origin": [
+                435.157312257403,
+                187.63538534146443
+              ],
+              "scale": 8.218151438766743,
+              "angle": -4.302733446937625
+            }
+          ]
+        },
+        {
+          "frame": 87,
+          "recoil_source_frame": 99,
+          "walk_frame": 64,
+          "upper_offset": [
+            9,
+            -1
+          ],
+          "belt_confidence": 0.971,
+          "guns": [
+            {
+              "origin": [
+                430.96683623757247,
+                190.3842274320864
+              ],
+              "scale": 7.901658265708759,
+              "angle": -6.618355292412796
+            }
+          ]
+        },
+        {
+          "frame": 88,
+          "recoil_source_frame": 100,
+          "walk_frame": 65,
+          "upper_offset": [
+            8,
+            1
+          ],
+          "belt_confidence": 0.967,
+          "guns": [
+            {
+              "origin": [
+                436.31548734866703,
+                189.4778340455771
+              ],
+              "scale": 8.169883701758298,
+              "angle": -3.4837946819611347
+            }
+          ]
+        },
+        {
+          "frame": 89,
+          "recoil_source_frame": 101,
+          "walk_frame": 66,
+          "upper_offset": [
+            1,
+            2
+          ],
+          "belt_confidence": 0.945,
+          "guns": [
+            {
+              "origin": [
+                483.74698079660084,
+                196.8630616070953
+              ],
+              "scale": 7.970574935317739,
+              "angle": -0.16263620690291433
+            }
+          ]
+        },
+        {
+          "frame": 90,
+          "recoil_source_frame": 102,
+          "walk_frame": 67,
+          "upper_offset": [
+            1,
+            3
+          ],
+          "belt_confidence": 0.95,
+          "guns": [
+            {
+              "origin": [
+                484.07982480048287,
+                196.29689120697145
+              ],
+              "scale": 7.9695481667081625,
+              "angle": 0.12461115985385735
+            }
+          ]
+        },
+        {
+          "frame": 91,
+          "recoil_source_frame": 103,
+          "walk_frame": 68,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.959,
+          "guns": [
+            {
+              "origin": [
+                490.1825454105683,
+                193.7739185888245
+              ],
+              "scale": 8.00863616665578,
+              "angle": 0.27360905708901867
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "20-dual-recoil",
+      "label": "Walk + dual fire",
+      "frames": [
+        {
+          "frame": 0,
+          "recoil_source_frame": 12,
+          "walk_frame": 45,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.965,
+          "guns": [
+            {
+              "origin": [
+                495.7328291553498,
+                195.6485707850861
+              ],
+              "scale": 7.966011330089855,
+              "angle": -0.3614413735793902
+            },
+            {
+              "origin": [
+                241.29253827101087,
+                270.57394213601634
+              ],
+              "scale": 7.724335852132066,
+              "angle": 0.20584486834708374
+            }
+          ]
+        },
+        {
+          "frame": 1,
+          "recoil_source_frame": 13,
+          "walk_frame": 46,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                495.7317946696548,
+                195.70321366730496
+              ],
+              "scale": 7.9662188243709435,
+              "angle": -0.3549186491447869
+            },
+            {
+              "origin": [
+                241.9072037610556,
+                270.69995867763595
+              ],
+              "scale": 7.691340606721974,
+              "angle": -0.06382746709854963
+            }
+          ]
+        },
+        {
+          "frame": 2,
+          "recoil_source_frame": 14,
+          "walk_frame": 47,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.969,
+          "guns": [
+            {
+              "origin": [
+                495.729870538859,
+                195.68268291010494
+              ],
+              "scale": 7.966222492240349,
+              "angle": -0.35729538348091444
+            },
+            {
+              "origin": [
+                241.90153112683595,
+                270.68275312327097
+              ],
+              "scale": 7.691442959521602,
+              "angle": -0.06771525020799539
+            }
+          ]
+        },
+        {
+          "frame": 3,
+          "recoil_source_frame": 15,
+          "walk_frame": 48,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.969,
+          "guns": [
+            {
+              "origin": [
+                495.73304062379606,
+                195.71651819550235
+              ],
+              "scale": 7.966216440223608,
+              "angle": -0.35337849390701415
+            },
+            {
+              "origin": [
+                241.91554686498307,
+                270.7252810341809
+              ],
+              "scale": 7.691189928992288,
+              "angle": -0.058106549073974306
+            }
+          ]
+        },
+        {
+          "frame": 4,
+          "recoil_source_frame": 16,
+          "walk_frame": 49,
+          "upper_offset": [
+            0,
+            1
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                495.73198539514493,
+                195.7052497584566
+              ],
+              "scale": 7.966218459877176,
+              "angle": -0.3546829457794247
+            },
+            {
+              "origin": [
+                241.93485042581813,
+                270.7839477730686
+              ],
+              "scale": 7.690840658747595,
+              "angle": -0.04485666857724498
+            }
+          ]
+        },
+        {
+          "frame": 5,
+          "recoil_source_frame": 17,
+          "walk_frame": 50,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                496.5472865029462,
+                195.15084243884584
+              ],
+              "scale": 7.966679352104107,
+              "angle": -0.3021384602318104
+            },
+            {
+              "origin": [
+                241.90618245480377,
+                270.6968602816141
+              ],
+              "scale": 7.691359040135783,
+              "angle": -0.06452754517484097
+            }
+          ]
+        },
+        {
+          "frame": 6,
+          "recoil_source_frame": 18,
+          "walk_frame": 51,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                495.6974413131828,
+                195.548967568398
+              ],
+              "scale": 8.000526376510523,
+              "angle": -0.3989561276742444
+            },
+            {
+              "origin": [
+                240.97178472250516,
+                270.55311691255054
+              ],
+              "scale": 7.72424582447967,
+              "angle": -0.0363718665695351
+            }
+          ]
+        },
+        {
+          "frame": 7,
+          "recoil_source_frame": 19,
+          "walk_frame": 52,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.973,
+          "guns": [
+            {
+              "origin": [
+                495.7108940173238,
+                195.23308939138894
+              ],
+              "scale": 7.999597697005648,
+              "angle": -0.3784665513483595
+            },
+            {
+              "origin": [
+                240.9525282239799,
+                270.4313135630765
+              ],
+              "scale": 7.724211653323738,
+              "angle": -0.06543221503144388
+            }
+          ]
+        },
+        {
+          "frame": 8,
+          "recoil_source_frame": 20,
+          "walk_frame": 53,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                495.7156973132874,
+                195.28354077123927
+              ],
+              "scale": 7.999606583895892,
+              "angle": -0.37260827391974377
+            },
+            {
+              "origin": [
+                240.9227437528913,
+                271.2871444256693
+              ],
+              "scale": 7.722191823777934,
+              "angle": -0.10363278253703906
+            }
+          ]
+        },
+        {
+          "frame": 9,
+          "recoil_source_frame": 21,
+          "walk_frame": 54,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.965,
+          "guns": [
+            {
+              "origin": [
+                466.43219009604127,
+                190.07967670646056
+              ],
+              "scale": 9.08437994887527,
+              "angle": -1.4504075073252456
+            },
+            {
+              "origin": [
+                229.82422864841809,
+                270.78766226382896
+              ],
+              "scale": 7.837289473013549,
+              "angle": -1.523349931539014
+            }
+          ]
+        },
+        {
+          "frame": 10,
+          "recoil_source_frame": 22,
+          "walk_frame": 55,
+          "upper_offset": [
+            2,
+            -2
+          ],
+          "belt_confidence": 0.945,
+          "guns": [
+            {
+              "origin": [
+                460.41134839056735,
+                199.12031355779635
+              ],
+              "scale": 8.161188646267625,
+              "angle": -4.445807612093242
+            },
+            {
+              "origin": [
+                213.9184758854133,
+                272.7134068535246
+              ],
+              "scale": 7.812894296498319,
+              "angle": -3.713816276463806
+            }
+          ]
+        },
+        {
+          "frame": 11,
+          "recoil_source_frame": 23,
+          "walk_frame": 56,
+          "upper_offset": [
+            2,
+            -1
+          ],
+          "belt_confidence": 0.953,
+          "guns": [
+            {
+              "origin": [
+                464.70009275128854,
+                198.0510724630729
+              ],
+              "scale": 8.135014364908637,
+              "angle": -3.9917725967484277
+            },
+            {
+              "origin": [
+                216.02387975899944,
+                272.6525834839943
+              ],
+              "scale": 7.814436394071234,
+              "angle": -3.5439471455681
+            }
+          ]
+        },
+        {
+          "frame": 12,
+          "recoil_source_frame": 24,
+          "walk_frame": 57,
+          "upper_offset": [
+            1,
+            1
+          ],
+          "belt_confidence": 0.944,
+          "guns": [
+            {
+              "origin": [
+                479.7462471492708,
+                195.70162758249992
+              ],
+              "scale": 8.027376365732017,
+              "angle": -2.1765926665275868
+            },
+            {
+              "origin": [
+                224.19577217519773,
+                271.921758888745
+              ],
+              "scale": 7.764923959114686,
+              "angle": -2.754212569160831
+            }
+          ]
+        },
+        {
+          "frame": 13,
+          "recoil_source_frame": 25,
+          "walk_frame": 58,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.963,
+          "guns": [
+            {
+              "origin": [
+                495.54985357405076,
+                195.75809204456962
+              ],
+              "scale": 7.9725950109007355,
+              "angle": -0.34277682964335604
+            },
+            {
+              "origin": [
+                239.9599540019556,
+                270.8598921446966
+              ],
+              "scale": 7.6903939634170975,
+              "angle": -0.027933570486441392
+            }
+          ]
+        },
+        {
+          "frame": 14,
+          "recoil_source_frame": 26,
+          "walk_frame": 59,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.97,
+          "guns": [
+            {
+              "origin": [
+                495.72285950286755,
+                195.424445677169
+              ],
+              "scale": 7.990846665173931,
+              "angle": -0.364396207239752
+            },
+            {
+              "origin": [
+                240.9276740925232,
+                270.7608118669957
+              ],
+              "scale": 7.690925895870268,
+              "angle": -0.05038921557434795
+            }
+          ]
+        },
+        {
+          "frame": 15,
+          "recoil_source_frame": 27,
+          "walk_frame": 60,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.97,
+          "guns": [
+            {
+              "origin": [
+                495.73318629985476,
+                195.46186759004863
+              ],
+              "scale": 8.000483728856633,
+              "angle": -0.3511199658160811
+            },
+            {
+              "origin": [
+                240.91639694575613,
+                270.45858151436227
+              ],
+              "scale": 7.724692789030096,
+              "angle": -0.05803268967777283
+            }
+          ]
+        },
+        {
+          "frame": 16,
+          "recoil_source_frame": 28,
+          "walk_frame": 61,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.969,
+          "guns": [
+            {
+              "origin": [
+                495.7189418389005,
+                195.31106563383912
+              ],
+              "scale": 8.000499948792209,
+              "angle": -0.3685881680901335
+            },
+            {
+              "origin": [
+                240.91957143092634,
+                270.46877794877224
+              ],
+              "scale": 7.724571118152823,
+              "angle": -0.05583603376838403
+            }
+          ]
+        },
+        {
+          "frame": 17,
+          "recoil_source_frame": 29,
+          "walk_frame": 62,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.969,
+          "guns": [
+            {
+              "origin": [
+                495.7189418389005,
+                195.31106563383912
+              ],
+              "scale": 8.000499948792209,
+              "angle": -0.3685881680901335
+            },
+            {
+              "origin": [
+                240.92257134629162,
+                270.477626515378
+              ],
+              "scale": 7.724555136734715,
+              "angle": -0.0537591635053555
+            }
+          ]
+        },
+        {
+          "frame": 18,
+          "recoil_source_frame": 30,
+          "walk_frame": 63,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.973,
+          "guns": [
+            {
+              "origin": [
+                480.02869941067786,
+                174.61792026168533
+              ],
+              "scale": 10.067290816643105,
+              "angle": 2.2707005784750205
+            },
+            {
+              "origin": [
+                240.93497475102697,
+                271.0581174606173
+              ],
+              "scale": 7.656346651044658,
+              "angle": -0.0454672437395251
+            }
+          ]
+        },
+        {
+          "frame": 19,
+          "recoil_source_frame": 31,
+          "walk_frame": 64,
+          "upper_offset": [
+            1,
+            -2
+          ],
+          "belt_confidence": 0.964,
+          "guns": [
+            {
+              "origin": [
+                491.0288853170816,
+                195.04975394349879
+              ],
+              "scale": 8.051890698535452,
+              "angle": -0.6473327050476986
+            },
+            {
+              "origin": [
+                217.4145221249353,
+                271.778261761788
+              ],
+              "scale": 7.799735603115495,
+              "angle": -2.5276418158159073
+            }
+          ]
+        },
+        {
+          "frame": 20,
+          "recoil_source_frame": 32,
+          "walk_frame": 65,
+          "upper_offset": [
+            1,
+            0
+          ],
+          "belt_confidence": 0.955,
+          "guns": [
+            {
+              "origin": [
+                491.07046709656663,
+                195.1612756557483
+              ],
+              "scale": 8.050809840763872,
+              "angle": -0.6352211415839288
+            },
+            {
+              "origin": [
+                219.31747931667354,
+                271.3794155995264
+              ],
+              "scale": 7.79862498993275,
+              "angle": -2.340905458920545
+            }
+          ]
+        },
+        {
+          "frame": 21,
+          "recoil_source_frame": 33,
+          "walk_frame": 66,
+          "upper_offset": [
+            1,
+            2
+          ],
+          "belt_confidence": 0.949,
+          "guns": [
+            {
+              "origin": [
+                492.4489130522338,
+                195.18788183643036
+              ],
+              "scale": 8.009803118715002,
+              "angle": -0.37672954600025893
+            },
+            {
+              "origin": [
+                223.5093944472781,
+                270.7052095879911
+              ],
+              "scale": 7.769673659611429,
+              "angle": -1.7334954183969942
+            }
+          ]
+        },
+        {
+          "frame": 22,
+          "recoil_source_frame": 34,
+          "walk_frame": 67,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                495.50214868806665,
+                195.32869527311078
+              ],
+              "scale": 7.9743999427284455,
+              "angle": -0.33295229953826233
+            },
+            {
+              "origin": [
+                230.02974396821895,
+                271.04892678094
+              ],
+              "scale": 7.731625871245141,
+              "angle": -1.1591813678036806
+            }
+          ]
+        },
+        {
+          "frame": 23,
+          "recoil_source_frame": 35,
+          "walk_frame": 68,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                495.4361274023676,
+                195.4348415940164
+              ],
+              "scale": 7.975569891933174,
+              "angle": -0.3775725185308232
+            },
+            {
+              "origin": [
+                229.45934324646407,
+                271.1155188215733
+              ],
+              "scale": 7.751293079475996,
+              "angle": -1.104872765508978
+            }
+          ]
+        },
+        {
+          "frame": 24,
+          "recoil_source_frame": 36,
+          "walk_frame": 69,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.973,
+          "guns": [
+            {
+              "origin": [
+                495.4283160015377,
+                195.39044381983012
+              ],
+              "scale": 7.975701525355074,
+              "angle": -0.38260440677581464
+            },
+            {
+              "origin": [
+                235.520543787967,
+                271.04129211971855
+              ],
+              "scale": 7.6981975465866,
+              "angle": -0.3351749284156923
+            }
+          ]
+        },
+        {
+          "frame": 25,
+          "recoil_source_frame": 37,
+          "walk_frame": 70,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                495.4268500988146,
+                195.38211735254848
+              ],
+              "scale": 7.975726206480374,
+              "angle": -0.3835481422927142
+            },
+            {
+              "origin": [
+                240.959270243541,
+                270.8581105503727
+              ],
+              "scale": 7.690121543079912,
+              "angle": -0.02876002722551545
+            }
+          ]
+        },
+        {
+          "frame": 26,
+          "recoil_source_frame": 38,
+          "walk_frame": 71,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.971,
+          "guns": [
+            {
+              "origin": [
+                495.43079433401033,
+                195.40452479560247
+              ],
+              "scale": 7.975659782728714,
+              "angle": -0.3810084766066683
+            },
+            {
+              "origin": [
+                241.87037277601672,
+                271.36188778445995
+              ],
+              "scale": 7.657380687485195,
+              "angle": -0.08987483563642802
+            }
+          ]
+        },
+        {
+          "frame": 27,
+          "recoil_source_frame": 39,
+          "walk_frame": 72,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.966,
+          "guns": [
+            {
+              "origin": [
+                495.3683000046399,
+                195.26768931237908
+              ],
+              "scale": 8.010962004019891,
+              "angle": -0.42216392370768085
+            },
+            {
+              "origin": [
+                240.85541641356974,
+                271.5406071922658
+              ],
+              "scale": 7.691540381078317,
+              "angle": -0.1016950937720868
+            }
+          ]
+        },
+        {
+          "frame": 28,
+          "recoil_source_frame": 40,
+          "walk_frame": 73,
+          "upper_offset": [
+            0,
+            1
+          ],
+          "belt_confidence": 0.966,
+          "guns": [
+            {
+              "origin": [
+                495.42316802508304,
+                195.16573877477816
+              ],
+              "scale": 8.008948547581497,
+              "angle": -0.43581093465852977
+            },
+            {
+              "origin": [
+                240.86465573696177,
+                270.80347408506464
+              ],
+              "scale": 7.725035924076429,
+              "angle": -0.0943427712883705
+            }
+          ]
+        },
+        {
+          "frame": 29,
+          "recoil_source_frame": 41,
+          "walk_frame": 74,
+          "upper_offset": [
+            -1,
+            2
+          ],
+          "belt_confidence": 0.962,
+          "guns": [
+            {
+              "origin": [
+                474.43194594591137,
+                196.36219885875371
+              ],
+              "scale": 8.190694392296331,
+              "angle": -1.5318015211894582
+            },
+            {
+              "origin": [
+                240.83089055296242,
+                271.69807954677583
+              ],
+              "scale": 7.7251970909288525,
+              "angle": -0.11917607313114292
+            }
+          ]
+        },
+        {
+          "frame": 30,
+          "recoil_source_frame": 42,
+          "walk_frame": 75,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.966,
+          "guns": [
+            {
+              "origin": [
+                494.3583579307553,
+                196.0071882946858
+              ],
+              "scale": 7.908301229209926,
+              "angle": -0.432538745265035
+            },
+            {
+              "origin": [
+                236.50801340797062,
+                271.29833481959395
+              ],
+              "scale": 7.749365926578165,
+              "angle": -0.6601032530870007
+            }
+          ]
+        },
+        {
+          "frame": 31,
+          "recoil_source_frame": 43,
+          "walk_frame": 76,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.973,
+          "guns": [
+            {
+              "origin": [
+                494.3315610215795,
+                196.07149153797906
+              ],
+              "scale": 7.943001478184187,
+              "angle": -0.4509432960114974
+            },
+            {
+              "origin": [
+                236.81055256388828,
+                271.8264665134053
+              ],
+              "scale": 7.711316230920544,
+              "angle": -0.8499727488610558
+            }
+          ]
+        },
+        {
+          "frame": 32,
+          "recoil_source_frame": 44,
+          "walk_frame": 77,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.974,
+          "guns": [
+            {
+              "origin": [
+                494.3062523334064,
+                195.9282574374273
+              ],
+              "scale": 7.943424446014058,
+              "angle": -0.467228377604216
+            },
+            {
+              "origin": [
+                237.0245160893175,
+                271.31254346024315
+              ],
+              "scale": 7.730243183183663,
+              "angle": -0.692652745394334
+            }
+          ]
+        },
+        {
+          "frame": 33,
+          "recoil_source_frame": 45,
+          "walk_frame": 78,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.966,
+          "guns": [
+            {
+              "origin": [
+                495.4409622924753,
+                195.46234562825964
+              ],
+              "scale": 7.975488320370781,
+              "angle": -0.3744555006721086
+            },
+            {
+              "origin": [
+                240.59900114836523,
+                271.28577483769334
+              ],
+              "scale": 7.692100828029303,
+              "angle": -0.28116716904130135
+            }
+          ]
+        },
+        {
+          "frame": 34,
+          "recoil_source_frame": 46,
+          "walk_frame": 45,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.969,
+          "guns": [
+            {
+              "origin": [
+                495.4661923150075,
+                195.34676731754303
+              ],
+              "scale": 8.00865550729315,
+              "angle": -0.357073872142438
+            },
+            {
+              "origin": [
+                240.88839484725744,
+                270.64056212352466
+              ],
+              "scale": 7.691657394371563,
+              "angle": -0.07764137875245881
+            }
+          ]
+        },
+        {
+          "frame": 35,
+          "recoil_source_frame": 47,
+          "walk_frame": 46,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                478.60779402092805,
+                195.1703839124344
+              ],
+              "scale": 8.259613207902875,
+              "angle": -1.0518128686169919
+            },
+            {
+              "origin": [
+                239.8436697014534,
+                271.49514224707826
+              ],
+              "scale": 7.692453038180435,
+              "angle": -0.11126105067588798
+            }
+          ]
+        },
+        {
+          "frame": 36,
+          "recoil_source_frame": 48,
+          "walk_frame": 47,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                490.2713043619734,
+                196.67420645680957
+              ],
+              "scale": 7.937508001892538,
+              "angle": -0.7412031489861671
+            },
+            {
+              "origin": [
+                239.57256489900246,
+                270.94478588049196
+              ],
+              "scale": 7.726368225499065,
+              "angle": -0.29845764289481164
+            }
+          ]
+        },
+        {
+          "frame": 37,
+          "recoil_source_frame": 49,
+          "walk_frame": 48,
+          "upper_offset": [
+            1,
+            -1
+          ],
+          "belt_confidence": 0.95,
+          "guns": [
+            {
+              "origin": [
+                486.7993926625826,
+                196.037008521015
+              ],
+              "scale": 8.011679951555676,
+              "angle": -1.166498287912343
+            },
+            {
+              "origin": [
+                236.43694485321393,
+                270.7690155190113
+              ],
+              "scale": 7.726114859900974,
+              "angle": -0.7132061717904106
+            }
+          ]
+        },
+        {
+          "frame": 38,
+          "recoil_source_frame": 50,
+          "walk_frame": 49,
+          "upper_offset": [
+            1,
+            1
+          ],
+          "belt_confidence": 0.951,
+          "guns": [
+            {
+              "origin": [
+                486.82392484475986,
+                196.1581591417478
+              ],
+              "scale": 8.019096998106338,
+              "angle": -1.1450214851626417
+            },
+            {
+              "origin": [
+                236.43922692543669,
+                270.9271745868754
+              ],
+              "scale": 7.721946857212465,
+              "angle": -0.6825256474194271
+            }
+          ]
+        },
+        {
+          "frame": 39,
+          "recoil_source_frame": 51,
+          "walk_frame": 50,
+          "upper_offset": [
+            1,
+            2
+          ],
+          "belt_confidence": 0.956,
+          "guns": [
+            {
+              "origin": [
+                492.93457283946043,
+                195.96186539288306
+              ],
+              "scale": 7.984763871543883,
+              "angle": -0.7178107349664197
+            },
+            {
+              "origin": [
+                236.88943236316314,
+                271.612245073454
+              ],
+              "scale": 7.710111287979381,
+              "angle": -0.7817747236044434
+            }
+          ]
+        },
+        {
+          "frame": 40,
+          "recoil_source_frame": 52,
+          "walk_frame": 51,
+          "upper_offset": [
+            1,
+            2
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                492.86609814675154,
+                195.65602537888108
+              ],
+              "scale": 7.986112142844034,
+              "angle": -0.7523866775424621
+            },
+            {
+              "origin": [
+                236.89980300990786,
+                271.6492461395319
+              ],
+              "scale": 7.709003208576437,
+              "angle": -0.7748275022171334
+            }
+          ]
+        },
+        {
+          "frame": 41,
+          "recoil_source_frame": 53,
+          "walk_frame": 52,
+          "upper_offset": [
+            1,
+            3
+          ],
+          "belt_confidence": 0.941,
+          "guns": [
+            {
+              "origin": [
+                449.861960808418,
+                199.65179588789772
+              ],
+              "scale": 8.265556737064706,
+              "angle": -5.972343058340936
+            },
+            {
+              "origin": [
+                235.60629778712018,
+                271.43541806341943
+              ],
+              "scale": 7.697369713190992,
+              "angle": -0.9789234812831762
+            }
+          ]
+        },
+        {
+          "frame": 42,
+          "recoil_source_frame": 54,
+          "walk_frame": 53,
+          "upper_offset": [
+            1,
+            -1
+          ],
+          "belt_confidence": 0.942,
+          "guns": [
+            {
+              "origin": [
+                450.21164464697085,
+                200.45541306925332
+              ],
+              "scale": 8.190484402026229,
+              "angle": -5.873739339330822
+            },
+            {
+              "origin": [
+                235.43220319990075,
+                271.59386853474246
+              ],
+              "scale": 7.6846157950896,
+              "angle": -1.0899347229820655
+            }
+          ]
+        },
+        {
+          "frame": 43,
+          "recoil_source_frame": 55,
+          "walk_frame": 54,
+          "upper_offset": [
+            2,
+            -1
+          ],
+          "belt_confidence": 0.964,
+          "guns": [
+            {
+              "origin": [
+                465.954289087019,
+                197.70104636165252
+              ],
+              "scale": 8.020761125831603,
+              "angle": -4.715093325016779
+            },
+            {
+              "origin": [
+                230.15563679048984,
+                272.04412851143115
+              ],
+              "scale": 7.704031068690177,
+              "angle": -2.2493445341600187
+            }
+          ]
+        },
+        {
+          "frame": 44,
+          "recoil_source_frame": 56,
+          "walk_frame": 55,
+          "upper_offset": [
+            2,
+            -1
+          ],
+          "belt_confidence": 0.962,
+          "guns": [
+            {
+              "origin": [
+                467.2475581552626,
+                197.32354344202548
+              ],
+              "scale": 8.029062883787255,
+              "angle": -4.6136021789417265
+            },
+            {
+              "origin": [
+                230.11419150149126,
+                271.88155274145464
+              ],
+              "scale": 7.704188694111294,
+              "angle": -2.2919098156173945
+            }
+          ]
+        },
+        {
+          "frame": 45,
+          "recoil_source_frame": 57,
+          "walk_frame": 56,
+          "upper_offset": [
+            2,
+            0
+          ],
+          "belt_confidence": 0.961,
+          "guns": [
+            {
+              "origin": [
+                467.40519083336255,
+                197.27853485832685
+              ],
+              "scale": 8.025037477732262,
+              "angle": -4.558154902845116
+            },
+            {
+              "origin": [
+                230.05578228210118,
+                271.92468085248765
+              ],
+              "scale": 7.7066510282150995,
+              "angle": -2.276095524718865
+            }
+          ]
+        },
+        {
+          "frame": 46,
+          "recoil_source_frame": 58,
+          "walk_frame": 57,
+          "upper_offset": [
+            2,
+            2
+          ],
+          "belt_confidence": 0.96,
+          "guns": [
+            {
+              "origin": [
+                467.5468651508087,
+                196.80143644067832
+              ],
+              "scale": 8.026162109035646,
+              "angle": -4.488893380384687
+            },
+            {
+              "origin": [
+                229.9599691859148,
+                271.8647355311994
+              ],
+              "scale": 7.709611389770768,
+              "angle": -2.286567943519495
+            }
+          ]
+        },
+        {
+          "frame": 47,
+          "recoil_source_frame": 59,
+          "walk_frame": 58,
+          "upper_offset": [
+            2,
+            3
+          ],
+          "belt_confidence": 0.96,
+          "guns": [
+            {
+              "origin": [
+                467.51992299556554,
+                196.96580569463808
+              ],
+              "scale": 8.041251757200147,
+              "angle": -4.516551972041187
+            },
+            {
+              "origin": [
+                229.95574883299938,
+                271.8535802028932
+              ],
+              "scale": 7.709671300212745,
+              "angle": -2.2894038316416583
+            }
+          ]
+        },
+        {
+          "frame": 48,
+          "recoil_source_frame": 60,
+          "walk_frame": 59,
+          "upper_offset": [
+            1,
+            3
+          ],
+          "belt_confidence": 0.951,
+          "guns": [
+            {
+              "origin": [
+                479.2976822531851,
+                195.6023960278904
+              ],
+              "scale": 8.015740640609597,
+              "angle": -2.811189256147757
+            },
+            {
+              "origin": [
+                234.2361722121675,
+                271.7547638766744
+              ],
+              "scale": 7.700028255129446,
+              "angle": -1.2750697605436343
+            }
+          ]
+        },
+        {
+          "frame": 49,
+          "recoil_source_frame": 61,
+          "walk_frame": 60,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.976,
+          "guns": [
+            {
+              "origin": [
+                495.27413868738995,
+                195.21596716190396
+              ],
+              "scale": 8.012551301066258,
+              "angle": -0.48479648074282683
+            },
+            {
+              "origin": [
+                239.81156740160395,
+                271.139886293934
+              ],
+              "scale": 7.72610184594783,
+              "angle": -0.1318880838687965
+            }
+          ]
+        },
+        {
+          "frame": 50,
+          "recoil_source_frame": 62,
+          "walk_frame": 61,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.971,
+          "guns": [
+            {
+              "origin": [
+                495.45580352587746,
+                195.247903749188
+              ],
+              "scale": 8.00935574010174,
+              "angle": -0.36789335091905
+            },
+            {
+              "origin": [
+                240.65507666449327,
+                270.9359446543447
+              ],
+              "scale": 7.694370044796696,
+              "angle": -0.24081840608741092
+            }
+          ]
+        },
+        {
+          "frame": 51,
+          "recoil_source_frame": 63,
+          "walk_frame": 62,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.965,
+          "guns": [
+            {
+              "origin": [
+                495.7330977006925,
+                195.46250746774314
+              ],
+              "scale": 8.000272455308197,
+              "angle": -0.35124171916611574
+            },
+            {
+              "origin": [
+                241.02059096799402,
+                270.3204208498887
+              ],
+              "scale": 7.724835444744259,
+              "angle": 0.028305839219664546
+            }
+          ]
+        },
+        {
+          "frame": 52,
+          "recoil_source_frame": 64,
+          "walk_frame": 63,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.973,
+          "guns": [
+            {
+              "origin": [
+                495.36323952035366,
+                195.22963094149677
+              ],
+              "scale": 8.001341522667746,
+              "angle": -0.4355118141777395
+            },
+            {
+              "origin": [
+                240.96377093313814,
+                270.37205741192736
+              ],
+              "scale": 7.69028944456507,
+              "angle": -0.02512191915766498
+            }
+          ]
+        },
+        {
+          "frame": 53,
+          "recoil_source_frame": 65,
+          "walk_frame": 64,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                474.6674222391423,
+                191.14804871170173
+              ],
+              "scale": 8.834016808121811,
+              "angle": -1.234225759112826
+            },
+            {
+              "origin": [
+                240.71778103015527,
+                271.1142239755585
+              ],
+              "scale": 7.694719793448365,
+              "angle": -0.19746887227672727
+            }
+          ]
+        },
+        {
+          "frame": 54,
+          "recoil_source_frame": 66,
+          "walk_frame": 65,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.961,
+          "guns": [
+            {
+              "origin": [
+                476.12909077795234,
+                185.4598031707078
+              ],
+              "scale": 9.2162803872145,
+              "angle": -0.7613112026390731
+            },
+            {
+              "origin": [
+                239.52341774716885,
+                271.02530132379917
+              ],
+              "scale": 7.698345967934347,
+              "angle": -0.3331008771778501
+            }
+          ]
+        },
+        {
+          "frame": 55,
+          "recoil_source_frame": 67,
+          "walk_frame": 66,
+          "upper_offset": [
+            1,
+            3
+          ],
+          "belt_confidence": 0.961,
+          "guns": [
+            {
+              "origin": [
+                484.5692954386431,
+                196.1400739931179
+              ],
+              "scale": 8.01786562713782,
+              "angle": -1.392410768256919
+            },
+            {
+              "origin": [
+                236.7914195700781,
+                271.3317029802779
+              ],
+              "scale": 7.711774199616786,
+              "angle": -0.847838219098591
+            }
+          ]
+        },
+        {
+          "frame": 56,
+          "recoil_source_frame": 68,
+          "walk_frame": 67,
+          "upper_offset": [
+            1,
+            3
+          ],
+          "belt_confidence": 0.958,
+          "guns": [
+            {
+              "origin": [
+                484.2650998072161,
+                196.4359091971355
+              ],
+              "scale": 8.024754083815946,
+              "angle": -1.4709088706954887
+            },
+            {
+              "origin": [
+                236.58550784420137,
+                271.22608201007165
+              ],
+              "scale": 7.715342113753632,
+              "angle": -0.9909803897031542
+            }
+          ]
+        },
+        {
+          "frame": 57,
+          "recoil_source_frame": 69,
+          "walk_frame": 68,
+          "upper_offset": [
+            1,
+            2
+          ],
+          "belt_confidence": 0.964,
+          "guns": [
+            {
+              "origin": [
+                489.5926767817056,
+                195.91491795991044
+              ],
+              "scale": 8.054067607038522,
+              "angle": -1.1341781733831156
+            },
+            {
+              "origin": [
+                238.93731591834543,
+                271.3702144282586
+              ],
+              "scale": 7.697444653594765,
+              "angle": -0.7368282009810158
+            }
+          ]
+        },
+        {
+          "frame": 58,
+          "recoil_source_frame": 70,
+          "walk_frame": 69,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.979,
+          "guns": [
+            {
+              "origin": [
+                493.85788169001404,
+                197.19211413040705
+              ],
+              "scale": 8.011380884518335,
+              "angle": -1.1318532990777312
+            },
+            {
+              "origin": [
+                239.79184622519622,
+                271.0901885905097
+              ],
+              "scale": 7.725164540674835,
+              "angle": -0.14560291261212005
+            }
+          ]
+        },
+        {
+          "frame": 59,
+          "recoil_source_frame": 71,
+          "walk_frame": 70,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.979,
+          "guns": [
+            {
+              "origin": [
+                472.5712906118261,
+                191.85470653903687
+              ],
+              "scale": 8.780855547672678,
+              "angle": -1.5114892288819308
+            },
+            {
+              "origin": [
+                240.88788775768484,
+                271.14671004198306
+              ],
+              "scale": 7.690450870524738,
+              "angle": -0.07847643390793298
+            }
+          ]
+        },
+        {
+          "frame": 60,
+          "recoil_source_frame": 72,
+          "walk_frame": 71,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.975,
+          "guns": [
+            {
+              "origin": [
+                464.14064119706177,
+                189.7270242969247
+              ],
+              "scale": 9.10156949438107,
+              "angle": -1.8594460440369676
+            },
+            {
+              "origin": [
+                240.88750956490645,
+                271.1489808005264
+              ],
+              "scale": 7.690027035939999,
+              "angle": -0.0787433457958041
+            }
+          ]
+        },
+        {
+          "frame": 61,
+          "recoil_source_frame": 73,
+          "walk_frame": 72,
+          "upper_offset": [
+            1,
+            -2
+          ],
+          "belt_confidence": 0.965,
+          "guns": [
+            {
+              "origin": [
+                483.40152730886246,
+                197.3673198402439
+              ],
+              "scale": 7.945212596795141,
+              "angle": -1.7380729819733955
+            },
+            {
+              "origin": [
+                237.9186444732586,
+                271.8763768662165
+              ],
+              "scale": 7.674720070068389,
+              "angle": -0.7829930988365296
+            }
+          ]
+        },
+        {
+          "frame": 62,
+          "recoil_source_frame": 74,
+          "walk_frame": 73,
+          "upper_offset": [
+            1,
+            1
+          ],
+          "belt_confidence": 0.965,
+          "guns": [
+            {
+              "origin": [
+                485.26961625033175,
+                196.58987780247855
+              ],
+              "scale": 8.02268949065384,
+              "angle": -1.3321550484548863
+            },
+            {
+              "origin": [
+                237.90906156375704,
+                271.84802721044167
+              ],
+              "scale": 7.674880078098921,
+              "angle": -0.7896481708267868
+            }
+          ]
+        },
+        {
+          "frame": 63,
+          "recoil_source_frame": 75,
+          "walk_frame": 74,
+          "upper_offset": [
+            1,
+            2
+          ],
+          "belt_confidence": 0.959,
+          "guns": [
+            {
+              "origin": [
+                486.64271453498407,
+                196.06031264412582
+              ],
+              "scale": 8.01991911749148,
+              "angle": -1.0376107745294092
+            },
+            {
+              "origin": [
+                238.9531713230784,
+                272.07078849008207
+              ],
+              "scale": 7.674813289289746,
+              "angle": -0.7320417256726601
+            }
+          ]
+        },
+        {
+          "frame": 64,
+          "recoil_source_frame": 76,
+          "walk_frame": 75,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                495.4639199553069,
+                195.63662059237458
+              ],
+              "scale": 7.969474560003027,
+              "angle": -0.35981143767574303
+            },
+            {
+              "origin": [
+                240.91692619435872,
+                270.72568443291954
+              ],
+              "scale": 7.691025758068799,
+              "angle": -0.058564341766504484
+            }
+          ]
+        },
+        {
+          "frame": 65,
+          "recoil_source_frame": 77,
+          "walk_frame": 76,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                495.4127648652256,
+                195.36253530960553
+              ],
+              "scale": 7.9746470211151275,
+              "angle": -0.44482478280182297
+            },
+            {
+              "origin": [
+                240.95008067742148,
+                270.55955410303073
+              ],
+              "scale": 7.7243244348954265,
+              "angle": -0.03469372489703888
+            }
+          ]
+        },
+        {
+          "frame": 66,
+          "recoil_source_frame": 78,
+          "walk_frame": 77,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.967,
+          "guns": [
+            {
+              "origin": [
+                495.625872895348,
+                195.96944894632705
+              ],
+              "scale": 7.966115579911741,
+              "angle": -0.4981429114710248
+            },
+            {
+              "origin": [
+                240.95348923641305,
+                270.5683491950736
+              ],
+              "scale": 7.724467459481958,
+              "angle": -0.03232823977980505
+            }
+          ]
+        },
+        {
+          "frame": 67,
+          "recoil_source_frame": 79,
+          "walk_frame": 78,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                495.3519520038735,
+                195.7104645244116
+              ],
+              "scale": 8.004155610714417,
+              "angle": -0.4931561596081366
+            },
+            {
+              "origin": [
+                240.9544179718969,
+                270.57110963937305
+              ],
+              "scale": 7.724460914236951,
+              "angle": -0.03168376468886042
+            }
+          ]
+        },
+        {
+          "frame": 68,
+          "recoil_source_frame": 80,
+          "walk_frame": 45,
+          "upper_offset": [
+            0,
+            -2
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                466.3043861462487,
+                189.98186899510853
+              ],
+              "scale": 9.07980679969711,
+              "angle": -1.5917649446205062
+            },
+            {
+              "origin": [
+                240.9575642564113,
+                270.85518988078195
+              ],
+              "scale": 7.690046047282031,
+              "angle": -0.0295988120041835
+            }
+          ]
+        },
+        {
+          "frame": 69,
+          "recoil_source_frame": 81,
+          "walk_frame": 46,
+          "upper_offset": [
+            1,
+            -2
+          ],
+          "belt_confidence": 0.957,
+          "guns": [
+            {
+              "origin": [
+                467.95981396582664,
+                197.1358275515525
+              ],
+              "scale": 8.149727214926273,
+              "angle": -2.492741909822105
+            },
+            {
+              "origin": [
+                237.19589586451224,
+                271.92825738742556
+              ],
+              "scale": 7.695012081339918,
+              "angle": -0.9786612952658187
+            }
+          ]
+        },
+        {
+          "frame": 70,
+          "recoil_source_frame": 82,
+          "walk_frame": 47,
+          "upper_offset": [
+            1,
+            -2
+          ],
+          "belt_confidence": 0.951,
+          "guns": [
+            {
+              "origin": [
+                486.2223605889121,
+                196.50692974157815
+              ],
+              "scale": 7.993687652286079,
+              "angle": -1.3669984193054447
+            },
+            {
+              "origin": [
+                238.76380636364962,
+                271.5273502474837
+              ],
+              "scale": 7.678085796980424,
+              "angle": -0.858749833957847
+            }
+          ]
+        },
+        {
+          "frame": 71,
+          "recoil_source_frame": 83,
+          "walk_frame": 48,
+          "upper_offset": [
+            1,
+            -1
+          ],
+          "belt_confidence": 0.947,
+          "guns": [
+            {
+              "origin": [
+                486.4319489515211,
+                195.74995350228897
+              ],
+              "scale": 8.019815440981638,
+              "angle": -1.193749518600924
+            },
+            {
+              "origin": [
+                238.94935010574844,
+                270.83401694732066
+              ],
+              "scale": 7.708643251788794,
+              "angle": -0.7237887453688794
+            }
+          ]
+        },
+        {
+          "frame": 72,
+          "recoil_source_frame": 84,
+          "walk_frame": 49,
+          "upper_offset": [
+            0,
+            1
+          ],
+          "belt_confidence": 0.972,
+          "guns": [
+            {
+              "origin": [
+                495.4847797011892,
+                195.72049191363124
+              ],
+              "scale": 7.973704891937357,
+              "angle": -0.34615102911784534
+            },
+            {
+              "origin": [
+                240.79464036117648,
+                271.3426637055991
+              ],
+              "scale": 7.693142064842545,
+              "angle": -0.1458790446437651
+            }
+          ]
+        },
+        {
+          "frame": 73,
+          "recoil_source_frame": 85,
+          "walk_frame": 50,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.969,
+          "guns": [
+            {
+              "origin": [
+                495.75552954562426,
+                195.2377173293504
+              ],
+              "scale": 7.99948991671847,
+              "angle": -0.3200696739806362
+            },
+            {
+              "origin": [
+                241.9438668297885,
+                270.81621763544643
+              ],
+              "scale": 7.6900722685148315,
+              "angle": -0.0386637054026788
+            }
+          ]
+        },
+        {
+          "frame": 74,
+          "recoil_source_frame": 86,
+          "walk_frame": 51,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.976,
+          "guns": [
+            {
+              "origin": [
+                495.6483120284108,
+                195.41502096449625
+              ],
+              "scale": 7.969719480829138,
+              "angle": -0.3271904571046852
+            },
+            {
+              "origin": [
+                240.88685643752498,
+                270.64568389067074
+              ],
+              "scale": 7.690453282621832,
+              "angle": -0.07871651221808199
+            }
+          ]
+        },
+        {
+          "frame": 75,
+          "recoil_source_frame": 87,
+          "walk_frame": 52,
+          "upper_offset": [
+            1,
+            2
+          ],
+          "belt_confidence": 0.961,
+          "guns": [
+            {
+              "origin": [
+                463.58878938022997,
+                198.63343284693136
+              ],
+              "scale": 8.158074218734544,
+              "angle": -3.3946430082567822
+            },
+            {
+              "origin": [
+                237.91506025441146,
+                271.7298278239527
+              ],
+              "scale": 7.7023186514929,
+              "angle": -0.7648412003808446
+            }
+          ]
+        },
+        {
+          "frame": 76,
+          "recoil_source_frame": 88,
+          "walk_frame": 53,
+          "upper_offset": [
+            2,
+            0
+          ],
+          "belt_confidence": 0.966,
+          "guns": [
+            {
+              "origin": [
+                468.69678662848,
+                198.72510538684185
+              ],
+              "scale": 8.006778118418655,
+              "angle": -3.685995205674125
+            },
+            {
+              "origin": [
+                233.8133353147319,
+                271.6656531103847
+              ],
+              "scale": 7.71532462886651,
+              "angle": -1.5213239437502502
+            }
+          ]
+        },
+        {
+          "frame": 77,
+          "recoil_source_frame": 89,
+          "walk_frame": 54,
+          "upper_offset": [
+            2,
+            -1
+          ],
+          "belt_confidence": 0.96,
+          "guns": [
+            {
+              "origin": [
+                468.588487922579,
+                198.64818036469364
+              ],
+              "scale": 8.037658568048972,
+              "angle": -3.7284141692489845
+            },
+            {
+              "origin": [
+                233.74660460688906,
+                271.5829167646122
+              ],
+              "scale": 7.703746743094365,
+              "angle": -1.5661545261925265
+            }
+          ]
+        },
+        {
+          "frame": 78,
+          "recoil_source_frame": 90,
+          "walk_frame": 55,
+          "upper_offset": [
+            2,
+            -2
+          ],
+          "belt_confidence": 0.939,
+          "guns": [
+            {
+              "origin": [
+                479.04770599908613,
+                197.31828563681754
+              ],
+              "scale": 8.039680143971761,
+              "angle": -2.6410461319142122
+            },
+            {
+              "origin": [
+                236.03651354656282,
+                271.08313834282006
+              ],
+              "scale": 7.736253914484709,
+              "angle": -0.8636144716319101
+            }
+          ]
+        },
+        {
+          "frame": 79,
+          "recoil_source_frame": 91,
+          "walk_frame": 56,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.964,
+          "guns": [
+            {
+              "origin": [
+                490.53581477857847,
+                196.13374395306286
+              ],
+              "scale": 7.991694519744062,
+              "angle": -0.9884177204263287
+            },
+            {
+              "origin": [
+                239.68858361947574,
+                271.0294924626229
+              ],
+              "scale": 7.695232827083932,
+              "angle": -0.21767290416962531
+            }
+          ]
+        },
+        {
+          "frame": 80,
+          "recoil_source_frame": 92,
+          "walk_frame": 57,
+          "upper_offset": [
+            0,
+            1
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                495.504247240047,
+                195.4659999829039
+              ],
+              "scale": 7.973266742527299,
+              "angle": -0.3760443372614475
+            },
+            {
+              "origin": [
+                240.96438382947463,
+                270.0996100439777
+              ],
+              "scale": 7.724611288305623,
+              "angle": -0.024615760300403255
+            }
+          ]
+        },
+        {
+          "frame": 81,
+          "recoil_source_frame": 93,
+          "walk_frame": 58,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                495.7106585508184,
+                195.48041234874344
+              ],
+              "scale": 7.966028961487348,
+              "angle": -0.38092731367759713
+            },
+            {
+              "origin": [
+                241.05977858514018,
+                270.38334325416577
+              ],
+              "scale": 7.724161115448577,
+              "angle": 0.04196520854797874
+            }
+          ]
+        },
+        {
+          "frame": 82,
+          "recoil_source_frame": 94,
+          "walk_frame": 59,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.973,
+          "guns": [
+            {
+              "origin": [
+                495.61704957686715,
+                195.4232996873803
+              ],
+              "scale": 7.966118742054555,
+              "angle": -0.5035002201553336
+            },
+            {
+              "origin": [
+                240.90087584145905,
+                270.41171105583203
+              ],
+              "scale": 7.724918718421404,
+              "angle": -0.06876753687088728
+            }
+          ]
+        },
+        {
+          "frame": 83,
+          "recoil_source_frame": 95,
+          "walk_frame": 60,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.974,
+          "guns": [
+            {
+              "origin": [
+                474.23887577989143,
+                196.81567398543956
+              ],
+              "scale": 8.13712389728221,
+              "angle": -1.896576222747975
+            },
+            {
+              "origin": [
+                239.8543746824616,
+                270.7689747285135
+              ],
+              "scale": 7.725835678802179,
+              "angle": -0.10146665854131862
+            }
+          ]
+        },
+        {
+          "frame": 84,
+          "recoil_source_frame": 96,
+          "walk_frame": 61,
+          "upper_offset": [
+            0,
+            -1
+          ],
+          "belt_confidence": 0.974,
+          "guns": [
+            {
+              "origin": [
+                471.1495165554791,
+                195.8526464559269
+              ],
+              "scale": 8.244609057640199,
+              "angle": -1.9218533328010519
+            },
+            {
+              "origin": [
+                236.3781986608768,
+                271.147747504771
+              ],
+              "scale": 7.757917054929502,
+              "angle": -0.5579359369387186
+            }
+          ]
+        },
+        {
+          "frame": 85,
+          "recoil_source_frame": 97,
+          "walk_frame": 62,
+          "upper_offset": [
+            1,
+            -1
+          ],
+          "belt_confidence": 0.97,
+          "guns": [
+            {
+              "origin": [
+                476.16127247018005,
+                198.7423452662274
+              ],
+              "scale": 7.973062533709497,
+              "angle": -2.548154812374006
+            },
+            {
+              "origin": [
+                232.78864648810074,
+                271.607182777642
+              ],
+              "scale": 7.779514295913052,
+              "angle": -0.9084574963649074
+            }
+          ]
+        },
+        {
+          "frame": 86,
+          "recoil_source_frame": 98,
+          "walk_frame": 63,
+          "upper_offset": [
+            1,
+            -2
+          ],
+          "belt_confidence": 0.961,
+          "guns": [
+            {
+              "origin": [
+                482.5617814025721,
+                197.38573203270525
+              ],
+              "scale": 8.031001848281402,
+              "angle": -1.8970314776509012
+            },
+            {
+              "origin": [
+                236.68794161284256,
+                271.9060919854984
+              ],
+              "scale": 7.713190891063668,
+              "angle": -0.9503704576083947
+            }
+          ]
+        },
+        {
+          "frame": 87,
+          "recoil_source_frame": 99,
+          "walk_frame": 64,
+          "upper_offset": [
+            1,
+            -2
+          ],
+          "belt_confidence": 0.963,
+          "guns": [
+            {
+              "origin": [
+                482.9953827410854,
+                197.0290987637208
+              ],
+              "scale": 8.02763776415625,
+              "angle": -2.0016289843414
+            },
+            {
+              "origin": [
+                237.75832610324744,
+                271.22702345497885
+              ],
+              "scale": 7.711804589009211,
+              "angle": -0.8699353977393496
+            }
+          ]
+        },
+        {
+          "frame": 88,
+          "recoil_source_frame": 100,
+          "walk_frame": 65,
+          "upper_offset": [
+            0,
+            0
+          ],
+          "belt_confidence": 0.976,
+          "guns": [
+            {
+              "origin": [
+                490.5323648554165,
+                196.55303117275176
+              ],
+              "scale": 8.008454354817848,
+              "angle": -1.099833942340976
+            },
+            {
+              "origin": [
+                240.9183498126412,
+                270.73231312143713
+              ],
+              "scale": 7.691088789516868,
+              "angle": -0.056865699930691474
+            }
+          ]
+        },
+        {
+          "frame": 89,
+          "recoil_source_frame": 101,
+          "walk_frame": 66,
+          "upper_offset": [
+            -1,
+            2
+          ],
+          "belt_confidence": 0.967,
+          "guns": [
+            {
+              "origin": [
+                497.8203136053757,
+                195.70297873365337
+              ],
+              "scale": 7.967100159457332,
+              "angle": -0.17968191137761655
+            },
+            {
+              "origin": [
+                242.215027565371,
+                270.4652933708779
+              ],
+              "scale": 7.724034422234001,
+              "angle": 0.2966208963122689
+            }
+          ]
+        },
+        {
+          "frame": 90,
+          "recoil_source_frame": 102,
+          "walk_frame": 67,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.962,
+          "guns": [
+            {
+              "origin": [
+                497.7555468320575,
+                192.59808969690928
+              ],
+              "scale": 7.963840755080378,
+              "angle": 0.9533882818493687
+            },
+            {
+              "origin": [
+                307.8663015865402,
+                254.22200202665243
+              ],
+              "scale": 7.563489628342201,
+              "angle": -2.9038483280780785
+            }
+          ]
+        },
+        {
+          "frame": 91,
+          "recoil_source_frame": 103,
+          "walk_frame": 68,
+          "upper_offset": [
+            0,
+            2
+          ],
+          "belt_confidence": 0.968,
+          "guns": [
+            {
+              "origin": [
+                496.6876313416001,
+                192.14825188867894
+              ],
+              "scale": 7.998531382209356,
+              "angle": 0.8783445243663583
+            },
+            {
+              "origin": [
+                307.88407887817124,
+                253.23697605531027
+              ],
+              "scale": 7.559409544087308,
+              "angle": -2.7127054291322756
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

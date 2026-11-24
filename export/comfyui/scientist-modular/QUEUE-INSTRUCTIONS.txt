@@ -1,0 +1,67 @@
+SCIENTIST ANIMATION BATCH QUEUE
+
+Start ComfyUI, then double-click Queue Scientist Animations.bat in the repository root.
+It uploads the required references and queues all 36 shots. Default generation settings
+come from the clean 115037 take: 16 steps, 24fps, its installed models and two enabled
+LoRAs (H3_Combat_V2 and Motion_Repair_V2). Durations follow the manifest, totaling 182
+requested seconds. ComfyUI executes its queue in order. Closing the launcher after it
+finishes submitting does not cancel queued jobs.
+
+Preview Scientist Queue.bat lists the complete plan without contacting ComfyUI.
+Both launchers accept the command-line options below.
+
+OUTPUTS
+ComfyUI output/video/mad-villain-sprite/batch/<shot-id>/
+The recorded output metadata contains the matching prompt and editable UI workflow.
+Submission log: repository .local/h3-animation-queue/queue-log.json
+Saved exact API requests: repository .local/h3-animation-queue/requests/
+
+REFERENCES
+Each shot gets scientist.png and the appropriate proxy-grip.png or proxy-rod.png.
+Motion references are assigned only where supplied:
+  01 near shoulder: corrected near shoulder behind-head guide
+  02 near elbow: corrected near elbow behind-head guide
+  06 far shoulder: corrected far shoulder behind-head guide
+  07 far elbow: corrected far elbow behind-head guide
+  11 walk: walk guide
+Other shots are prompt-driven and contain no stale video reference. These are generation
+requests, not a guarantee that H3 selects the requested arm or preserves every pixel.
+
+Reference filenames on the server include their content hash. Existing manually uploaded
+files are not overwritten. The script uploads only missing hash-named assets before it
+submits the first generation. Prompt, builder state, timeline, duration and output folder
+are rebuilt together for every shot, preventing the old near-arm/far-guide mismatch.
+
+COMMANDS (run from the repository folder)
+  python tools/pixelstudio/queue_h3_animations.py
+      Offline dry run; does not upload or queue anything.
+  python tools/pixelstudio/queue_h3_animations.py --check
+      Check the running server's nodes/models/LoRAs without uploads or generation.
+  python tools/pixelstudio/queue_h3_animations.py --submit
+      Upload required refs and queue all shots.
+  python tools/pixelstudio/queue_h3_animations.py --submit --shots 01,02,07,11
+      Queue selected shot numbers (complete IDs also work).
+  python tools/pixelstudio/queue_h3_animations.py --submit --steps 16 --seed 12345
+      Override settings consistently for the batch.
+  python tools/pixelstudio/queue_h3_animations.py --submit --url http://127.0.0.1:8188
+      Explicit server; otherwise COMFYUI_URL, 8188 and 8000 are tried.
+  python tools/pixelstudio/queue_h3_animations.py --submit --shots 07 --force
+      Deliberately generate another copy of a previously submitted shot.
+
+Optional --subject PATH, --item PATH and --motion-dir DIRECTORY override references.
+--limit N restricts the selection. --state-dir DIRECTORY selects another submission log.
+
+RERUNS / INTERRUPTIONS
+An unchanged job already accepted by this server is skipped on rerun. Changed prompts,
+references, seeds or sampling parameters get a new job identity. Only one launcher can
+submit through the same state directory at a time.
+After a lost reply, the script checks the recorded prompt ID in ComfyUI's queue/history
+before resubmitting. If acceptance cannot be established, it stops with an explanation
+instead of automatically making duplicate generations. --force is an explicit requeue.
+The script never clears or interrupts your existing ComfyUI queue.
+
+VERIFICATION
+14 automated tests pass, including all 36 assignments, canonical prompt synchronization,
+interrupted-submission recovery, deduplication and locking. The live ComfyUI server's
+node/model/LoRA inventory check passed. No real generation batch was submitted during
+development. The source is tools/pixelstudio/queue_h3_animations.py (standard library only).

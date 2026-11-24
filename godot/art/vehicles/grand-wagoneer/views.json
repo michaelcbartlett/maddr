@@ -1,0 +1,82 @@
+{
+  "id": "grand-wagoneer",
+  "name": "1980s Jeep Grand Wagoneer",
+  "sheet": "res://art/vehicles/grand-wagoneer/grand-wagoneer-8way-v1.png",
+  "world_length": 245,
+  "world_width": 105,
+  "police": false,
+  "frames": {
+    "front_left": {
+      "region": [
+        63,
+        40,
+        349,
+        347
+      ],
+      "opaque_pixels": 69932
+    },
+    "front": {
+      "region": [
+        546,
+        35,
+        236,
+        346
+      ],
+      "opaque_pixels": 64305
+    },
+    "front_right": {
+      "region": [
+        925,
+        43,
+        343,
+        344
+      ],
+      "opaque_pixels": 68651
+    },
+    "left": {
+      "region": [
+        1340,
+        97,
+        398,
+        254
+      ],
+      "opaque_pixels": 76851
+    },
+    "rear_left": {
+      "region": [
+        54,
+        484,
+        354,
+        326
+      ],
+      "opaque_pixels": 70142
+    },
+    "rear": {
+      "region": [
+        549,
+        481,
+        228,
+        334
+      ],
+      "opaque_pixels": 62862
+    },
+    "rear_right": {
+      "region": [
+        914,
+        485,
+        352,
+        325
+      ],
+      "opaque_pixels": 69600
+    },
+    "right": {
+      "region": [
+        1339,
+        532,
+        404,
+        263
+      ],
+      "opaque_pixels": 81974
+    }
+  }
+}

@@ -1,0 +1,27 @@
+subject_definitions:
+<Subject 1> is the scientist in <Picture 1>, which is a frame from the approved straight-arm sweep.
+<Picture 2> defines the green calibration pistol only.
+<Video 1> defines the small recoil motion only; ignore mannequin appearance.
+
+summary:
+[reference generation] Three small straight-arm recoil pulses, near arm aimed vertically STRAIGHT DOWN. Preserve the approved pose and return to it fully after each pulse.
+
+retention_analysis:
+<Picture 1> (appearance and starting pose): fully_preserved - identical scientist, face, glasses, hair, coat, burgundy shirt, trousers, shoes, pixel style, fixed shoulder, extended arm and baseline aim.
+<Picture 2> (item): fully_preserved - rigid matte green proxy, same size and continuous grip.
+<Video 1> (motion): partially_preserved - transfer timing, tiny shoulder kick and recovery, straight elbow and fixed camera. Never render the mannequin.
+
+detailed_description:
+Maintain the fixed three-quarter SCREEN-RIGHT-facing body shown in <Picture 1>. Only the foreground near (screen-left shoulder in the right-facing body) arm performs the motion. Keep that arm aimed vertically STRAIGHT DOWN. The other arm, head, torso, pelvis, legs, feet and expression remain still.
+
+The moving elbow stays fully extended at 180 degrees throughout. Upper arm, elbow center and wrist remain collinear. Keep the wrist aligned and fingers wrapped around the same proxy handle. No elbow curls, folded-arm recoil, saluting, head touching, altered limb lengths, detached parts or extra hands.
+
+Hold the exact ready pose for the first second. At 1.00, 2.25 and 3.50 seconds perform three separate restrained recoil pulses: a tiny quick shoulder-driven kick of only a few degrees, then a smooth complete recovery to the original extended pose within about 0.25 seconds. Pause clearly between pulses. Hold the original pose for the last second. The proxy stays rigid and returns to precisely the same position and angle each time. Follow <Video 1>. Do not turn this into a large arm swing, a new aim sweep, torso rocking or a camera shake.
+
+Keep the camera position, size, zoom, perspective and framing fixed. Full body and full hand/proxy visible with clear margin overhead and below. No clipping, cuts, pans, zooms, orbit or reframing. Stable pixel edges and colors, no motion blur, ghost frames, crosshatching or texture overlays. Flat dark blue-gray background. Do NOT render firing effects: no muzzle flash, beam, projectile, smoke, sparks, added weapons, sounds, dialogue, text or logos. These are clean modular limb poses; the game supplies its own weapon and shot effects.
+
+overall_soundscape:
+Silent. No speech, music or sound effects.
+
+non_diegetic_music:
+N/A

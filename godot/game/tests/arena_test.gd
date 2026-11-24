@@ -107,9 +107,10 @@ func _run() -> void:
 		var spawn: Vector2 = arena.arena_level.spawn
 		_check(not arena.in_wall(spawn.x, spawn.y, 40) and Vector2(arena.P.x, arena.P.y) == spawn, "spawn is clear in %s" % arena.level)
 		# the train heist adds its car walls and couplings on top of one wall per prop
-		var structural: int = 0 if arena.level != "train" else arena.walls.filter(func(wall): return not wall.has("prop_index")).size()
+		var structural: int = arena.walls.filter(func(wall): return not wall.has("prop_index")).size()
 		_check(arena.walls.size() > 0 and arena.arena_level.props.size() == arena.walls.size() - structural, "%s has solid props" % arena.level)
-		_check(arena.wave_t == minf(60.0, 25.0 + 5.0 * w), "wave %d length (30 s, +5 s a wave, 60 s cap)" % w)
+		var expected_length := float(run.RULES.heist.duration) if arena.level == "train" else minf(60.0,25.0+5.0*w)
+		_check(arena.wave_t == expected_length, "wave %d uses the normal cap or the 180 s train-heist duration" % w)
 		if run.boss_for(w) != null:
 			arena.P.inv = 1000.0
 			for frame in 120: arena._process(0.05)

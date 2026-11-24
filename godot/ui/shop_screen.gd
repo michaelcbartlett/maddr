@@ -12,21 +12,34 @@ var owned_box: HFlowContainer
 var reroll_btn: Button
 var next_btn: Button
 var sell_l: Label
-var consumables_box: HBoxContainer
+var consumables_box: HFlowContainer
 var consumable_l: Label
 var secondary_l: Label
-const SUPPLY_DESCS := {"disguise":"Disguise · Lose pursuit for 4s. Firing reveals you.", "grenade":"Grenade · Throw along your aim; explodes after a short fuse."}
+var swap_btn: Button   # ⇄ trade the main-hand and Bionic Arm melee weapons
+var arm_btn: Button    # 🦾 cycle which owned arm item is mounted
+const SUPPLY_DESCS := {"disguise":"Disguise · Lose pursuit for 4s. Firing reveals you.", "grenade":"Grenade · Throw along your aim; explodes after a short fuse.",
+	"shrink_pill":"Shrinking Pill · 55% size and hitbox for 10s. Replaces enlargement.",
+	"enlarge_pill":"Enlargement Pill · 160% size for 10s. Walk over small ground enemies to stomp them.",
+	"tesla_coil":"Tesla Coil · Place for 15s. Stay within 240 units: random lightning pulses shock enemies between you and the coil. Walls block the link."}
+var intel_btn: Button
+var intel_s: Control     # RIG THE DEPOT overlay (ui/intel_screen.gd): Select/Back or the Intel button
+var _panel: Control
 var _confirm_id := ""   # owned item waiting for a second press to sell ("part:ammo"/"part:frame" = the main gun's parts)
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var s := UiKit.screen(940); add_child(s[0]); var vb: VBoxContainer = s[1]
+	var s := UiKit.screen(940); add_child(s[0]); var vb: VBoxContainer = s[1]; _panel = s[0]
 	var row := HBoxContainer.new(); row.add_theme_constant_override("separation", 14); vb.add_child(row)
 	var left := VBoxContainer.new(); left.custom_minimum_size.x = 260; row.add_child(left)
 	left.add_child(VillainPreview.new(2.5, Vector2(260, 180)))
 	name_l = UiKit.label("", 13, UiKit.NEON); left.add_child(name_l)
 	secondary_l = UiKit.label("", 10, UiKit.DIM); left.add_child(secondary_l)
-	secondary_l.tooltip_text = "Bionic Arm opens shop offers for the rear Weapon Mount, Time Freeze, Proximity Bomb, the Switchblade, Shock Whip and Mad Katana (auto-swing melee), and melee upgrades. Triple Seeker Rack also needs Viper's blueprint. Extra Laser, Bullet and Razor barrels need no arm."
+	secondary_l.tooltip_text = "Choose a primary knife, sword or whip in the Lab: sweep the right stick or mouse to attack. Bionic Arm opens a separate automatic secondary melee slot for dual wielding, or a rear gun and utilities. Melee upgrades apply to both hands. Triple Seeker Rack also needs Viper's blueprint."
+	var loadout := HBoxContainer.new(); loadout.add_theme_constant_override("separation", 6); left.add_child(loadout)
+	swap_btn = UiKit.button("⇄ Swap hands", _on_swap_hands, true); swap_btn.add_theme_font_size_override("font_size", 11); loadout.add_child(swap_btn)
+	swap_btn.tooltip_text = "Trade weapons between your main hand (manual sweep) and the Bionic Arm (automatic swing)."
+	arm_btn = UiKit.button("🦾 Arm ▸", _on_cycle_arm, true); arm_btn.add_theme_font_size_override("font_size", 11); loadout.add_child(arm_btn)
+	arm_btn.tooltip_text = "Choose which owned arm equipment is mounted on the Bionic Arm."
 	var stats_scroll := ScrollContainer.new(); stats_scroll.custom_minimum_size.y = 178
 	stats_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED; left.add_child(stats_scroll)
 	stats_box = VBoxContainer.new(); stats_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL; stats_scroll.add_child(stats_box)
@@ -37,11 +50,13 @@ func _ready() -> void:
 	offers_box = HBoxContainer.new(); offers_box.add_theme_constant_override("separation", 8); right.add_child(offers_box)
 	var btns := HBoxContainer.new(); right.add_child(btns)
 	reroll_btn = UiKit.button("Reroll", _on_reroll, true); btns.add_child(reroll_btn)
+	intel_btn = UiKit.button("🗂 Intel", open_intel, true); btns.add_child(intel_btn)
+	intel_btn.tooltip_text = "Rig the depot (Select/Back): assign banked Intel to modules so they appear more often. Takes effect on the next reroll or shop."
 	var sp := Control.new(); sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL; btns.add_child(sp)
 	next_btn = UiKit.button("Next Wave ▶", func(): next_wave.emit()); btns.add_child(next_btn)
 	right.add_child(UiKit.label("CONSUMABLES · carry 3 of each", 11, UiKit.NEON))
-	consumables_box = HBoxContainer.new(); consumables_box.add_theme_constant_override("separation", 6); right.add_child(consumables_box)
-	consumable_l = UiKit.label("Y / Q use · D-UP / E switch consumable",10,UiKit.DIM); right.add_child(consumable_l)
+	consumables_box = HFlowContainer.new(); consumables_box.add_theme_constant_override("h_separation", 6); right.add_child(consumables_box)
+	consumable_l = UiKit.label("X / Q use · D-UP / E switch consumable",10,UiKit.DIM); right.add_child(consumable_l)
 	var owned_head := HBoxContainer.new(); owned_head.add_theme_constant_override("separation", 12); right.add_child(owned_head)
 	var owned_title := UiKit.label("INSTALLED MODULES", 14, UiKit.NEON); owned_title.autowrap_mode = TextServer.AUTOWRAP_OFF; owned_head.add_child(owned_title)
 	# sell hint shares the heading row so hovering a module never shifts the layout
@@ -61,14 +76,24 @@ func refresh(focus_idx := -1) -> void:
 	if Run.build.off != null:
 		var kind: String = Run.build.off.get("kind","gun")
 		secondary_l.text = "SECONDARY · " + ("Rear weapon" if kind=="gun" else Run.arm_name(kind))
-	consumable_l.text = "Y / Q use · D-UP / E switch consumable"
-	for c in stats_box.get_children(): c.queue_free()
+	if Run.has_primary_melee() and Run.build.off != null:
+		var arm_kind: String = Run.arm_off().get("kind", "gun")
+		secondary_l.text = "MAIN · %s   ARM · %s" % [Run.arm_name(Run.primary_kind()), "Rear weapon" if arm_kind == "gun" else Run.arm_name(arm_kind)]
+	swap_btn.visible = Run.can_swap_hands()
+	var arms := Run.arm_options()
+	arm_btn.visible = arms.size() > 1
+	if arm_btn.visible:
+		var nxt: String = arms[(arms.find(Run.mounted_arm_id()) + 1) % arms.size()]
+		arm_btn.text = "🦾 Mount %s" % Run.ITEM[nxt].name
+	consumable_l.text = "X / Q use · D-UP / E switch consumable"
+	for c in stats_box.get_children(): stats_box.remove_child(c); c.queue_free()
 	stats_box.add_child(UiKit.stats_grid(Run.stats_rows()))
-	for c in offers_box.get_children(): c.queue_free()
+	for c in offers_box.get_children(): offers_box.remove_child(c); c.queue_free()   # detach now: focus_default() must never pick a card that is about to be freed
 	var focus_me: Control = null
 	for i in Run.offers.size():
 		var card := _offer(i); offers_box.add_child(card[0])
 		if i == focus_idx: focus_me = card[1]
+	intel_btn.text = "🗂 Intel %d" % Run.intel.unspent
 	reroll_btn.text = "Reroll ⚙ %d" % Run.reroll_cost; reroll_btn.disabled = Run.scrap < Run.reroll_cost
 	for c in consumables_box.get_children(): consumables_box.remove_child(c); c.queue_free()
 	if Run.consumables_owned.is_empty():
@@ -83,7 +108,7 @@ func refresh(focus_idx := -1) -> void:
 			if Run.buy_consumable(id): refresh(); next_btn.call_deferred("grab_focus")
 		, true)
 		button.add_theme_font_size_override("font_size",10)
-		button.tooltip_text = {"disguise":"Y / Q: lose pursuit for 4s. Firing ends the disguise.","grenade":"Y / Q: throw a grenade along your aim."}[id]
+		button.tooltip_text = SUPPLY_DESCS[id]
 		button.disabled = count >= 3 or Run.scrap < price
 		button.focus_entered.connect(func(): consumable_l.text = SUPPLY_DESCS[id])
 		button.mouse_entered.connect(func(): consumable_l.text = SUPPLY_DESCS[id])
@@ -205,8 +230,15 @@ func _offer(i: int) -> Array:
 		back = Run.part_trade_in(it.swap)
 		var cur: String = (Run.AMMO[Run.build.ammo] if it.swap == "ammo" else Run.FRAMES[Run.build.frame]).name
 		vb.add_child(UiKit.label(("Trade in %s: −⚙ %d" % [cur, back]) if back > 0 else "Replaces %s" % cur, 10, UiKit.GOLD))
+		if not Run.has_primary_melee() and Run.ammo_id() != "hook" and not (it.swap == "ammo" and (Run.AMMO[int(it.idx)].id == "hook" or Run.AMMO[int(it.idx)].has("melee"))):
+			var dps := Run.part_dps_change(it)
+			var pellets: String = " (all pellets hit)" if it.swap == "frame" and int(Run.FRAMES[int(it.idx)].get("add", {}).get("shots", 0)) > 0 else ""
+			vb.add_child(UiKit.label("Gun DPS %+d%%%s" % [roundi(dps * 100.0), pellets], 10, Color("#7dff8a") if dps >= 0.0 else Color("#ff7a7a")))
+	var short: int = o.price - back - Run.scrap   # scrap still missing; offers are only ever disabled for this (or SOLD)
+	if not o.sold and short > 0:
+		var need := UiKit.label("Need ⚙ %d more" % short, 10, UiKit.BAD, HORIZONTAL_ALIGNMENT_CENTER); need.name = "NeedScrap"; vb.add_child(need)
 	var b := UiKit.button("SOLD" if o.sold else ("⚙ %d" % (o.price - back)), _on_buy.bind(i))
-	b.disabled = o.sold or Run.scrap + back < o.price
+	b.disabled = o.sold or short > 0
 	vb.add_child(b)
 	return [p, b]
 
@@ -215,6 +247,21 @@ func _on_buy(i: int) -> void:
 	if Run.buy(i):
 		Sfx.play("buy1"); get_tree().create_timer(0.07).timeout.connect(Sfx.play.bind("buy2"))
 		refresh(i)
+		var it: Dictionary = Run.offers[i].it
+		if (it.has("arm") or (it.has("swap") and it.swap == "ammo")) and Run.can_swap_hands():
+			# offer the hand choice for the new weapon: A on the highlighted button swaps it into the other hand
+			secondary_l.text = "%s is on the Bionic Arm · A: swap it to your main hand" % Run.arm_name(Run.arm_off().kind) if it.has("arm") else "New main-hand weapon · A: swap it onto the Bionic Arm"
+			_focus_later(swap_btn)
+
+func _on_swap_hands() -> void:
+	if not Run.swap_hands(): return
+	refresh(); _focus_later(swap_btn)
+
+func _on_cycle_arm() -> void:
+	var arms := Run.arm_options()
+	if arms.size() < 2: return
+	Run.mount_arm(arms[(arms.find(Run.mounted_arm_id()) + 1) % arms.size()])
+	refresh(); _focus_later(arm_btn if arm_btn.visible else next_btn)
 
 func _on_reroll() -> void:
 	if not Run.reroll(): return
@@ -228,7 +275,15 @@ func focus_default() -> void:
 		if not b.disabled: b.grab_focus(); return
 	next_btn.grab_focus()
 
+func open_intel() -> void:
+	if intel_s == null:
+		intel_s = preload("res://ui/intel_screen.gd").new(); add_child(intel_s)
+		intel_s.closed.connect(func():
+			_panel.visible = true; refresh(); _focus_later(intel_btn))
+	_panel.visible = false; intel_s.open()
+
 func _unhandled_input(e: InputEvent) -> void:
-	if not visible: return
+	if not visible or (intel_s != null and intel_s.visible): return
+	if e is InputEventJoypadButton and e.pressed and e.button_index == JOY_BUTTON_BACK: open_intel(); get_viewport().set_input_as_handled(); return
 	if e.is_action_pressed("reroll") and not (get_viewport().gui_get_focus_owner() is LineEdit): _on_reroll(); get_viewport().set_input_as_handled()
 	elif e is InputEventJoypadButton and e.pressed and e.button_index == JOY_BUTTON_START: next_wave.emit(); get_viewport().set_input_as_handled()

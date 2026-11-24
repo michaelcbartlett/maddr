@@ -1,0 +1,46 @@
+{
+  "cop": [
+    "idle",
+    "walk",
+    "run",
+    "attack",
+    "hurt",
+    "stagger",
+    "frozen",
+    "stunned",
+    "sick",
+    "hypnotized",
+    "burning",
+    "death",
+    "death_poison",
+    "death_melt",
+    "death_burnt"
+  ],
+  "swat": [
+    "walk",
+    "idle",
+    "attack",
+    "hurt",
+    "stunned",
+    "frozen"
+  ],
+  "det": [
+    "idle",
+    "walk",
+    "backpedal",
+    "flee",
+    "attack",
+    "shoot",
+    "cornered",
+    "hurt",
+    "frozen",
+    "stunned",
+    "sick",
+    "hypnotized",
+    "burning",
+    "death",
+    "death_poison",
+    "death_melt",
+    "death_burnt"
+  ]
+}

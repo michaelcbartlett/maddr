@@ -1,0 +1,51 @@
+{
+  "format": "enemy-edited-clip-v1",
+  "kind": "det",
+  "animation": "hurt",
+  "frame_width": 66,
+  "frame_height": 66,
+  "frame_count": 1,
+  "fps": 6,
+  "holds": [
+    1
+  ],
+  "origin": [
+    31.0,
+    62.0
+  ],
+  "anchors": [
+    {
+      "head": [
+        -6.839,
+        -31.777
+      ],
+      "eye": [
+        0.544,
+        -29.909
+      ],
+      "eye_far": [
+        -5.382,
+        -28.97
+      ],
+      "chest": [
+        -4.179,
+        -14.986
+      ],
+      "hand_n": [
+        7.966,
+        -6.983
+      ],
+      "hand_f": [
+        -11.142,
+        -7.808
+      ],
+      "muzzle": [
+        22.622,
+        -2.835
+      ]
+    }
+  ],
+  "source_project": "export/pixelstudio/detective/detective.pixelstudio",
+  "source_sha256": "58b64f535439ccfff0603c4cbf54ecd921e50492190bc3bd57bdf30a71d86148",
+  "generated_by": "tools/pixelstudio/import_detective.py"
+}

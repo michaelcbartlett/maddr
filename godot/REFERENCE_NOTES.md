@@ -34,3 +34,25 @@ These are observations, not a spec. The Diabolical Doctor keeps its own art, nam
 ## Applied in the balance pass
 Shorter opening waves, a one-shot opener, a faster villain and faster cops, ±20% per-cop speed jitter, and a
 tighter economy. See the README "Tuning notes".
+
+## Enemy roster reference (2026-11-23)
+
+User-requested reference for future enemy development:
+[Brotato Wiki — Enemies](https://brotato.wiki.spellsandguns.com/Enemies).
+Consult this page as we rebuild the roster one enemy at a time.
+
+Use it to compare:
+
+- Distinct combat roles: basic pursuers, fast groups, ranged enemies that maintain distance,
+  charging threats, durable frontliners, support units, spawners and fleeing loot carriers.
+- Each role's health, damage, movement speed relative to the player, knockback resistance,
+  rewards, first appearance and progression across waves/difficulties.
+- Elite and boss attack patterns, readable threats, and phase changes triggered by health or time.
+- How enemy combinations and introductions change the pressure of a wave.
+
+Treat these as design references for our own police, military, machines and superhero enemies.
+Adapt behavior and relative balance to this game's map, movement, weapons and visual scale;
+retain our own characters and artwork. Recheck the source when tuning a specific enemy rather
+than treating the current wiki numbers as fixed project values.
+
+This note records a future reference; it does not change the current enemy-free art scene.

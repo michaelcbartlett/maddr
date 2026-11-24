@@ -1,0 +1,1178 @@
+{
+  "completed_clips": 36,
+  "fps": 24,
+  "cell": [
+    128,
+    128
+  ],
+  "frames": 124,
+  "sources": {
+    "01-near-shoulder": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\01-near-shoulder\\123319_00001_audio.mp4",
+    "02-near-elbow": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\02-near-elbow\\123937_00001_audio.mp4",
+    "03-near-elbow-up": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\03-near-elbow-up\\124223_00001_audio.mp4",
+    "04-near-elbow-down": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\04-near-elbow-down\\124511_00001_audio.mp4",
+    "05-near-wrist": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\05-near-wrist\\124801_00001_audio.mp4",
+    "06-far-shoulder": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\06-far-shoulder\\125434_00001_audio.mp4",
+    "07-far-elbow": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\07-far-elbow\\130105_00001_audio.mp4",
+    "08-far-wrist": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\08-far-wrist\\130358_00001_audio.mp4",
+    "09-idle": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\09-idle\\130645_00001_audio.mp4",
+    "10-blink": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\10-blink\\130931_00001_audio.mp4",
+    "11-walk": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\11-walk\\131604_00001_audio.mp4",
+    "12-run": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\12-run\\131850_00001_audio.mp4",
+    "13-backpedal": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\13-backpedal\\132135_00001_audio.mp4",
+    "14-start-stop": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\14-start-stop\\132458_00001_audio.mp4",
+    "15-hurt": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\15-hurt\\132709_00001_audio.mp4",
+    "16-fall": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\16-fall\\133029_00001_audio.mp4",
+    "17-stunned": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\17-stunned\\133302_00001_audio.mp4",
+    "18-near-recoil": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\18-near-recoil\\133534_00001_audio.mp4",
+    "19-far-recoil": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\19-far-recoil\\133822_00001_audio.mp4",
+    "20-dual-recoil": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\20-dual-recoil\\134109_00001_audio.mp4",
+    "21-charge-release": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\21-charge-release\\134358_00001_audio.mp4",
+    "22-grapple-cast": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\22-grapple-cast\\134641_00001_audio.mp4",
+    "23-grapple-brace": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\23-grapple-brace\\134930_00001_audio.mp4",
+    "24-near-thrust": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\24-near-thrust\\135219_00001_audio.mp4",
+    "25-near-slash": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\25-near-slash\\135507_00001_audio.mp4",
+    "26-near-reverse-slash": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\26-near-reverse-slash\\135755_00001_audio.mp4",
+    "27-near-whip-cast": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\27-near-whip-cast\\140040_00001_audio.mp4",
+    "28-far-thrust": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\28-far-thrust\\140326_00001_audio.mp4",
+    "29-far-slash": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\29-far-slash\\140612_00001_audio.mp4",
+    "30-far-whip-cast": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\30-far-whip-cast\\140858_00001_audio.mp4",
+    "31-kick": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\31-kick\\141144_00001_audio.mp4",
+    "32-stomp": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\32-stomp\\141430_00001_audio.mp4",
+    "33-leap-land": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\33-leap-land\\141808_00001_audio.mp4",
+    "34-airborne": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\34-airborne\\142055_00001_audio.mp4",
+    "35-dash": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\35-dash\\142341_00001_audio.mp4",
+    "36-device-activate": "C:\\Users\\micha\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Shared\\output\\video\\mad-villain-sprite\\batch\\36-device-activate\\142627_00001_audio.mp4"
+  },
+  "layer_order": [
+    "far arm",
+    "walk lower body",
+    "static upper body and resting near arm"
+  ],
+  "limitations": [
+    "Rough polygon masks; not production segmentation",
+    "Green proxy retained",
+    "Static head/torso/near arm",
+    "Selected walk span repeats without loop cleanup",
+    "No invented hidden pixels or replacement weapon",
+    "Overhead source prop is clipped by the original video"
+  ],
+  "frames_metadata": [
+    {
+      "frame": 0,
+      "walk_source_frame": 20,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.981
+    },
+    {
+      "frame": 1,
+      "walk_source_frame": 21,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.989
+    },
+    {
+      "frame": 2,
+      "walk_source_frame": 22,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.985
+    },
+    {
+      "frame": 3,
+      "walk_source_frame": 23,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.958
+    },
+    {
+      "frame": 4,
+      "walk_source_frame": 24,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.977
+    },
+    {
+      "frame": 5,
+      "walk_source_frame": 25,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.979
+    },
+    {
+      "frame": 6,
+      "walk_source_frame": 26,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.973
+    },
+    {
+      "frame": 7,
+      "walk_source_frame": 27,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.982
+    },
+    {
+      "frame": 8,
+      "walk_source_frame": 28,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.963
+    },
+    {
+      "frame": 9,
+      "walk_source_frame": 29,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.985
+    },
+    {
+      "frame": 10,
+      "walk_source_frame": 30,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 1.0
+    },
+    {
+      "frame": 11,
+      "walk_source_frame": 31,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.969
+    },
+    {
+      "frame": 12,
+      "walk_source_frame": 32,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.994
+    },
+    {
+      "frame": 13,
+      "walk_source_frame": 33,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.975
+    },
+    {
+      "frame": 14,
+      "walk_source_frame": 34,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.979
+    },
+    {
+      "frame": 15,
+      "walk_source_frame": 35,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.975
+    },
+    {
+      "frame": 16,
+      "walk_source_frame": 36,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.961
+    },
+    {
+      "frame": 17,
+      "walk_source_frame": 37,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.965
+    },
+    {
+      "frame": 18,
+      "walk_source_frame": 38,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.977
+    },
+    {
+      "frame": 19,
+      "walk_source_frame": 39,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 20,
+      "walk_source_frame": 40,
+      "root_offset": [
+        0,
+        1
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 21,
+      "walk_source_frame": 41,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.98
+    },
+    {
+      "frame": 22,
+      "walk_source_frame": 42,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.968
+    },
+    {
+      "frame": 23,
+      "walk_source_frame": 43,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.967
+    },
+    {
+      "frame": 24,
+      "walk_source_frame": 44,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.967
+    },
+    {
+      "frame": 25,
+      "walk_source_frame": 45,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 26,
+      "walk_source_frame": 46,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.978
+    },
+    {
+      "frame": 27,
+      "walk_source_frame": 47,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.977
+    },
+    {
+      "frame": 28,
+      "walk_source_frame": 48,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.967
+    },
+    {
+      "frame": 29,
+      "walk_source_frame": 49,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.977
+    },
+    {
+      "frame": 30,
+      "walk_source_frame": 50,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.966
+    },
+    {
+      "frame": 31,
+      "walk_source_frame": 51,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.984
+    },
+    {
+      "frame": 32,
+      "walk_source_frame": 52,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.968
+    },
+    {
+      "frame": 33,
+      "walk_source_frame": 53,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 34,
+      "walk_source_frame": 54,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.958
+    },
+    {
+      "frame": 35,
+      "walk_source_frame": 55,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.967
+    },
+    {
+      "frame": 36,
+      "walk_source_frame": 56,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.972
+    },
+    {
+      "frame": 37,
+      "walk_source_frame": 57,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.975
+    },
+    {
+      "frame": 38,
+      "walk_source_frame": 58,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 39,
+      "walk_source_frame": 59,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 40,
+      "walk_source_frame": 60,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.968
+    },
+    {
+      "frame": 41,
+      "walk_source_frame": 61,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.955
+    },
+    {
+      "frame": 42,
+      "walk_source_frame": 62,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.969
+    },
+    {
+      "frame": 43,
+      "walk_source_frame": 63,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 44,
+      "walk_source_frame": 64,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 45,
+      "walk_source_frame": 65,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.98
+    },
+    {
+      "frame": 46,
+      "walk_source_frame": 66,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.972
+    },
+    {
+      "frame": 47,
+      "walk_source_frame": 67,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.953
+    },
+    {
+      "frame": 48,
+      "walk_source_frame": 68,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 49,
+      "walk_source_frame": 69,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.956
+    },
+    {
+      "frame": 50,
+      "walk_source_frame": 70,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.972
+    },
+    {
+      "frame": 51,
+      "walk_source_frame": 71,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 52,
+      "walk_source_frame": 72,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.973
+    },
+    {
+      "frame": 53,
+      "walk_source_frame": 73,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.976
+    },
+    {
+      "frame": 54,
+      "walk_source_frame": 74,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.979
+    },
+    {
+      "frame": 55,
+      "walk_source_frame": 75,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 56,
+      "walk_source_frame": 76,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.98
+    },
+    {
+      "frame": 57,
+      "walk_source_frame": 77,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.962
+    },
+    {
+      "frame": 58,
+      "walk_source_frame": 78,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.95
+    },
+    {
+      "frame": 59,
+      "walk_source_frame": 79,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 60,
+      "walk_source_frame": 80,
+      "root_offset": [
+        0,
+        -5
+      ],
+      "belt_match": 0.956
+    },
+    {
+      "frame": 61,
+      "walk_source_frame": 81,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.979
+    },
+    {
+      "frame": 62,
+      "walk_source_frame": 82,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.979
+    },
+    {
+      "frame": 63,
+      "walk_source_frame": 83,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.97
+    },
+    {
+      "frame": 64,
+      "walk_source_frame": 84,
+      "root_offset": [
+        0,
+        1
+      ],
+      "belt_match": 0.957
+    },
+    {
+      "frame": 65,
+      "walk_source_frame": 85,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.963
+    },
+    {
+      "frame": 66,
+      "walk_source_frame": 86,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.959
+    },
+    {
+      "frame": 67,
+      "walk_source_frame": 87,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.958
+    },
+    {
+      "frame": 68,
+      "walk_source_frame": 88,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.976
+    },
+    {
+      "frame": 69,
+      "walk_source_frame": 89,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.958
+    },
+    {
+      "frame": 70,
+      "walk_source_frame": 20,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.981
+    },
+    {
+      "frame": 71,
+      "walk_source_frame": 21,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.989
+    },
+    {
+      "frame": 72,
+      "walk_source_frame": 22,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.985
+    },
+    {
+      "frame": 73,
+      "walk_source_frame": 23,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.958
+    },
+    {
+      "frame": 74,
+      "walk_source_frame": 24,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.977
+    },
+    {
+      "frame": 75,
+      "walk_source_frame": 25,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.979
+    },
+    {
+      "frame": 76,
+      "walk_source_frame": 26,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.973
+    },
+    {
+      "frame": 77,
+      "walk_source_frame": 27,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.982
+    },
+    {
+      "frame": 78,
+      "walk_source_frame": 28,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.963
+    },
+    {
+      "frame": 79,
+      "walk_source_frame": 29,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.985
+    },
+    {
+      "frame": 80,
+      "walk_source_frame": 30,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 1.0
+    },
+    {
+      "frame": 81,
+      "walk_source_frame": 31,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.969
+    },
+    {
+      "frame": 82,
+      "walk_source_frame": 32,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.994
+    },
+    {
+      "frame": 83,
+      "walk_source_frame": 33,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.975
+    },
+    {
+      "frame": 84,
+      "walk_source_frame": 34,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.979
+    },
+    {
+      "frame": 85,
+      "walk_source_frame": 35,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.975
+    },
+    {
+      "frame": 86,
+      "walk_source_frame": 36,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.961
+    },
+    {
+      "frame": 87,
+      "walk_source_frame": 37,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.965
+    },
+    {
+      "frame": 88,
+      "walk_source_frame": 38,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.977
+    },
+    {
+      "frame": 89,
+      "walk_source_frame": 39,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 90,
+      "walk_source_frame": 40,
+      "root_offset": [
+        0,
+        1
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 91,
+      "walk_source_frame": 41,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.98
+    },
+    {
+      "frame": 92,
+      "walk_source_frame": 42,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.968
+    },
+    {
+      "frame": 93,
+      "walk_source_frame": 43,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.967
+    },
+    {
+      "frame": 94,
+      "walk_source_frame": 44,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.967
+    },
+    {
+      "frame": 95,
+      "walk_source_frame": 45,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 96,
+      "walk_source_frame": 46,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.978
+    },
+    {
+      "frame": 97,
+      "walk_source_frame": 47,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.977
+    },
+    {
+      "frame": 98,
+      "walk_source_frame": 48,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.967
+    },
+    {
+      "frame": 99,
+      "walk_source_frame": 49,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.977
+    },
+    {
+      "frame": 100,
+      "walk_source_frame": 50,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.966
+    },
+    {
+      "frame": 101,
+      "walk_source_frame": 51,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.984
+    },
+    {
+      "frame": 102,
+      "walk_source_frame": 52,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.968
+    },
+    {
+      "frame": 103,
+      "walk_source_frame": 53,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 104,
+      "walk_source_frame": 54,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.958
+    },
+    {
+      "frame": 105,
+      "walk_source_frame": 55,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.967
+    },
+    {
+      "frame": 106,
+      "walk_source_frame": 56,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.972
+    },
+    {
+      "frame": 107,
+      "walk_source_frame": 57,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.975
+    },
+    {
+      "frame": 108,
+      "walk_source_frame": 58,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 109,
+      "walk_source_frame": 59,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.971
+    },
+    {
+      "frame": 110,
+      "walk_source_frame": 60,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.968
+    },
+    {
+      "frame": 111,
+      "walk_source_frame": 61,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.955
+    },
+    {
+      "frame": 112,
+      "walk_source_frame": 62,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.969
+    },
+    {
+      "frame": 113,
+      "walk_source_frame": 63,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 114,
+      "walk_source_frame": 64,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 115,
+      "walk_source_frame": 65,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.98
+    },
+    {
+      "frame": 116,
+      "walk_source_frame": 66,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.972
+    },
+    {
+      "frame": 117,
+      "walk_source_frame": 67,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.953
+    },
+    {
+      "frame": 118,
+      "walk_source_frame": 68,
+      "root_offset": [
+        0,
+        0
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 119,
+      "walk_source_frame": 69,
+      "root_offset": [
+        0,
+        -2
+      ],
+      "belt_match": 0.956
+    },
+    {
+      "frame": 120,
+      "walk_source_frame": 70,
+      "root_offset": [
+        0,
+        -3
+      ],
+      "belt_match": 0.972
+    },
+    {
+      "frame": 121,
+      "walk_source_frame": 71,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.974
+    },
+    {
+      "frame": 122,
+      "walk_source_frame": 72,
+      "root_offset": [
+        0,
+        -4
+      ],
+      "belt_match": 0.973
+    },
+    {
+      "frame": 123,
+      "walk_source_frame": 73,
+      "root_offset": [
+        0,
+        -1
+      ],
+      "belt_match": 0.976
+    }
+  ]
+}

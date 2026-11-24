@@ -68,9 +68,9 @@ func _layout() -> void:
 		var sheet := EnemyArt.sheet(kind)
 		var cell: Vector2 = sheet.cell
 		var x := 96.0
-		for st in Painter.states(kind):
+		for st in Sheets.states(kind):
 			if x + cell.x > 956.0: x = 96.0; y += cell.y + 12
-			var pos := Vector2(x + sheet.origin.x, y + sheet.origin.y)
+			var pos := Vector2(x + cell.x * 0.5, y + cell.y)
 			layout.append({"kind": kind, "state": st, "pos": pos, "sheet": sheet})
 			if kind == "det" and st == "attack":
 				var fl := Flash.new(); add_child(fl); fl.set_meta("pos", pos); flashes.append(fl)
@@ -117,7 +117,7 @@ func _process(dt: float) -> void:
 
 func _frame(entry: Dictionary) -> int:
 	var st: String = entry.state
-	if entry.kind == "cop" and st in ["idle", "walk", "attack"]: return int(t * Sheets.CopEditedArt.fps(st))
+	if Sheets.EditedArt.has(entry.kind, st): return int(t * Sheets.EditedArt.fps(entry.kind, st, 6.0))
 	if st == "attack" and entry.kind == "det": return 1 if fmod(t, 0.8) < 0.12 else 0
 	if st == "death": return mini(3, int(fmod(t, 2.0) * 8.0))
 	return int(t * (10.0 if st in ["walk", "panic", "blink"] else 4.0))
@@ -126,7 +126,7 @@ func _draw_floor(ci: Node2D) -> void:
 	for entry in layout:
 		var p: Vector2 = entry.pos
 		var sh: Vector2 = EnemyView.SHADOW[entry.sheet.family]
-		ci.draw_rect(Rect2(p.x - entry.sheet.origin.x, p.y - 1, entry.sheet.cell.x, 3), Color("#4a5060"))
+		ci.draw_rect(Rect2(p.x - entry.sheet.cell.x * 0.5, p.y - 1, entry.sheet.cell.x, 3), Color("#4a5060"))
 		ci.draw_set_transform(p + Vector2(0, 0), 0.0, sh)
 		ci.draw_circle(Vector2.ZERO, 1.0, Color(0, 0, 0, 0.32))
 		ci.draw_set_transform(Vector2.ZERO)
@@ -154,8 +154,8 @@ func _draw_labels() -> void:
 	var last := ""
 	for entry in layout:
 		var p: Vector2 = entry.pos
-		var top: float = p.y - entry.sheet.origin.y
-		labels.draw_string(font, Vector2(p.x - entry.sheet.origin.x + 2, top + 8), entry.state, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color("#aab4c4"))
+		var top: float = p.y - entry.sheet.cell.y
+		labels.draw_string(font, Vector2(p.x - entry.sheet.cell.x * 0.5 + 2, top + 8), entry.state, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color("#aab4c4"))
 		if entry.kind != last:
 			last = entry.kind
 			labels.draw_string(font, Vector2(6, p.y - 10), entry.kind, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("#ffd23c"))

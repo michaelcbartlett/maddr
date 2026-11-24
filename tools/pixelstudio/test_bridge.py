@@ -8,7 +8,7 @@ import unittest
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-from bridge import BridgeServer, REPO, SOURCE, current_edited_character, export_character, find_godot, instrument
+from bridge import BridgeServer, REPO, SOURCE, DOCTOR_SETUPS, current_edited_character, export_character, export_doctor, find_godot, instrument
 from prepare_editor import patch_editor
 
 
@@ -52,6 +52,25 @@ class BridgeTests(unittest.TestCase):
     def test_rejects_unadapted_painter(self):
         with self.assertRaises(ValueError):
             instrument('extends RefCounted\n')
+
+    def test_doctor_melee_has_independent_grips_and_parented_parts(self):
+        source = self.project / 'character' / 'villain.gd'
+        before = source.read_bytes()
+        with tempfile.TemporaryDirectory(dir=REPO / '.local') as temp:
+            for setup in DOCTOR_SETUPS:
+                data = export_doctor(self.project,self.godot,setup,Path(temp)/f'{setup}.pixelstudio')
+                layers = {layer['id']:layer for layer in data['layers']}
+                self.assertEqual(len(layers),9 if setup.startswith('dual-') else 5)
+                self.assertEqual(data['godotSource']['character'],'doctor')
+                for hand in (['primary','secondary'] if setup.startswith('dual-') else ['primary']):
+                    self.assertEqual(layers[f'layer-{hand}-hand']['parent'],f'layer-{hand}-forearm')
+                    self.assertEqual(layers[f'layer-{hand}-weapon']['parent'],f'layer-{hand}-hand')
+                    self.assertEqual(layers[f'layer-{hand}-forearm']['parent'],f'layer-{hand}-upper-arm')
+                    grip = data['frames'][0]['poses'][f'layer-{hand}-hand']
+                    blade = data['frames'][0]['poses'][f'layer-{hand}-weapon']
+                    self.assertEqual((grip['px'],grip['py']),(blade['px'],blade['py']))
+                    self.assertIn('attachmentAngle',blade)
+        self.assertEqual(source.read_bytes(),before)
 
     def test_import_opens_the_current_edited_game_clips(self):
         for animation, count in [('idle', 4), ('walk', 8), ('attack', 3)]:

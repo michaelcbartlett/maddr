@@ -1,0 +1,119 @@
+{
+  "format": "enemy-edited-clip-v1",
+  "kind": "cop",
+  "animation": "run_start",
+  "frame_width": 128,
+  "frame_height": 96,
+  "frame_count": 3,
+  "fps": 24,
+  "holds": [
+    1,
+    1,
+    1
+  ],
+  "origin": [
+    64,
+    96
+  ],
+  "anchors": [
+    {
+      "head": [
+        0,
+        -75
+      ],
+      "eye": [
+        11,
+        -67
+      ],
+      "eye_far": [
+        2,
+        -67
+      ],
+      "chest": [
+        0,
+        -43
+      ],
+      "hand_n": [
+        25,
+        -38
+      ],
+      "hand_f": [
+        -25,
+        -35
+      ],
+      "muzzle": [
+        31,
+        -45
+      ]
+    },
+    {
+      "head": [
+        0,
+        -75
+      ],
+      "eye": [
+        11,
+        -67
+      ],
+      "eye_far": [
+        2,
+        -67
+      ],
+      "chest": [
+        0,
+        -43
+      ],
+      "hand_n": [
+        25,
+        -38
+      ],
+      "hand_f": [
+        -25,
+        -35
+      ],
+      "muzzle": [
+        31,
+        -45
+      ]
+    },
+    {
+      "head": [
+        0,
+        -75
+      ],
+      "eye": [
+        11,
+        -67
+      ],
+      "eye_far": [
+        2,
+        -67
+      ],
+      "chest": [
+        0,
+        -43
+      ],
+      "hand_n": [
+        25,
+        -38
+      ],
+      "hand_f": [
+        -25,
+        -35
+      ],
+      "muzzle": [
+        31,
+        -45
+      ]
+    }
+  ],
+  "source_archive": "export/pixelstudio/base-cop/BASE_COP_frames.zip",
+  "source_project": "export/pixelstudio/base-cop/cop-run_start.pixelstudio",
+  "source_sha256": "55f6a01db8e6879ac4f7f1bb811eba469ca14c2f71bbb84e9e5a035ac1be3db9",
+  "source_frames": [
+    1,
+    2,
+    3
+  ],
+  "normal_mode": "flat"
+}

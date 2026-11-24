@@ -1,0 +1,9 @@
+Weapon sounds, all CC0 (public domain), cut and leveled by tools/audio/install_recorded_sounds.py
+
+gun_*: The Free Firearm Sound Library - Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney
+  https://opengameart.org/content/the-free-firearm-sound-library
+blade_*, knife_*: Swishes Sound Pack - artisticdude
+  https://opengameart.org/content/swishes-sound-pack
+sword_*, blade_ping_*: 20 Sword Sound Effects (Attacks and Clashes) - StarNinjas
+  https://opengameart.org/content/20-sword-sound-effects-attacks-and-clashes
+bullet_hit_*, ricochet_*: synthesized by tools/audio/build_weapon_sounds.py

@@ -4,6 +4,7 @@ extends RefCounted
 static func distracted(e, dt: float) -> void:
 	if e.hero == "vex": preload("res://game/rival_scientist.gd").cancel(e)
 	if e.action_phase == "swing": e.action_phase = ""
+	if e.action_phase in ["aim","flee","cornered"]: e.action_phase = ""
 	if e.action_phase in ["windup","rush","zigzag"]: e.action_phase = "recover"; e.action_t = 1.0
 	e.burst_left = 0; e.shoot_cd = maxf(e.shoot_cd, 0.8)
 	e.charging = 0.0; e.slam = null; e.air = 0.0; e.laser = null
@@ -27,6 +28,9 @@ static func tick(e, dt: float, speed: float) -> void:
 		"ram": _rush(e, dt, speed, distance, dir, false)
 		"pounce": _rush(e, dt, speed, distance, dir, true)
 		"cannon": _cannon(e, dt, speed, distance, dir)
+		"marksman":
+			_marksman(e, dt, speed, distance, dir)
+			return   # he runs from contact instead of hitting back
 	if distance < e.r + e.A.P.r and e.atk_cd <= 0.0:
 		e.atk_cd = 1.0
 		e.A.hurt_player(e.dmg)
@@ -73,6 +77,90 @@ static func _rifle(e, dt: float, speed: float, distance: float, dir: Vector2) ->
 	e.gfx.shot_t = 0.0
 	EnemyView._fire_flash(e, e.gfx, shot)
 	e.A.snd("ebul")
+
+## The detective: holds revolver range, steadies, fires, and runs when you close in.
+const FLEE_IN := 115.0        # closer than this: run
+const FLEE_OUT := 235.0       # far enough to stop running
+const FLEE_MAX := 2.2         # he tires, so a chase always ends
+const FLEE_REST := 1.1        # breath before he can run again
+const FLEE_SPEED := 1.35
+const PINNED := 0.55
+const HOLD_NEAR := 185.0
+const HOLD_FAR := 275.0
+const STEADY := 0.45          # rooted aim before the shot (matches the sight line)
+
+static func _marksman(e, dt: float, speed: float, distance: float, dir: Vector2) -> void:
+	var clear := _clear(e, dir, distance)
+	e.action_cd = maxf(0.0, e.action_cd - dt)
+	if e.action_phase == "flee":
+		e.action_t -= dt
+		var stuck := _run_from(e, dt, speed * FLEE_SPEED, dir)
+		if stuck:
+			# Nowhere left to go: he spins round for one desperate shot.
+			e.action_phase = "cornered"; e.action_t = 0.55
+		elif distance > FLEE_OUT or e.action_t <= 0.0:
+			e.action_phase = ""; e.action_cd = FLEE_REST; e.shoot_cd = maxf(e.shoot_cd, 0.7)
+		return
+	if e.action_phase == "cornered":
+		e.action_t -= dt
+		if e.action_t <= 0.0:
+			if distance < 420.0: _revolver(e, true)
+			e.action_phase = ""; e.action_cd = FLEE_REST; e.shoot_cd = randf_range(1.6, 2.2)
+		return
+	if distance < FLEE_IN and e.action_cd <= 0.0:
+		e.action_phase = "flee"; e.action_t = FLEE_MAX; e.w_t = 0.0; e.juke = 0.0; e.gfx.erase("flee_at")
+		return
+	if e.action_phase == "aim":
+		e.action_t -= dt; e.shoot_cd = maxf(0.0, e.action_t)
+		if not clear: e.action_phase = ""; e.shoot_cd = 0.6
+		elif e.action_t <= 0.0:
+			_revolver(e, false)
+			e.action_phase = ""; e.shoot_cd = randf_range(1.8, 2.6)
+		return
+	if not clear or distance > HOLD_FAR: _advance(e, Vector2(e.A.P.x, e.A.P.y), speed, dt)
+	elif distance < HOLD_NEAR:
+		e._move(-dir.x * speed * 0.6 * dt, -dir.y * speed * 0.6 * dt)
+		e.x = clampf(e.x, 28.0, e.A.AW - 28.0); e.y = clampf(e.y, 28.0, e.A.AH - 28.0)
+	# The last moment before a shot belongs to the rooted aim.
+	e.shoot_cd = maxf(STEADY, e.shoot_cd - dt)
+	if e.shoot_cd <= STEADY and clear and distance < 380.0:
+		e.action_phase = "aim"; e.action_t = STEADY
+
+static func _revolver(e, wild: bool) -> void:
+	var muzzle := EnemyView.muzzle_world(e); var target := Vector2(e.A.P.x, e.A.P.y)
+	if not e.A.nav.clear_segment(Vector2(e.x, e.y), muzzle, 0.0) or not e.A.nav.clear_segment(muzzle, target, 0.0): return
+	var shot := (target - muzzle).normalized().rotated(randf_range(-0.16, 0.16) if wild else 0.0)
+	e.A.ebul.append({"x":muzzle.x, "y":muzzle.y, "vx":shot.x * 210.0, "vy":shot.y * 210.0, "r":4.0, "dmg":e.dmg, "t":3.0})
+	e.gfx.shot_t = 0.0
+	EnemyView._fire_flash(e, e.gfx, shot)
+	e.A.snd("ebul")
+
+## Runs along the most open heading away from the villain. True when he has been pinned for a moment.
+static func _run_from(e, dt: float, speed: float, dir: Vector2) -> bool:
+	e.w_t -= dt
+	if e.w_t <= 0.0:
+		e.w_t = 0.18
+		var best := -INF
+		for i in 16:
+			var heading := Vector2.from_angle(TAU * i / 16.0)
+			var room: float = minf(150.0, e.A.ray_len(e.x, e.y, heading.x, heading.y, 150.0))
+			for axis in 2:
+				# The arena edge is a wall too.
+				var at: float = e.x if axis == 0 else e.y; var limit: float = e.A.AW if axis == 0 else e.A.AH
+				if absf(heading[axis]) > 0.01: room = minf(room, maxf(0.0, ((limit - 30.0 - at) if heading[axis] > 0.0 else (30.0 - at)) / heading[axis]))
+			var score := -heading.dot(dir) * 1.2 + room / 150.0 * 1.5 + heading.dot(Vector2.from_angle(e.w_a)) * 0.25
+			if room < 24.0: score -= 4.0
+			if heading.dot(dir) > 0.5: score -= 3.0   # never bolt into the villain's arms
+			if score > best: best = score; e.w_a = heading.angle()
+	# Pinned means going nowhere: jittering along a wall does not count as running.
+	var from := Vector2(e.x, e.y)
+	if not e.gfx.has("flee_at") or from.distance_to(e.gfx.flee_at) > speed * PINNED * 0.5: e.gfx.flee_at = from; e.juke = 0.0
+	else: e.juke += dt
+	var step := Vector2.from_angle(e.w_a) * speed * dt
+	e._move(step.x, step.y)
+	e.x = clampf(e.x, 28.0, e.A.AW - 28.0); e.y = clampf(e.y, 28.0, e.A.AH - 28.0)
+	e.aim_dir = Vector2.from_angle(e.w_a); e.face = 1 if step.x >= 0.0 else -1
+	return e.juke > PINNED
 
 static func _rush(e, dt: float, speed: float, distance: float, dir: Vector2, dog: bool) -> void:
 	if e.action_phase == "windup":
@@ -143,12 +231,13 @@ static func _sight(e) -> void:
 	if e.A == null or e.A.P == null or not e.ranged or e.vehicle: return
 	var ready: bool
 	if e.behavior == "rifle": ready = e.burst_left <= 0 and e.shoot_cd < SIGHT_T
+	elif e.behavior == "marksman": ready = e.action_phase in ["aim","cornered"]
 	else: ready = e.behavior == "" and e.shoot_cd < SIGHT_T
 	if not ready: return
 	var to := Vector2(e.A.P.x - e.x, e.A.P.y - e.y)
 	var reach := float(Run.ET[e.type].get("range", 380)) + (85.0 if e.behavior == "rifle" else 0.0)
 	if to.length() > reach or to.x * e.face < 0.0: return
-	var k := clampf(1.0 - maxf(0.0, e.shoot_cd) / SIGHT_T, 0.0, 1.0)
+	var k := clampf(1.0 - maxf(0.0, e.action_t if e.behavior == "marksman" else e.shoot_cd) / SIGHT_T, 0.0, 1.0)
 	var from := EnemyView.muzzle_local(e)
 	var end := to + Vector2(0, -14)
 	var col := Color("#ff3a3a", 0.18 + 0.5 * k)

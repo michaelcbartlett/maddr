@@ -27,7 +27,7 @@ func _ready() -> void:
 func reset(arena, level) -> void:
 	_arena = arena; _level = level
 	theme = level.theme_id; floor_kind = level.theme.floor; lamp_col = level.theme.lamp
-	parts.clear(); gulls.clear()
+	parts.clear(); gulls.clear(); _spawn_acc = 0.0
 
 func update(dt: float, centre: Vector2, half: Vector2) -> void:
 	time += dt
@@ -112,12 +112,14 @@ func _draw_glow() -> void:
 	for l in _level.lamps:
 		if not view.grow(200).has_point(l): continue
 		var flick := 1.0
-		if theme == "street" and l == _level.lamps[2]: flick = 0.25 if fmod(time, 5.3) < 0.2 or (fmod(time, 5.3) > 0.3 and fmod(time, 5.3) < 0.36) else 1.0
+		if theme == "street" and _level.lamps.size()>2 and l == _level.lamps[2]: flick = 0.25 if fmod(time, 5.3) < 0.2 or (fmod(time, 5.3) > 0.3 and fmod(time, 5.3) < 0.36) else 1.0
 		if floor_kind in ["street", "planks"]:
-			var head: Vector2 = l + Vector2(18, -63)
-			g.draw_polygon(PackedVector2Array([head + Vector2(-5, 0), head + Vector2(5, 0), l + Vector2(70, 10), l + Vector2(-34, 10)]),
+			var scale_factor: float = _level.STUDIO_LAMP_SCALE if theme=="rainy_street" else 1.0
+			var head: Vector2 = l + Vector2(18, -63)*scale_factor
+			g.draw_polygon(PackedVector2Array([head + Vector2(-5, 0)*scale_factor, head + Vector2(5, 0)*scale_factor, l + Vector2(70, 10)*scale_factor, l + Vector2(-34, 10)*scale_factor]),
 				PackedColorArray([Color(lamp_col, 0.16 * flick), Color(lamp_col, 0.16 * flick), Color(lamp_col, 0.0), Color(lamp_col, 0.0)]))
-			_blob(g, head, 14, Color(lamp_col, 0.55 * flick)); _blob(g, l + Vector2(18, 4), 70, Color(lamp_col, 0.07 * flick))
+			if theme!="rainy_street": _blob(g, head, 14*scale_factor, Color(lamp_col, 0.55 * flick))
+			_blob(g, l + Vector2(18, 4)*scale_factor, 70*scale_factor, Color(lamp_col, 0.07 * flick))
 		elif floor_kind not in ["grid", "gravel"]:
 			g.draw_polygon(PackedVector2Array([l + Vector2(-30, -260), l + Vector2(30, -260), l + Vector2(90, 30), l + Vector2(-90, 30)]),
 				PackedColorArray([Color(lamp_col, 0.035), Color(lamp_col, 0.035), Color(lamp_col, 0.0), Color(lamp_col, 0.0)]))
@@ -125,6 +127,7 @@ func _draw_glow() -> void:
 	for n in _level.prop_nodes:
 		if not is_instance_valid(n) or not view.grow(120).has_point(n.global_position): continue
 		for e in n.glows():
+			if theme=="rainy_street" and n.kind=="lamp_post": continue
 			if e.glow > 0.0: _blob(g, e.pos, e.glow * (0.6 + 0.4 * e.e), Color(e.col, 0.35 * minf(1.0, e.e + 0.2)))
 			if e.has("sparkle") and e.sparkle > 0.85: _star(g, e.pos + Vector2(4, 4), 9.0 * (e.sparkle - 0.85) / 0.15, Color(1, 1, 1, 0.9))
 	# atmosphere glows
@@ -159,6 +162,9 @@ func _draw_glow() -> void:
 			_blob(g, Vector2(c.x, c.y), 40.0 * a + 10.0, Color(0.7, 1.0, 0.4, 0.5 * a))
 
 func _blob(g: Node2D, p: Vector2, r: float, c: Color) -> void:
+	if theme=="rainy_street":
+		g.draw_texture_rect(LightPool.light_tex(),Rect2(p-Vector2.ONE*r,Vector2.ONE*r*2.0),false,c)
+		return
 	# cheap radial falloff: stacked translucent discs
 	for i in 4:
 		var k := 1.0 - i * 0.24

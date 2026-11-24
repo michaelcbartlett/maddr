@@ -130,7 +130,7 @@ func _test_projectile_sweeps() -> void:
 	var target = _target(115,200)
 	_fire_test_projectile("bullet",100,200)
 	arena._update_projs(0.05)
-	_check(target.hp<10000 and arena.projs.is_empty(),"fast bullets hit enemies crossed between frames")
+	_check(target.hp<10000 and (arena.projs.is_empty() or int(arena.projs[0].pierce) == int(run.S.pierce) - 1),"fast bullets hit enemies crossed between frames")
 	_check(not arena.blaster_fx.impacts.is_empty(),"enemy hit emits a lit impact")
 	_reset([],1)
 	target = _target(135,200)

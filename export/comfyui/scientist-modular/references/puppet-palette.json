@@ -1,0 +1,20 @@
+{
+  "head": "#f3cd36",
+  "neck": "#9b59b6",
+  "torso": "#7040dc",
+  "pelvis": "#ec31a1",
+  "near_shoulder": "#1f77ff",
+  "near_upper_arm": "#fa3030",
+  "near_forearm": "#ff8c21",
+  "near_hand": "#f2b49b",
+  "far_shoulder": "#a4e2ff",
+  "far_upper_arm": "#13d6e7",
+  "far_forearm": "#128884",
+  "far_hand": "#b2ffe0",
+  "near_thigh": "#8acc22",
+  "near_shin": "#364fe5",
+  "near_foot": "#fe7198",
+  "far_thigh": "#7b8d23",
+  "far_shin": "#9c246b",
+  "far_foot": "#c2c9db"
+}

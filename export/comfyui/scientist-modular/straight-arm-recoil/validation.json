@@ -1,0 +1,16 @@
+{
+  "jobs": 6,
+  "seconds_each": 5,
+  "requested_seconds": 30,
+  "fps": 24,
+  "steps": 16,
+  "guide_frames_checked": 720,
+  "subject_references": [
+    "scientist-near-level.png",
+    "scientist-near-up.png",
+    "scientist-near-down.png",
+    "scientist-far-level.png",
+    "scientist-far-up.png",
+    "scientist-far-down.png"
+  ]
+}

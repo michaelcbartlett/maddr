@@ -1,0 +1,11 @@
+[
+  {
+    "id": "70-armless-dash-back",
+    "seconds": 5,
+    "fps": 24,
+    "subject_reference": "armless-body.png",
+    "item_reference": "proxy-grip.png",
+    "motion_reference": "guide.mp4",
+    "prompt": "subject_definitions:\n<Subject 1> is the mad scientist costume puppet body with no arm layers, exactly as shown in <Picture 1>. <Picture 1> is a complete, finished isolated sprite layer, not a cropped person. <Picture 2> is a color swatch only; its object must NOT appear. <Video 1> defines motion and timing only; never render the colored guide.\n\nsummary:\n[reference generation] Isolated game-sprite layer animation of the mad scientist costume puppet body with no arm layers. Nothing else exists in the frame.\n\nretention_analysis:\n<Picture 1>: fully_preserved - exact parts present, shapes, colors, outlines, pixel-art style and scale. Add no body parts.\n<Picture 2>: not_preserved - never show it.\n<Video 1>: partially_preserved - joint motion, timing, position and scale. Ignore its appearance.\n\ndetailed_description:\nHopping BACKWARD away from what he is looking at, three times, matching the guide. He keeps facing screen-right. The hips drop and drive toward SCREEN-LEFT, the chest and head tilt BACK toward screen-left behind the hips, the front leg stretches out to SCREEN-RIGHT with the heel down, the rear knee bends. The coat tails and hair swing FORWARD toward SCREEN-RIGHT. Never lean or lunge toward screen-right. Recover to the starting stance between repetitions. Stay in place.\n\nThere are NO arms, sleeves, hands or held objects. The coat sides are smooth closed cloth at the shoulders. This is a detached puppet part, a clean cartoon costume layer with a smooth rounded cloth end. It never becomes a full person. Empty flat background everywhere else, in every frame from first to last.\n\nFixed camera, position, scale and framing. Flat uniform dark blue-gray background. Crisp pixel edges, stable colors, fully opaque. No motion blur, ghosting, shadows, effects, flashes, particles, added texture, text or logos.\n\noverall_soundscape:\nSilent. No speech, sound effects or music.\n\nnon_diegetic_music:\nN/A"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "75-tazed-loop",
+    "seconds": 5,
+    "fps": 24,
+    "subject_reference": "tazed.png",
+    "item_reference": "proxy-grip.png",
+    "motion_reference": null,
+    "prompt": "subject_definitions:\n<Subject 1> is the mad scientist in <Picture 1>, exactly as drawn there.\n<Picture 2> is a color swatch only. Its object must NOT appear.\n\nsummary:\n[reference generation] A seamless looping electrocution. He is already in the X-ray pose in every frame.\n\nretention_analysis:\n<Picture 1> (character appearance): fully_preserved - identity, proportions, costume, palette, outlines and pixel-art style.\n<Picture 2> (swatch): not_preserved - never show it.\n\ndetailed_description:\nHe stays in this exact splayed X-ray skeleton pose for the whole shot: bones showing inside the dark body, head, hair, glasses, coat edges and shoes drawn normally. He trembles violently in short stiff jerks: fingers twitching and curling, shoulders and knees shaking, head rattling, jaw chattering, coat edges quivering. Legs stay apart and feet planted. The bone drawing stays the same from frame to frame. The first and last frames match.\n\nEmpty hands, no gun, weapon or held object. Feet stay near the same canvas position. Constant body scale and limb lengths, five fingers per hand, no extra limbs. Keep one thin even cyan glow hugging the outline. NO lightning bolts, arcs or sparks separate from the body; the game draws those.\n\nLocked orthographic-style camera, identical position, zoom and framing. Full body visible with generous margin on all sides. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames, crisp pixel edges, stable colors. No motion blur, ghosting, added texture, text or logos.\n\noverall_soundscape:\nSilent. No speech, sound effects or music.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+    "id": "76-hurt",
+    "seconds": 5,
+    "fps": 24,
+    "subject_reference": "scientist.png",
+    "item_reference": "proxy-grip.png",
+    "motion_reference": null,
+    "prompt": "subject_definitions:\n<Subject 1> is the mad scientist in <Picture 1>, exactly as drawn there.\n<Picture 2> is a color swatch only. Its object must NOT appear.\n\nsummary:\n[reference generation] A quick, clear hit reaction repeated three times.\n\nretention_analysis:\n<Picture 1> (character appearance): fully_preserved - identity, proportions, costume, palette, outlines and pixel-art style.\n<Picture 2> (swatch): not_preserved - never show it.\n\ndetailed_description:\nFacing three-quarter screen-right. Hold neutral for 0.4 seconds. Then, at 0.40, 1.95 and 3.50 seconds, he is struck from the right: head snaps back toward screen-left, teeth clenched, eyebrows up, chest caves, shoulders jump, both arms fly up bent in front of him with open hands, weight rocks onto the back foot and the front toes lift. Reach the full flinch within 0.10 seconds, hold 0.25 seconds, recover to neutral in 0.5 seconds.\n\nEmpty hands, no gun, weapon or held object. Feet stay near the same canvas position. Constant body scale and limb lengths, five fingers per hand, no extra limbs. No lightning, sparks, glow, smoke, flashes or particles of any kind; the game adds effects.\n\nLocked orthographic-style camera, identical position, zoom and framing. Full body visible with generous margin on all sides. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames, crisp pixel edges, stable colors. No motion blur, ghosting, added texture, text or logos.\n\noverall_soundscape:\nSilent. No speech, sound effects or music.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+    "id": "77-defeat",
+    "seconds": 5,
+    "fps": 24,
+    "subject_reference": "scientist.png",
+    "item_reference": "proxy-grip.png",
+    "motion_reference": null,
+    "prompt": "subject_definitions:\n<Subject 1> is the mad scientist in <Picture 1>, exactly as drawn there.\n<Picture 2> is a color swatch only. Its object must NOT appear.\n\nsummary:\n[reference generation] A single dramatic cartoon defeat, ending lying down.\n\nretention_analysis:\n<Picture 1> (character appearance): fully_preserved - identity, proportions, costume, palette, outlines and pixel-art style.\n<Picture 2> (swatch): not_preserved - never show it.\n\ndetailed_description:\nFacing three-quarter screen-right. Hold neutral 0.4 seconds. He staggers backward one step clutching his chest, knees wobbling, until 1.40. His legs give way and he topples backward toward screen-left, landing flat on his back by 2.20 with coat spread, arms out and shoes pointing up. One small bounce. From 2.60 to 5.00 he lies completely still, glasses crooked. The whole body stays in frame when lying down.\n\nEmpty hands, no gun, weapon or held object. Feet stay near the same canvas position. Constant body scale and limb lengths, five fingers per hand, no extra limbs. No lightning, sparks, glow, smoke, flashes or particles of any kind; the game adds effects.\n\nLocked orthographic-style camera, identical position, zoom and framing. Full body visible with generous margin on all sides. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames, crisp pixel edges, stable colors. No motion blur, ghosting, added texture, text or logos.\n\noverall_soundscape:\nSilent. No speech, sound effects or music.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+    "id": "78-cackle",
+    "seconds": 5,
+    "fps": 24,
+    "subject_reference": "scientist.png",
+    "item_reference": "proxy-grip.png",
+    "motion_reference": null,
+    "prompt": "subject_definitions:\n<Subject 1> is the mad scientist in <Picture 1>, exactly as drawn there.\n<Picture 2> is a color swatch only. Its object must NOT appear.\n\nsummary:\n[reference generation] An evil-genius laugh for wave victories, looping.\n\nretention_analysis:\n<Picture 1> (character appearance): fully_preserved - identity, proportions, costume, palette, outlines and pixel-art style.\n<Picture 2> (swatch): not_preserved - never show it.\n\ndetailed_description:\nFacing three-quarter screen-right. He throws his head back and cackles, mouth wide open, shoulders bouncing, both arms bent and raised at his sides with clawed fingers, coat shaking with each laugh. A steady rhythm of about three laughs per second. The first and last frames match.\n\nEmpty hands, no gun, weapon or held object. Feet stay near the same canvas position. Constant body scale and limb lengths, five fingers per hand, no extra limbs. No lightning, sparks, glow, smoke, flashes or particles of any kind; the game adds effects.\n\nLocked orthographic-style camera, identical position, zoom and framing. Full body visible with generous margin on all sides. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames, crisp pixel edges, stable colors. No motion blur, ghosting, added texture, text or logos.\n\noverall_soundscape:\nSilent. No speech, sound effects or music.\n\nnon_diegetic_music:\nN/A"
+  }
+]

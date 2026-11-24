@@ -1,0 +1,23 @@
+subject_definitions:
+<Subject 1> is the mad scientist in <Picture 1>, exactly as drawn there.
+<Picture 2> is a color swatch only. Its object must NOT appear.
+
+summary:
+[reference generation] An evil-genius laugh for wave victories, looping.
+
+retention_analysis:
+<Picture 1> (character appearance): fully_preserved - identity, proportions, costume, palette, outlines and pixel-art style.
+<Picture 2> (swatch): not_preserved - never show it.
+
+detailed_description:
+Facing three-quarter screen-right. He throws his head back and cackles, mouth wide open, shoulders bouncing, both arms bent and raised at his sides with clawed fingers, coat shaking with each laugh. A steady rhythm of about three laughs per second. The first and last frames match.
+
+Empty hands, no gun, weapon or held object. Feet stay near the same canvas position. Constant body scale and limb lengths, five fingers per hand, no extra limbs. No lightning, sparks, glow, smoke, flashes or particles of any kind; the game adds effects.
+
+Locked orthographic-style camera, identical position, zoom and framing. Full body visible with generous margin on all sides. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames, crisp pixel edges, stable colors. No motion blur, ghosting, added texture, text or logos.
+
+overall_soundscape:
+Silent. No speech, sound effects or music.
+
+non_diegetic_music:
+N/A

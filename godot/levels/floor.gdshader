@@ -1,4 +1,5 @@
 shader_type canvas_item;
+#include "res://levels/water_surface.gdshaderinc"
 // Arena floor. The albedo is baked per theme (arena_level.gd); this adds:
 //  - a normal map derived from the albedo, so the PointLight2D pool rakes across asphalt grain, grout, planks
 //  - specular (wet puddles, polished marble, waxed wood, glossy spy floor)
@@ -6,10 +7,22 @@ shader_type canvas_item;
 //  - soft prop shadows (light from the upper left) and contact occlusion along walls and props
 uniform int theme_id = 0;   // 0 street, 1 marble, 2 gravel, 3 tile, 4 parquet, 5 planks, 6 grid
 uniform vec2 world_size = vec2(1600.0, 1100.0);
+uniform vec2 floor_origin = vec2(0.0);
+uniform vec2 floor_size = vec2(1600.0, 1100.0);
 uniform vec4 prop_rects[8];
 uniform float prop_h[8];
 uniform int prop_count = 0;
 uniform vec4 lamp_col : source_color = vec4(1.0);
+uniform bool street_preview = false;
+uniform vec2 street_lamps[24];
+uniform int street_lamp_count = 0;
+uniform vec4 wet_rays[16];
+uniform vec4 wet_ray_colors[16];
+uniform int wet_ray_count = 0;
+uniform vec4 wet_glow_points[8];
+uniform vec4 wet_glow_colors[8];
+uniform int wet_glow_count = 0;
+uniform float preview_clock = 0.0;
 varying vec4 v_spec;   // rgb specular colour, a shininess (fragment -> light)
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -29,7 +42,7 @@ float sd_box(vec2 p, vec2 a, vec2 b) {
 }
 
 void fragment() {
-	vec2 w = UV * world_size;
+	vec2 w = floor_origin + UV * floor_size;
 	vec2 px = TEXTURE_PIXEL_SIZE;
 	vec4 base = texture(TEXTURE, UV);
 	vec3 col = base.rgb;
@@ -42,25 +55,74 @@ void fragment() {
 	vec2 g = vec2(hl - hr, hd - hu) * bump;
 	float grain = (theme_id == 0 || theme_id == 2) ? 0.22 : 0.08;
 	g += (vec2(noise(w * 0.8), noise(w * 0.8 + 17.0)) - 0.5) * grain;
+	if (street_preview) g *= 0.18;
 	vec3 spec = vec3(0.0); float shine = 0.3;
 	float edge = min(min(w.x, world_size.x - w.x), min(w.y, world_size.y - w.y));
 	bool inside = edge > 16.0;
 	bool outdoor = theme_id == 0 || theme_id == 2 || theme_id == 5;
 
 	if (theme_id == 0 && inside) {
+		float water_time = street_preview ? preview_clock : TIME;
 		// wet asphalt: puddles that mirror the lamps, with rain ripples
 		float wet = smoothstep(0.56, 0.64, fbm(w * 0.0055 + vec2(3.1, 7.7)));
 		float damp = smoothstep(0.45, 0.6, fbm(w * 0.0055 + vec2(3.1, 7.7)));
+		if (street_preview) {
+			float pool = water_field(w);
+			wet = water_mask(w);
+			float shore = smoothstep(0.51,0.525,pool)-smoothstep(0.525,0.55,pool);
+			col = mix(col,vec3(0.11,0.175,0.235)+col*0.24,wet*0.85);
+			col += vec3(0.045,0.075,0.105)*shore;
+			damp = max(damp,0.5);
+		}
 		col = mix(col, col * 0.9, damp);
 		col = mix(col, col * 0.7 + vec3(0.02, 0.03, 0.05), wet);
 		vec2 cell = floor(w / 22.0); vec2 f = fract(w / 22.0) - 0.5;
-		float tt = fract(TIME * 0.8 + hash(cell) * 7.0);
+		float tt = fract(water_time * 0.8 + hash(cell) * 7.0);
 		vec2 off = (vec2(hash(cell + 3.1), hash(cell + 5.3)) - 0.5) * 0.5;
 		float r = length(f - off);
 		float ring = exp(-abs(r - tt * 0.55) * 28.0) * (1.0 - tt) * step(0.35, hash(cell + 9.9));
-		g += normalize(f - off + 0.0001) * ring * 1.4 * wet;
-		col += vec3(0.5, 0.6, 0.7) * ring * 0.12 * wet;
+		g += normalize(f - off + 0.0001) * ring * (street_preview ? 0.12 : 1.4) * wet;
+		col += vec3(0.5, 0.6, 0.7) * ring * (street_preview ? 0.045 : 0.12) * wet;
+		if (street_preview) {
+			col += vec3(0.035,0.06,0.085)*wet;
+			// Broken, rippling lamp reflections belong to the wet ground only.
+			for (int i=0;i<24;i++) {
+				if (i>=street_lamp_count) break;
+				vec2 delta=w-(street_lamps[i]+vec2(34.2,12.0));
+				float ripple=sin(floor(w.y/3.0)*1.7+water_time*3.0)*4.0;
+				float streak=exp(-pow((delta.x+ripple)/(12.0+abs(delta.y)*0.11),2.0));
+				float falloff=exp(-abs(delta.y-50.0)/100.0)*smoothstep(-30.0,0.0,delta.y);
+				float broken=0.45+0.55*noise(vec2(floor(w.y/3.0),water_time*1.4));
+				col+=lamp_col.rgb*streak*falloff*broken*wet*0.5;
+			}
+		}
+		// Active roof lamps reflect only within the shared water mask.
+		for(int i=0;i<8;i++) {
+			if(i>=wet_glow_count) { break; }
+			vec2 offset=w-wet_glow_points[i].xy;
+			offset.x+=sin(floor(w.y/2.0)*0.7+water_time*3.0)*2.0;
+			vec2 shape=offset/max(wet_glow_points[i].zw,vec2(1.0));
+			float glow=exp(-dot(shape,shape)*1.4);
+			float glint=exp(-offset.x*offset.x/140.0-offset.y*offset.y/5.0);
+			float broken=0.6+0.4*water_noise(vec2(floor(w.y/2.0),water_time*1.5));
+			col+=wet_glow_colors[i].rgb*wet_glow_colors[i].a*wet*broken*(glow*0.45+glint*0.85);
+		}
+		// Reflected rays are projected beneath their live world-space source.
+		// The water mask clips both the streak and its glow at each pool edge.
+		for (int i=0;i<16;i++) {
+			if (i>=wet_ray_count) break;
+			vec2 a=wet_rays[i].xy+vec2(0.0,30.0);
+			vec2 b=wet_rays[i].zw+vec2(0.0,30.0);
+			vec2 ripple=vec2(sin(floor(w.y/2.0)*1.3+water_time*5.0),cos(w.x*0.1+water_time*4.0))*1.6;
+			vec2 ab=b-a; float along=clamp(dot(w+ripple-a,ab)/max(dot(ab,ab),0.01),0.0,1.0);
+			float distance_to_ray=length(w+ripple-(a+ab*along));
+			float core=exp(-distance_to_ray*distance_to_ray/7.0);
+			float glow=exp(-distance_to_ray*distance_to_ray/180.0);
+			float broken=0.6+0.4*noise(vec2(floor(w.y/2.0),water_time*2.0));
+			col+=wet_ray_colors[i].rgb*wet_ray_colors[i].a*wet*broken*(core*0.9+glow*0.25);
+		}
 		spec = vec3(0.9, 0.95, 1.0) * (0.08 * damp + 0.8 * wet); shine = mix(0.35, 1.0, wet);
+		if (street_preview) { spec *= 0.22; shine = mix(0.25,0.65,wet); }
 	} else if (theme_id == 1) {
 		float vein = abs(sin(w.x * 0.012 + w.y * 0.007 + fbm(w * 0.008) * 7.0));
 		col *= 1.0 - 0.1 * smoothstep(0.97, 1.0, 1.0 - vein);
@@ -125,6 +187,6 @@ void light() {
 	float nl = max(0.0, dot(NORMAL, LIGHT_DIRECTION));
 	vec3 hv = normalize(LIGHT_DIRECTION + vec3(0.0, 0.0, 1.0));
 	float s = pow(max(0.0, dot(NORMAL, hv)), exp2(v_spec.a * 7.0 + 1.0)) * (v_spec.a * 1.5 + 0.4);
-	vec3 lc = LIGHT_COLOR.rgb * LIGHT_ENERGY;
+	vec3 lc = LIGHT_COLOR.rgb * LIGHT_COLOR.a * LIGHT_ENERGY;
 	LIGHT = vec4(COLOR.rgb * lc * nl + v_spec.rgb * lc * s, LIGHT_COLOR.a);
 }

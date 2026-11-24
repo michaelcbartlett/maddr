@@ -1,0 +1,82 @@
+{
+  "id": "compact-hatchback",
+  "name": "1980s Compact",
+  "sheet": "res://art/vehicles/compact-hatchback/compact-hatchback-8way-v1.png",
+  "world_length": 195,
+  "world_width": 82,
+  "police": false,
+  "frames": {
+    "front_left": {
+      "region": [
+        71,
+        72,
+        329,
+        304
+      ],
+      "opaque_pixels": 60275
+    },
+    "front": {
+      "region": [
+        547,
+        63,
+        232,
+        305
+      ],
+      "opaque_pixels": 57254
+    },
+    "front_right": {
+      "region": [
+        932,
+        72,
+        320,
+        304
+      ],
+      "opaque_pixels": 59541
+    },
+    "left": {
+      "region": [
+        1351,
+        119,
+        353,
+        223
+      ],
+      "opaque_pixels": 61995
+    },
+    "rear_left": {
+      "region": [
+        80,
+        517,
+        313,
+        278
+      ],
+      "opaque_pixels": 54612
+    },
+    "rear": {
+      "region": [
+        548,
+        505,
+        231,
+        290
+      ],
+      "opaque_pixels": 53767
+    },
+    "rear_right": {
+      "region": [
+        929,
+        516,
+        311,
+        279
+      ],
+      "opaque_pixels": 54025
+    },
+    "right": {
+      "region": [
+        1359,
+        555,
+        365,
+        224
+      ],
+      "opaque_pixels": 63923
+    }
+  }
+}

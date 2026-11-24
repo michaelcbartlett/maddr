@@ -129,7 +129,7 @@ func _test_melee_windup() -> void:
 		var hp: float = a.P.hp
 		e.tick(1.0 / 60.0)
 		_check(e.action_phase == "swing" and a.P.hp == hp, "a %s winds up instead of hitting instantly" % type)
-		_tick(e, 0.5)
+		_tick(e, 1.55 if type == "cop" else 0.5)
 		_check(a.P.hp < hp and e.action_phase == "", "a %s's blow lands when the villain stays in reach" % type)
 		_setup([])
 		a.P.inv = 0.0
@@ -182,18 +182,23 @@ func _test_ironclad() -> void:
 	iron.charge_t = 10; iron.slam_cd = 10
 	iron._boss_ai(1.0, 250, 0, 250, iron.spd)
 	var normal_stride: float = iron.x - start
-	_check(normal_stride > 125, "Ironclad closes more than 125 pixels in a second, above his old maximum")
+	_check(normal_stride > 110 and normal_stride < iron.spd * 1.01, "Ironclad closes ground steadily without outpacing the villain")
 	iron.x = start; iron.hp = iron.max_hp * 0.49
 	iron._boss_ai(1.0, 250, 0, 250, iron.spd)
 	_check(iron.x - start > normal_stride * 1.15, "Ironclad visibly speeds up below half health")
-	iron.hp = iron.max_hp; iron.x = start; iron.charge_t = -0.001; iron.charging = 0
+	iron.hp = iron.max_hp; iron.x = start; iron.charge_t = 0.001; iron.charging = 0
+	iron._boss_ai(0.01, 250, 0, 250, iron.spd)   # windup begins: the charge is aimed now
+	var aimed: Vector2 = iron.action_dir
+	a.P.y += 120.0   # sidestep during the telegraph
 	for frame in 12: iron._boss_ai(0.05, 250, 0, 250, iron.spd)
+	_check(Vector2(iron.cvx, iron.cvy).normalized().dot(aimed) > 0.999, "Ironclad's charge keeps the aim shown at the start of its windup, so a sidestep dodges it")
+	a.P.y -= 120.0
 	_check(iron.charging > 0 and iron.charge_t < 3 and Vector2(iron.cvx, iron.cvy).length() > iron.spd * 3, "Ironclad launches a fast charge within 0.6 seconds, with a shorter recovery")
 	iron.charging = 0; iron.charge_t = 10; iron.slam_cd = 0; iron.x = start
 	iron._boss_ai(0.01, 250, 0, 250, iron.spd)
-	_check(iron.slam != null and iron.slam.T <= 0.8 and iron.slam.radius == 115 and iron.slam_cd <= 4, "Ironclad's normal slam has a shorter leap and recovery")
-	iron._boss_ai(0.81, 250, 0, 250, iron.spd)
-	_check(iron.slam == null and a.booms.back().r == 115, "the normal slam lands with the telegraphed radius")
+	_check(iron.slam != null and iron.slam.T >= 1.0 and iron.slam.radius == 100 and iron.slam_cd <= 4, "Ironclad's normal slam leaves time to run out of a 100 px circle")
+	iron._boss_ai(1.01, 250, 0, 250, iron.spd)
+	_check(iron.slam == null and a.booms.back().r == 100, "the normal slam lands with the telegraphed radius")
 	iron.hp = iron.max_hp * 0.49; iron.slam_cd = 0; iron.charge_t = 10; iron.x = start
 	iron._boss_ai(0.01, 250, 0, 250, iron.spd)
-	_check(iron.slam != null and iron.slam.T <= 0.65 and iron.slam.radius == 130 and iron.slam_cd <= 3.2, "enraged Ironclad slams faster, wider and more often")
+	_check(iron.slam != null and iron.slam.T < 1.0 and iron.slam.T >= 0.85 and iron.slam.radius == 115 and iron.slam_cd <= 3.2, "enraged Ironclad slams faster, wider and more often")

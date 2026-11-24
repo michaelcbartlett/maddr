@@ -1,0 +1,17 @@
+{
+  "source_sha256": "6c0781f229dab959db35fbb9e03af7b6111c93f1cc2b60e6313bff6a0b63f0d6",
+  "frames": [
+    {
+      "art_sha256": "6dd2a852a32dd60c1112729c4ab29757fd869976436201877a71c76866fb5b41",
+      "normal_sha256": "bd7e90a99b4b175d69b7cda68791dfbc34341690baceb73ebd565fb7373fbc89"
+    },
+    {
+      "art_sha256": "8e042b02d3b3fe410826604139818654596fb6b61e04478bf63737bae629e7f5",
+      "normal_sha256": "e5f11c14ef1bff602c12d6274a8b24afeddaa8f73b2e25d5c6ed4903c482b9b4"
+    },
+    {
+      "art_sha256": "629f42a49f589abf170f190a86651ce3ac23f81b7149c0b323a95e585f77d3ed",
+      "normal_sha256": "d78e3ace4a304e2141b19a11feac6eca10e7e5da439222d1bc2e779043a8532a"
+    }
+  ]
+}

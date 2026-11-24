@@ -468,12 +468,14 @@ func _draw_server() -> void:
 		var bar := 0.5 + 0.5 * sin(time * (2.0 + i * 0.7) + i)
 		draw_rect(Rect2(hw - 18, y + 2, 12 * bar, 1), lamp.darkened(0.3))
 
-# ---------------- street lamp post (not solid) ----------------
+# ---------------- street lamp post (solid base; elevated fixture) ----------------
 func _draw_lamp_post() -> void:
 	draw_rect(Rect2(-5, -6, 10, 6), Color("#22282a")); draw_rect(Rect2(-4, -7, 8, 2), Color("#3a4246"))
 	_grad(Rect2(-2, -66, 4, 61), Color("#4a5458"), Color("#2a3032"), true)
 	draw_rect(Rect2(-2, -68, 20, 3), Color("#3a4246"))
 	_rr(Rect2(10, -70, 16, 7), Color("#2a3032"), 3)
+	# The painted cap stays dark; the small underside is the exposed emitter.
+	draw_rect(Rect2(10,-70,16,3),Color("#151c25"))
 	draw_rect(Rect2(12, -64, 12, 2), lamp.lightened(0.4))
 
 ## Emissive points for the arena's light pool / additive layer: [{pos (global), col, e, r, glow}]
@@ -505,5 +507,5 @@ func glows() -> Array:
 		"ac_unit":
 			if variant % 2 == 0 and fmod(time, 1.6) < 0.25: out.append({"pos": gp + Vector2(size.x / 2.0 - 6, -h - size.y + 5), "col": Color("#ff3030"), "e": 0.9, "r": 50.0, "glow": 6.0})
 		"lamp_post":
-			out.append({"pos": gp + Vector2(18, -63), "col": lamp, "e": 0.0, "r": 0.0, "glow": 12.0})
+			out.append({"pos": to_global(Vector2(18, -63)), "col": lamp, "e": 0.0, "r": 0.0, "glow": 12.0*scale.x})
 	return out

@@ -16,9 +16,11 @@
       "name": "Bullets",
       "noun": "Slug",
       "col": "#ffd76a",
-      "desc": "Fast, hard-hitting slugs.",
+      "desc": "Heavy slugs: harder hits that pierce 1 cop, +10% crit chance.",
       "add": {
-        "dmg": 11
+        "dmg": 11,
+        "pierce": 1,
+        "crit": 0.1
       }
     },
     {
@@ -42,6 +44,40 @@
       "desc": "Wall grapple · electrified chain",
       "add": {
         "dmg": 9
+      }
+    },
+    {
+      "id": "knife",
+      "name": "Switchblade",
+      "noun": "Switchblade",
+      "col": "#e8eef4",
+      "melee": "knife",
+      "desc": "PRIMARY KNIFE · sweep the right stick or mouse to cut. Fast, heavy strikes.",
+      "add": {
+        "dmg": 8
+      }
+    },
+    {
+      "id": "katana",
+      "name": "Mad Sword",
+      "noun": "Sword",
+      "col": "#ff5ad0",
+      "melee": "katana",
+      "desc": "PRIMARY SWORD · sweep the right stick or mouse. Heavy cuts through groups.",
+      "add": {
+        "dmg": 8
+      }
+    },
+    {
+      "id": "whip",
+      "name": "Shock Whip",
+      "noun": "Whip",
+      "col": "#7df9ff",
+      "melee": "whip",
+      "no_start": true,
+      "desc": "PRIMARY WHIP · sweep the right stick or mouse. Long, stunning lashes.",
+      "add": {
+        "dmg": 8
       }
     }
   ],
@@ -104,782 +140,66 @@
   ],
   "items": [
     {"id":"capacitor","t":2,"c":32,"ic":"🔋","name":"Patience Capacitor","desc":"Release fire to charge · 1.5s for 2.5× next laser damage","look":"Copper capacitor with three amber charge windows on the gun","wv":{"s":"top","w":5}},
-    {
-      "id": "tesla_helmet",
-      "t": 2,
-      "c": 28,
-      "ic": "⚡",
-      "name": "Electrode Helmet",
-      "desc": "3 lightning damage · 3 targets · 110 radius · 1.5s cooldown",
-      "look": "Silver wire cage helmet with copper electrodes and blue sparks"
-    },
-    {
-      "id": "bionic_arm",
-      "t": 1,
-      "c": 18,
-      "ic": "🦾",
-      "name": "Bionic Arm",
-      "desc": "Auto melee · opens secondary equipment offers",
-      "look": "A metal arm with a glowing fist"
-    },
-    {
-      "id": "fins",
-      "t": 1,
-      "c": 14,
-      "ic": "❄",
-      "name": "Cooling Fins",
-      "desc": "+15% fire rate",
-      "look": "Fins line the barrel",
-      "add": {
-        "atkSpd": 0.15
-      },
-      "wv": {
-        "s": "wrap",
-        "w": 2
-      }
-    },
-    {
-      "id": "cell",
-      "t": 1,
-      "c": 14,
-      "ic": "🔋",
-      "name": "Power Cell",
-      "desc": "+3 base damage",
-      "look": "Glowing cell under the barrel",
-      "add": {
-        "dmg": 3
-      },
-      "wv": {
-        "s": "bot",
-        "w": 4
-      }
-    },
-    {
-      "id": "telescope",
-      "t": 1,
-      "c": 14,
-      "ic": "🔎",
-      "name": "Telescoping Monocle",
-      "desc": "Aim guide. Buy a second for an upgraded crosshair.",
-      "look": "A stacked spyglass eyepiece that extends from your eye as you aim",
-      "set": {
-        "aimGuide": 1
-      }
-    },
-    {
-      "id": "monocle",
-      "t": 2,
-      "c": 26,
-      "ic": "🧐",
-      "name": "Monocle of Disdain",
-      "desc": "+10% critical hit chance",
-      "look": "A big brass monocle on a chain",
-      "add": {
-        "crit": 0.1
-      }
-    },
-    {
-      "id": "scope",
-      "t": 1,
-      "c": 12,
-      "ic": "🔭",
-      "name": "Targeting Scope",
-      "desc": "+60 range",
-      "look": "Scope on top; the barrel gets longer",
-      "add": {
-        "rangeAdd": 60
-      },
-      "wv": {
-        "s": "top",
-        "w": 6
-      }
-    },
-    {
-      "id": "flare",
-      "t": 1,
-      "c": 12,
-      "ic": "📯",
-      "name": "Flared Muzzle",
-      "desc": "+30% shot width",
-      "look": "Wider muzzle cone",
-      "add": {
-        "widthPct": 0.3
-      }
-    },
-    {
-      "id": "drill",
-      "t": 1,
-      "c": 14,
-      "ic": "🔩",
-      "name": "Drill Tip",
-      "desc": "+1 pierce (lasers: +10% dmg)",
-      "look": "Drill bit on the muzzle",
-      "add": {
-        "pierce": 1,
-        "drill": 1
-      }
-    },
-    {
-      "id": "coat",
-      "t": 1,
-      "c": 12,
-      "ic": "🥼",
-      "name": "Lead-Lined Coat",
-      "desc": "+15 max HP",
-      "look": "Grey riveted lab coat (2+: shoulder pads)",
-      "add": {
-        "maxHp": 15
-      }
-    },
-    {
-      "id": "boots",
-      "t": 1,
-      "c": 12,
-      "ic": "🚀",
-      "name": "Rocket Boots",
-      "desc": "+12% move speed",
-      "look": "Red rocket boots with jets",
-      "add": {
-        "speedPct": 0.12
-      }
-    },
-    {
-      "id": "magnet",
-      "t": 1,
-      "c": 10,
-      "ic": "🧲",
-      "name": "Scrap Magnet",
-      "desc": "+60% pickup range",
-      "look": "Giant magnet on your backpack",
-      "add": {
-        "pickupPct": 0.6
-      }
-    },
-    {
-      "id": "serum",
-      "t": 1,
-      "c": 14,
-      "ic": "🧪",
-      "name": "Regen Serum",
-      "desc": "+0.6 HP regen/sec",
-      "look": "Green vial on your belt",
-      "add": {
-        "regen": 0.6
-      }
-    },
-    {
-      "id": "thermite",
-      "t": 1,
-      "c": 16,
-      "ic": "🔥",
-      "name": "Thermite Tank",
-      "desc": "Shots ignite cops (+3 burn/sec)",
-      "look": "Fuel tank; your hair catches fire",
-      "add": {
-        "burn": 3
-      },
-      "wv": {
-        "s": "bot",
-        "w": 5
-      }
-    },
-    {
-      "id": "acid",
-      "t": 1,
-      "c": 16,
-      "ic": "🧫",
-      "name": "Acid Canister",
-      "desc": "Chemical burn: +2/sec, and burned cops take +20% damage",
-      "look": "Yellow canister; acid stains on your coat",
-      "add": {
-        "acid": 2
-      },
-      "wv": {
-        "s": "top",
-        "w": 3
-      }
-    },
-    {
-      "id": "poison",
-      "t": 1,
-      "c": 16,
-      "ic": "☠",
-      "name": "Toxin Vial",
-      "desc": "Poison stacks up to 8 times (+1/sec per stack)",
-      "look": "Green vial; gas mask at your neck",
-      "add": {
-        "poison": 1
-      },
-      "wv": {
-        "s": "top",
-        "w": 2
-      }
-    },
-    {
-      "id": "napalm",
-      "t": 1,
-      "c": 16,
-      "ic": "🧨",
-      "name": "Napalm Gel",
-      "desc": "+40% fire spread/sec",
-      "look": "A sticky orange gel canister",
-      "add": {
-        "burnSpread": 0.4
-      }
-    },
-    {
-      "id": "spores",
-      "t": 1,
-      "c": 16,
-      "ic": "🍄",
-      "name": "Toxic Spores",
-      "desc": "+40% poison spread/sec",
-      "look": "A puffing green spore pod",
-      "add": {
-        "poisonSpread": 0.4
-      }
-    },
-    {
-      "id": "bleed",
-      "t": 1,
-      "c": 14,
-      "ic": "🩸",
-      "name": "Serrated Edge",
-      "desc": "Bleeding stacks up to 10 times (+0.8/sec per stack)",
-      "look": "Serrated blade; blood spatter on your coat",
-      "add": {
-        "bleed": 0.8
-      },
-      "wv": {
-        "s": "bot",
-        "w": 5
-      }
-    },
-    {
-      "id": "tesla",
-      "t": 1,
-      "c": 16,
-      "ic": "⚡",
-      "name": "Tesla Prong",
-      "desc": "+1 chain lightning jump",
-      "look": "Tesla prong on the gun and an antenna in your hair",
-      "add": {
-        "chain": 1
-      },
-      "wv": {
-        "s": "top",
-        "w": 2
-      }
-    },
-    {
-      "id": "cryo",
-      "t": 1,
-      "c": 16,
-      "ic": "🧊",
-      "name": "Cryo Coil",
-      "desc": "Chills cops. Enough chill freezes them solid",
-      "look": "Ice coil on the barrel; ice crystals on your shoulders",
-      "add": {
-        "freeze": 0.15
-      },
-      "wv": {
-        "s": "wrap",
-        "w": 2
-      }
-    },
-    {
-      "id": "auto",
-      "t": 2,
-      "c": 32,
-      "ic": "🔁",
-      "name": "Hair Trigger",
-      "desc": "+30% fire rate, −5% damage",
-      "look": "Ammo feed belt",
-      "add": {
-        "atkSpd": 0.3,
-        "dmgPct": -0.05
-      },
-      "wv": {
-        "s": "bot",
-        "w": 5
-      }
-    },
-    {
-      "id": "split",
-      "t": 2,
-      "c": 38,
-      "ic": "🔱",
-      "name": "Splitter Nozzle",
-      "desc": "+1 shot per fire, −8% damage",
-      "look": "Another nozzle on the muzzle",
-      "add": {
-        "shots": 1,
-        "dmgPct": -0.08
-      }
-    },
-    {
-      "id": "hypno",
-      "t": 2,
-      "c": 34,
-      "ic": "🌀",
-      "name": "Hypno Disc",
-      "desc": "+6% chance to mind-control cops into minions",
-      "look": "Spinning spiral disc; spiral badge on your chest",
-      "add": {
-        "mind": 0.06
-      },
-      "wv": {
-        "s": "top",
-        "w": 4
-      }
-    },
-    {
-      "id": "virus",
-      "t": 2,
-      "c": 38,
-      "ic": "🦠",
-      "name": "Plague Drum",
-      "desc": "Makes cops sick: slower, 3/sec damage, and it spreads",
-      "look": "Biohazard drum; biohazard patch on your arm",
-      "add": {
-        "sick": 0.15
-      },
-      "wv": {
-        "s": "bot",
-        "w": 4
-      }
-    },
-    {
-      "id": "grenade",
-      "t": 2,
-      "c": 34,
-      "ic": "💣",
-      "name": "Grenade Clip",
-      "desc": "12% chance for a hit to explode",
-      "look": "Grenade on the gun; bandolier across your chest",
-      "add": {
-        "explode": 0.12
-      },
-      "wv": {
-        "s": "bot",
-        "w": 4
-      }
-    },
-    {
-      "id": "clock",
-      "t": 2,
-      "c": 38,
-      "ic": "⏰",
-      "name": "Time Bomb Dispenser",
-      "desc": "8% chance to stick a time bomb on a cop (3x dmg after 2.5s)",
-      "look": "Alarm clock on the gun and your belt",
-      "add": {
-        "bomb": 0.08
-      },
-      "wv": {
-        "s": "top",
-        "w": 4
-      }
-    },
-    {
-      "id": "remote",
-      "t": 2,
-      "c": 32,
-      "ic": "📡",
-      "name": "Remote Mine Layer",
-      "desc": "10% mine chance · 8 mine capacity",
-      "look": "Antenna on the gun and on your backpack",
-      "add": {
-        "remote": 0.1
-      },
-      "wv": {
-        "s": "top",
-        "w": 2
-      }
-    },
-    {
-      "id": "syringe",
-      "t": 2,
-      "c": 36,
-      "ic": "💉",
-      "name": "Life Suck Syringe",
-      "desc": "Heal 4% of damage dealt",
-      "look": "Blood syringe; vampire cape",
-      "add": {
-        "lifesuck": 0.04
-      },
-      "wv": {
-        "s": "top",
-        "w": 6
-      }
-    },
-    {
-      "id": "goggles",
-      "t": 2,
-      "c": 28,
-      "ic": "🥽",
-      "name": "Blast Goggles",
-      "desc": "+3 armor",
-      "look": "Orange blast goggles",
-      "add": {
-        "armor": 3
-      }
-    },
-    {
-      "id": "pickpocket",
-      "t": 1,
-      "c": 14,
-      "ic": "🧤",
-      "name": "Pickpocket Glove",
-      "desc": "+12% loot drop chance from downed cops",
-      "look": "A sticky-fingered glove",
-      "add": {
-        "dropPct": 0.12
-      }
-    },
-    {
-      "id": "overkill",
-      "t": 2,
-      "c": 30,
-      "ic": "🔥",
-      "name": "Overkill Charge",
-      "desc": "+4 base damage, but cops are blown to bits: −15% loot drop chance",
-      "look": "A smoking over-volted charge cell",
-      "add": {
-        "dmg": 4,
-        "dropPct": -0.15
-      }
-    },
-    {
-      "id": "greed",
-      "t": 2,
-      "c": 30,
-      "ic": "💰",
-      "name": "Greed Gland",
-      "desc": "+20% scrap from all sources",
-      "look": "Gold chain; gold-plated barrel",
-      "add": {
-        "scrapPct": 0.2
-      }
-    },
-    {
-      "id": "orb",
-      "t": 2,
-      "c": 36,
-      "ic": "🟢",
-      "name": "Plasma Orb",
-      "desc": "A plasma orb circles you and burns cops",
-      "look": "Orbiting orb",
-      "add": {
-        "orbs": 1
-      }
-    },
-    {
-      "id": "sustain",
-      "t": 2,
-      "c": 44,
-      "ic": "〰",
-      "name": "Sustained Beam Emitter",
-      "desc": "Continuous laser · +15% DPS per stack",
-      "look": "Glowing red capacitor rings on the barrel",
-      "add": {
-        "sustain": 1
-      },
-      "wv": {
-        "s": "wrap",
-        "w": 3
-      }
-    },
-    {
-      "id": "lens",
-      "t": 2,
-      "c": 34,
-      "ic": "💠",
-      "name": "Focusing Lens",
-      "desc": "Laser beams · unlimited pierce",
-      "look": "A crystal lens clamped over the emitter",
-      "add": {
-        "beam": 1
-      }
-    },
-    {
-      "id": "offhand",
-      "t": 2,
-      "c": 52,
-      "ic": "🤲",
-      "name": "Bionic Weapon Mount",
-      "desc": "Rear gun · 70% damage",
-      "look": "A metal arm holding a rear-facing weapon"
-    },
-    {
-      "id": "gLaser",
-      "t": 2,
-      "c": 48,
-      "ic": "🔴",
-      "name": "Laser Emitter",
-      "desc": "Adds a second LASER gun (70% damage)",
-      "look": "Extra laser barrel bolted on",
-      "gun": "laser"
-    },
-    {
-      "id": "gBullet",
-      "t": 2,
-      "c": 48,
-      "ic": "🟡",
-      "name": "Bullet Barrel",
-      "desc": "Adds a second BULLET gun (70% damage)",
-      "look": "Extra gun barrel bolted on",
-      "gun": "bullet"
-    },
-    {
-      "id": "gRazor",
-      "t": 2,
-      "c": 48,
-      "ic": "⚪",
-      "name": "Razor Launcher",
-      "desc": "Adds a second RAZOR gun (70% damage)",
-      "look": "Extra saw launcher bolted on",
-      "gun": "razor",
-      "add": {
-        "bleed": 0.3
-      }
-    },
-    {
-      "id": "disint",
-      "t": 3,
-      "c": 68,
-      "ic": "💀",
-      "name": "Disintegration Lens",
-      "desc": "Instantly vaporize cops below 12% HP. +10% damage",
-      "look": "Red crystal on the gun; a red cyber-eye",
-      "add": {
-        "execute": 0.12,
-        "dmgPct": 0.1
-      },
-      "wv": {
-        "s": "bot",
-        "w": 3
-      }
-    },
-    {
-      "id": "reactor",
-      "t": 3,
-      "c": 72,
-      "ic": "☢",
-      "name": "Doomsday Reactor",
-      "desc": "+35% damage, +20% fire rate, −10 max HP",
-      "look": "Reactor on the gun and glowing in your chest",
-      "add": {
-        "dmgPct": 0.35,
-        "atkSpd": 0.2,
-        "maxHp": -10
-      },
-      "wv": {
-        "s": "bot",
-        "w": 5
-      }
-    },
-    {
-      "id": "hive",
-      "t": 3,
-      "c": 66,
-      "ic": "🧠",
-      "name": "Hive Mind Antenna",
-      "desc": "+6% mind control. Minions deal 1.6x and last +4s",
-      "look": "Glass brain dome on your head",
-      "add": {
-        "mind": 0.06,
-        "mindDur": 4
-      },
-      "mul": {
-        "minionMul": 1.6
-      },
-      "wv": {
-        "s": "top",
-        "w": 4
-      }
-    },
-    {
-      "id": "zero",
-      "t": 3,
-      "c": 62,
-      "ic": "🥶",
-      "name": "Absolute Zero Core",
-      "desc": "+30% chill. Frozen cops take 2x damage",
-      "look": "Frosty barrel; your hair turns icy blue",
-      "add": {
-        "freeze": 0.3
-      },
-      "set": {
-        "frozenMul": 2
-      },
-      "wv": {
-        "s": "wrap",
-        "w": 2
-      }
-    },
-    {
-      "id": "storm",
-      "t": 3,
-      "c": 64,
-      "ic": "🌩",
-      "name": "Storm Generator",
-      "desc": "+2 chain jumps, chain lightning +20% damage",
-      "look": "Twin storm rods",
-      "add": {
-        "chain": 2,
-        "chainMul": 0.2
-      },
-      "wv": {
-        "s": "top",
-        "w": 4
-      }
-    },
-    {
-      "id": "nuke",
-      "t": 3,
-      "c": 70,
-      "ic": "☣",
-      "name": "Mini Nuke Payload",
-      "desc": "Explosions get +60% radius and damage. +6% explode chance",
-      "look": "Nuke on the gun; radiation patch",
-      "add": {
-        "boomMul": 0.6,
-        "explode": 0.06
-      },
-      "wv": {
-        "s": "top",
-        "w": 4
-      }
-    },
-    {
-      "id": "moon",
-      "t": 4,
-      "c": 120,
-      "ic": "🌕",
-      "name": "Moon Laser Uplink",
-      "desc": "Every 3s an orbital laser hits a random cop",
-      "look": "Satellite dish on the gun and backpack",
-      "add": {
-        "moon": 1
-      },
-      "wv": {
-        "s": "top",
-        "w": 5
-      }
-    },
-    {
-      "id": "mutagen",
-      "t": 4,
-      "c": 105,
-      "ic": "🧬",
-      "name": "Mutagen Overdose",
-      "desc": "+40 max HP, +2 HP regen/sec, +5 armor",
-      "look": "Your skin turns green",
-      "add": {
-        "maxHp": 40,
-        "regen": 2,
-        "armor": 5
-      }
-    },
-    {
-      "id": "singular",
-      "t": 4,
-      "c": 135,
-      "ic": "🕳",
-      "name": "Pocket Singularity",
-      "desc": "+60% damage, +50% width, +80 range",
-      "look": "A black hole floats near you",
-      "add": {
-        "dmgPct": 0.6,
-        "widthPct": 0.5,
-        "rangeAdd": 80
-      },
-      "wv": {
-        "s": "bot",
-        "w": 4
-      }
-    },
-    {
-      "id": "core_isotope",
-      "t": 2,
-      "c": 34,
-      "ic": "☢",
-      "core": 1,
-      "name": "Unstable Isotope Pack",
-      "desc": "+30% damage, −15 max HP",
-      "look": "Bubbling green isotope tank on your back",
-      "add": {
-        "dmgPct": 0.3,
-        "maxHp": -15
-      }
-    },
-    {
-      "id": "core_hamster",
-      "t": 2,
-      "c": 34,
-      "ic": "🐹",
-      "core": 1,
-      "name": "Hamster Wheel Pack",
-      "desc": "+15% move speed, +50% pickup range",
-      "look": "A hamster running in a wheel on your back",
-      "add": {
-        "speedPct": 0.15,
-        "pickupPct": 0.5
-      }
-    },
-    {
-      "id": "core_battery",
-      "t": 2,
-      "c": 34,
-      "ic": "🔋",
-      "core": 1,
-      "name": "Stolen Car Battery",
-      "desc": "+25% fire rate",
-      "look": "Car battery backpack, jumper cables clamped to your head",
-      "add": {
-        "atkSpd": 0.25
-      }
-    },
-    {
-      "id": "core_brain",
-      "t": 2,
-      "c": 34,
-      "ic": "🧠",
-      "core": 1,
-      "name": "Brain in a Jar",
-      "desc": "+3 armor, +15% scrap. It gives advice",
-      "look": "A floating brain in a jar, wired to your temple",
-      "add": {
-        "armor": 3,
-        "scrapPct": 0.15
-      }
-    },
-    {
-      "id": "time_freeze",
-      "t": 2,
-      "c": 48,
-      "ic": "⏱",
-      "name": "Time Freeze",
-      "arm": "time_freeze",
-      "desc": "Nearby enemies + bullets: freeze 2.8s · 15s cooldown",
-      "look": "Blue clock emitter on the bionic wrist"
-    },
-    {
-      "id": "proximity_bomb",
-      "t": 2,
-      "c": 50,
-      "ic": "💥",
-      "name": "Proximity Bomb",
-      "arm": "proximity_bomb",
-      "desc": "Proximity blast · 12s cooldown",
-      "look": "Red proximity detonator on the bionic arm"
-    },
+    {"id":"tesla_helmet","t":2,"c":28,"ic":"⚡","name":"Electrode Helmet","desc":"3 lightning damage · 3 targets · 110 radius · 1.5s cooldown","look":"Silver wire cage helmet with copper electrodes and blue sparks"},
+    {"id":"bionic_arm","t":1,"c":18,"ic":"🦾","name":"Bionic Arm","desc":"Auto melee · opens secondary equipment offers","look":"A metal arm with a glowing fist"},
+    {"id":"fins","t":1,"c":14,"ic":"❄","name":"Cooling Fins","desc":"+15% fire rate","look":"Fins line the barrel","add":{"atkSpd":0.15},"wv":{"s":"wrap","w":2}},
+    {"id":"cell","t":1,"c":14,"ic":"🔋","name":"Power Cell","desc":"+3 base damage","look":"Glowing cell under the barrel","add":{"dmg":3},"wv":{"s":"bot","w":4}},
+    {"id":"telescope","t":1,"c":14,"ic":"🔎","name":"Telescoping Monocle","desc":"Aim guide. Buy a second for an upgraded crosshair.","look":"A stacked spyglass eyepiece that extends from your eye as you aim","set":{"aimGuide":1}},
+    {"id":"monocle","t":2,"c":26,"ic":"🧐","name":"Monocle of Disdain","desc":"+10% critical hit chance","look":"A big brass monocle on a chain","add":{"crit":0.1}},
+    {"id":"scope","t":1,"c":12,"ic":"🔭","name":"Targeting Scope","desc":"+60 range","look":"Scope on top; the barrel gets longer","add":{"rangeAdd":60},"wv":{"s":"top","w":6}},
+    {"id":"flare","t":1,"c":12,"ic":"📯","name":"Flared Muzzle","desc":"+30% shot width","look":"Wider muzzle cone","add":{"widthPct":0.3}},
+    {"id":"drill","t":1,"c":14,"ic":"🔩","name":"Drill Tip","desc":"+1 pierce (lasers: +10% dmg)","look":"Drill bit on the muzzle","add":{"pierce":1,"drill":1}},
+    {"id":"coat","t":1,"c":12,"ic":"🥼","name":"Lead-Lined Coat","desc":"+15 max HP","look":"Grey riveted lab coat (2+: shoulder pads)","add":{"maxHp":15}},
+    {"id":"boots","t":1,"c":12,"ic":"🚀","name":"Rocket Boots","desc":"+12% move speed","look":"Red rocket boots with jets","add":{"speedPct":0.12}},
+    {"id":"magnet","t":1,"c":10,"ic":"🧲","name":"Scrap Magnet","desc":"+60% pickup range","look":"Giant magnet on your backpack","add":{"pickupPct":0.6}},
+    {"id":"serum","t":1,"c":14,"ic":"🧪","name":"Regen Serum","desc":"+0.6 HP regen/sec","look":"Green vial on your belt","add":{"regen":0.6}},
+    {"id":"thermite","t":1,"c":16,"ic":"🔥","name":"Thermite Tank","desc":"Shots ignite cops (+3 burn/sec)","look":"Fuel tank; your hair catches fire","add":{"burn":3},"wv":{"s":"bot","w":5}},
+    {"id":"acid","t":1,"c":16,"ic":"🧫","name":"Acid Canister","desc":"Chemical burn: +2/sec, and burned cops take +20% damage","look":"Yellow canister; acid stains on your coat","add":{"acid":2},"wv":{"s":"top","w":3}},
+    {"id":"poison","t":1,"c":16,"ic":"☠","name":"Toxin Vial","desc":"Poison stacks up to 8 times (+1/sec per stack)","look":"Green vial; gas mask at your neck","add":{"poison":1},"wv":{"s":"top","w":2}},
+    {"id":"napalm","t":1,"c":16,"ic":"🧨","name":"Napalm Gel","desc":"+40% fire spread/sec","look":"A sticky orange gel canister","add":{"burnSpread":0.4}},
+    {"id":"spores","t":1,"c":16,"ic":"🍄","name":"Toxic Spores","desc":"+40% poison spread/sec","look":"A puffing green spore pod","add":{"poisonSpread":0.4}},
+    {"id":"bleed","t":1,"c":14,"ic":"🩸","name":"Serrated Edge","desc":"Bleeding stacks up to 10 times (+0.8/sec per stack)","look":"Serrated blade; blood spatter on your coat","add":{"bleed":0.8},"wv":{"s":"bot","w":5}},
+    {"id":"tesla","t":1,"c":16,"ic":"⚡","name":"Tesla Prong","desc":"+1 chain lightning jump","look":"Tesla prong on the gun and an antenna in your hair","add":{"chain":1},"wv":{"s":"top","w":2}},
+    {"id":"cryo","t":1,"c":16,"ic":"🧊","name":"Cryo Coil","desc":"Chills cops. Enough chill freezes them solid","look":"Ice coil on the barrel; ice crystals on your shoulders","add":{"freeze":0.15},"wv":{"s":"wrap","w":2}},
+    {"id":"auto","t":2,"c":32,"ic":"🔁","name":"Hair Trigger","desc":"+30% fire rate, −5% damage","look":"Ammo feed belt","add":{"atkSpd":0.3,"dmgPct":-0.05},"wv":{"s":"bot","w":5}},
+    {"id":"split","t":2,"c":38,"ic":"🔱","name":"Splitter Nozzle","desc":"+1 shot per fire, −8% damage","look":"Another nozzle on the muzzle","add":{"shots":1,"dmgPct":-0.08}},
+    {"id":"hypno","t":2,"c":34,"ic":"🌀","name":"Hypno Disc","desc":"+6% chance to mind-control cops into minions","look":"Spinning spiral disc; spiral badge on your chest","add":{"mind":0.06},"wv":{"s":"top","w":4}},
+    {"id":"virus","t":2,"c":38,"ic":"🦠","name":"Plague Drum","desc":"Makes cops sick: slower, 3/sec damage, and it spreads","look":"Biohazard drum; biohazard patch on your arm","add":{"sick":0.15},"wv":{"s":"bot","w":4}},
+    {"id":"grenade","t":2,"c":34,"ic":"💣","name":"Grenade Clip","desc":"12% chance for a hit to explode","look":"Grenade on the gun; bandolier across your chest","add":{"explode":0.12},"wv":{"s":"bot","w":4}},
+    {"id":"clock","t":2,"c":38,"ic":"⏰","name":"Time Bomb Dispenser","desc":"8% chance to stick a time bomb on a cop (3x dmg after 2.5s)","look":"Alarm clock on the gun and your belt","add":{"bomb":0.08},"wv":{"s":"top","w":4}},
+    {"id":"remote","t":2,"c":32,"ic":"📡","name":"Remote Mine Layer","desc":"10% mine chance · 8 mine capacity","look":"Antenna on the gun and on your backpack","add":{"remote":0.1},"wv":{"s":"top","w":2}},
+    {"id":"syringe","t":2,"c":36,"ic":"💉","name":"Life Suck Syringe","desc":"Heal 4% of damage dealt","look":"Blood syringe; vampire cape","add":{"lifesuck":0.04},"wv":{"s":"top","w":6}},
+    {"id":"goggles","t":2,"c":28,"ic":"🥽","name":"Blast Goggles","desc":"+3 armor","look":"Orange blast goggles","add":{"armor":3}},
+    {"id":"pickpocket","t":1,"c":14,"ic":"🧤","name":"Pickpocket Glove","desc":"+12% loot drop chance from downed cops","look":"A sticky-fingered glove","add":{"dropPct":0.12}},
+    {"id":"overkill","t":2,"c":30,"ic":"🔥","name":"Overkill Charge","desc":"+4 base damage, but cops are blown to bits: −15% loot drop chance","look":"A smoking over-volted charge cell","add":{"dmg":4,"dropPct":-0.15}},
+    {"id":"greed","t":2,"c":30,"ic":"💰","name":"Greed Gland","desc":"+20% scrap from all sources","look":"Gold chain; gold-plated barrel","add":{"scrapPct":0.2}},
+    {"id":"orb","t":2,"c":36,"ic":"🟢","name":"Plasma Orb","desc":"A plasma orb circles you and burns cops","look":"Orbiting orb","add":{"orbs":1}},
+    {"id":"sustain","t":2,"c":44,"ic":"〰","name":"Sustained Beam Emitter","desc":"Continuous laser · +15% DPS per stack","look":"Glowing red capacitor rings on the barrel","add":{"sustain":1},"wv":{"s":"wrap","w":3}},
+    {"id":"lens","t":2,"c":34,"ic":"💠","name":"Focusing Lens","desc":"Laser beams · unlimited pierce","look":"A crystal lens clamped over the emitter","add":{"beam":1}},
+    {"id":"offhand","t":2,"c":52,"ic":"🤲","name":"Bionic Weapon Mount","desc":"Rear gun · 70% damage","look":"A metal arm holding a rear-facing weapon"},
+    {"id":"gLaser","t":2,"c":48,"ic":"🔴","name":"Laser Emitter","desc":"Adds a second LASER gun (70% damage)","look":"Extra laser barrel bolted on","gun":"laser"},
+    {"id":"gBullet","t":2,"c":48,"ic":"🟡","name":"Bullet Barrel","desc":"Adds a second BULLET gun (70% damage)","look":"Extra gun barrel bolted on","gun":"bullet"},
+    {"id":"gRazor","t":2,"c":48,"ic":"⚪","name":"Razor Launcher","desc":"Adds a second RAZOR gun (70% damage)","look":"Extra saw launcher bolted on","gun":"razor","add":{"bleed":0.3}},
+    {"id":"disint","t":3,"c":68,"ic":"💀","name":"Disintegration Lens","desc":"Instantly vaporize cops below 12% HP. +10% damage","look":"Red crystal on the gun; a red cyber-eye","add":{"execute":0.12,"dmgPct":0.1},"wv":{"s":"bot","w":3}},
+    {"id":"reactor","t":3,"c":72,"ic":"☢","name":"Doomsday Reactor","desc":"+35% damage, +20% fire rate, −10 max HP","look":"Reactor on the gun and glowing in your chest","add":{"dmgPct":0.35,"atkSpd":0.2,"maxHp":-10},"wv":{"s":"bot","w":5}},
+    {"id":"hive","t":3,"c":66,"ic":"🧠","name":"Hive Mind Antenna","desc":"+6% mind control. Minions deal 1.6x and last +4s","look":"Glass brain dome on your head","add":{"mind":0.06,"mindDur":4},"mul":{"minionMul":1.6},"wv":{"s":"top","w":4}},
+    {"id":"zero","t":3,"c":62,"ic":"🥶","name":"Absolute Zero Core","desc":"+30% chill. Frozen cops take 2x damage","look":"Frosty barrel; your hair turns icy blue","add":{"freeze":0.3},"set":{"frozenMul":2},"wv":{"s":"wrap","w":2}},
+    {"id":"storm","t":3,"c":64,"ic":"🌩","name":"Storm Generator","desc":"+2 chain jumps, chain lightning +20% damage","look":"Twin storm rods","add":{"chain":2,"chainMul":0.2},"wv":{"s":"top","w":4}},
+    {"id":"nuke","t":3,"c":70,"ic":"☣","name":"Mini Nuke Payload","desc":"Explosions get +60% radius and damage. +6% explode chance","look":"Nuke on the gun; radiation patch","add":{"boomMul":0.6,"explode":0.06},"wv":{"s":"top","w":4}},
+    {"id":"moon","t":4,"c":120,"ic":"🌕","name":"Moon Laser Uplink","desc":"Every 3s an orbital laser hits a random cop","look":"Satellite dish on the gun and backpack","add":{"moon":1},"wv":{"s":"top","w":5}},
+    {"id":"mutagen","t":4,"c":105,"ic":"🧬","name":"Mutagen Overdose","desc":"+40 max HP, +2 HP regen/sec, +5 armor","look":"Your skin turns green","add":{"maxHp":40,"regen":2,"armor":5}},
+    {"id":"singular","t":4,"c":135,"ic":"🕳","name":"Pocket Singularity","desc":"+60% damage, +50% width, +80 range","look":"A black hole floats near you","add":{"dmgPct":0.6,"widthPct":0.5,"rangeAdd":80},"wv":{"s":"bot","w":4}},
+    {"id":"core_isotope","t":2,"c":34,"ic":"☢","core":1,"name":"Unstable Isotope Pack","desc":"+30% damage, −15 max HP","look":"Bubbling green isotope tank on your back","add":{"dmgPct":0.3,"maxHp":-15}},
+    {"id":"core_hamster","t":2,"c":34,"ic":"🐹","core":1,"name":"Hamster Wheel Pack","desc":"+15% move speed, +50% pickup range","look":"A hamster running in a wheel on your back","add":{"speedPct":0.15,"pickupPct":0.5}},
+    {"id":"core_battery","t":2,"c":34,"ic":"🔋","core":1,"name":"Stolen Car Battery","desc":"+25% fire rate","look":"Car battery backpack, jumper cables clamped to your head","add":{"atkSpd":0.25}},
+    {"id":"core_brain","t":2,"c":34,"ic":"🧠","core":1,"name":"Brain in a Jar","desc":"+3 armor, +15% scrap. It gives advice","look":"A floating brain in a jar, wired to your temple","add":{"armor":3,"scrapPct":0.15}},
+    {"id":"time_freeze","t":2,"c":48,"ic":"⏱","name":"Time Freeze","arm":"time_freeze","desc":"Nearby enemies + bullets: freeze 2.8s · 15s cooldown","look":"Blue clock emitter on the bionic wrist"},
+    {"id":"proximity_bomb","t":2,"c":50,"ic":"💥","name":"Proximity Bomb","arm":"proximity_bomb","desc":"Proximity blast · 12s cooldown","look":"Red proximity detonator on the bionic arm"},
     {"id":"seeker_rack","t":2,"c":48,"ic":"🚀","name":"Triple Seeker Rack","arm":"seeker_rack","desc":"3 homing rockets at nearby foes · 5s cooldown","look":"Three pink-tipped rocket tubes on the bionic forearm"},
     {"id":"shrink_ray","t":2,"c":44,"ic":"🔮","name":"Shrink Ray","arm":"shrink_ray","desc":"Arm turret · auto-fires shrink bolts (no damage) · 3 hits shrink a cop · stomp shrunk cops for heavy damage","look":"A violet ray dish on the bionic wrist"},
     {"id":"freeze_ray","t":2,"c":46,"ic":"🧊","name":"Freeze Ray","arm":"freeze_ray","desc":"Arm turret · auto-fires ice bolts (no damage) · 3 hits freeze a cop · kick frozen cops to shatter them into others","look":"A frosted cryo nozzle on the bionic wrist"},
     {"id":"knife","t":2,"c":36,"ic":"🔪","name":"Switchblade","arm":"knife","melee":{"reach":48,"arc":0.6,"swing":0.16,"cd":0.34,"dmg":6,"scale":0.3,"knock":40,"targets":1},"desc":"Auto stab · 48 reach · 0.34s cooldown · triggers on-hit effects","look":"A flick-out switchblade clipped to the bionic fist"},
-    {"id":"whip","t":2,"c":44,"ic":"〰","name":"Shock Whip","arm":"whip","melee":{"reach":150,"arc":0.3,"swing":0.4,"cd":1.4,"dmg":11,"scale":0.4,"knock":0,"targets":99,"stun":0.5},"desc":"Auto lash · 150 reach · hits the whole line, stuns 0.5s · 1.4s cooldown","look":"A coiled electrified whip hanging from the bionic fist"},
+    {"id":"whip","t":4,"c":44,"ic":"〰","name":"Shock Whip","arm":"whip","melee":{"reach":150,"arc":0.3,"swing":0.4,"cd":1.4,"dmg":11,"scale":0.4,"knock":0,"targets":99,"stun":0.5},"desc":"Auto lash · 150 reach · hits the whole line, stuns 0.5s · 1.4s cooldown","look":"A coiled electrified whip hanging from the bionic fist"},
     {"id":"katana","t":3,"c":62,"ic":"🗡","name":"Mad Katana","arm":"katana","melee":{"reach":84,"arc":2.4,"swing":0.3,"cd":0.95,"dmg":20,"scale":0.7,"knock":90,"targets":99},"desc":"Auto slash · 84 reach · hits every foe in a wide arc · 0.95s cooldown","look":"A long glowing katana gripped in the bionic fist"},
     {"id":"servos","t":1,"c":14,"ic":"⚙","name":"Overclocked Servos","needs_arm":1,"desc":"+20% melee attack speed","look":"Whirring servo rings on the bionic elbow","add":{"meleeSpd":0.2}},
     {"id":"extender","t":1,"c":14,"ic":"📏","name":"Telescoping Forearm","needs_arm":1,"desc":"+20% melee reach","look":"A sliding piston section in the bionic forearm","add":{"meleeReach":0.2}},
@@ -891,20 +211,24 @@
     {"id":"uranium","t":2,"c":34,"ic":"☢","name":"Uranium Slugs","desc":"Shots irradiate cops: dose stacks to 12 (+0.5/sec each). Full dose melts down and irradiates nearby cops","look":"Glowing green slugs in a lead-lined hopper","add":{"rad":0.5}},
     {"id":"geiger","t":1,"c":14,"ic":"📟","name":"Geiger Amplifier","desc":"+30% radiation damage","look":"A clicking Geiger counter strapped to the stock","add":{"radMul":0.3}},
     {"id":"payraise","t":1,"c":14,"ic":"💵","name":"Henchman Pay Raise","desc":"+30% minion damage","look":"A wad of cash tucked in the coat pocket","add":{"minionMul":0.3}},
-    {"id":"kit_disguise","t":1,"c":30,"ic":"🥸","name":"Disguise Kit","consumable":"disguise","desc":"Supply · 3 disguises (Y / Q): lose pursuit for 4s. Unlocks refills","look":"A fake moustache and tourist hat"},
-    {"id":"kit_grenade","t":1,"c":24,"ic":"💣","name":"Grenade Satchel","consumable":"grenade","desc":"Supply · 3 grenades (Y / Q): thrown along your aim. Unlocks refills","look":"A canvas satchel of grenades"},
-    {"id":"teleport","t":2,"c":40,"ic":"🌀","name":"Teleport Pads","action":"teleport","desc":"B / Shift: drop a pad, press again to drop its partner; step on either pad to warp · 14s cooldown after each trip","look":"Two glowing purple floor pads clipped to the lab coat"},
+    {"id":"kit_disguise","t":1,"c":30,"ic":"🥸","name":"Disguise Kit","consumable":"disguise","desc":"Supply · 3 disguises (X / Q): lose pursuit for 4s. Unlocks refills","look":"A fake moustache and tourist hat"},
+    {"id":"kit_grenade","t":1,"c":24,"ic":"💣","name":"Grenade Satchel","consumable":"grenade","desc":"Supply · 3 grenades (X / Q): thrown along your aim. Unlocks refills","look":"A canvas satchel of grenades"},
+    {"id":"kit_shrink_pill","t":1,"c":32,"ic":"💊","name":"Shrinking Pills","consumable":"shrink_pill","desc":"Supply · 3 pills (X / Q): 55% size and hitbox for 10s. Unlocks refills","look":"Violet shrinking capsules"},
+    {"id":"kit_enlarge_pill","t":2,"c":40,"ic":"💊","name":"Enlargement Pills","consumable":"enlarge_pill","desc":"Supply · 3 pills (X / Q): 160% size for 10s; walk over small ground enemies to stomp them. Unlocks refills","look":"Amber enlargement capsules"},
+    {"id":"kit_tesla_coil","t":2,"c":46,"ic":"⚡","name":"Portable Tesla Coils","consumable":"tesla_coil","desc":"Supply · 3 coils (X / Q): place for 15s; random lightning pulses shock enemies between you and the coil. Unlocks refills","look":"Copper coil with a silver discharge cap"},
+    {"id":"teleport","t":2,"c":40,"ic":"🌀","name":"Teleport Pads","action":"teleport","desc":"Y / F: drop a pad, press again to drop its partner; step on either pad to warp · 14s cooldown after each trip","look":"Two glowing purple floor pads clipped to the lab coat"},
     {"id":"vault_plating","t":2,"c":30,"ic":"🛡","name":"Vault Door Plating","bank":1,"desc":"+4 armor · +10 max HP","look":"Riveted steel slabs cut from a vault door","add":{"armor":4,"maxHp":10}},
     {"id":"money_counter","t":2,"c":34,"ic":"💸","name":"Money Counter Motor","bank":2,"desc":"+20% fire rate · +10% scrap","look":"A whirring bank-note counter feeding the breech","add":{"atkSpd":0.2,"scrapPct":0.1}},
     {"id":"dye_pack","t":3,"c":58,"ic":"🎨","name":"Exploding Dye Pack","bank":3,"desc":"+10% explode chance · +15% damage","look":"A red dye pack taped under the barrel","add":{"explode":0.1,"dmgPct":0.15}},
     {"id":"tumbler_scope","t":3,"c":62,"ic":"🔐","name":"Tumbler Lockpick Scope","bank":4,"desc":"+2 pierce · +15% crit chance","look":"A safecracker tumbler dial mounted as a sight","add":{"pierce":2,"crit":0.15}},
     {"id":"gold_reserve","t":4,"c":115,"ic":"🏦","name":"Federal Gold Reserve","bank":5,"desc":"+40% damage · +30% scrap · +20 max HP","look":"Gold bars stacked along the stock","add":{"dmgPct":0.4,"scrapPct":0.3,"maxHp":20}},
-    {"id":"zigzag","t":3,"c":62,"ic":"⚡","name":"Viper Zigzag","action":"zigzag","desc":"B / Shift: three damaging dashes · 7s cooldown","look":"Pink speed coils at the ankles"},
-    {"id":"iron_slam","t":3,"c":68,"ic":"💥","name":"Ironclad Leap","action":"iron_slam","desc":"B / Shift: leap and ground slam · 10s cooldown","look":"Gold impact pistons on the boots"},
+    {"id":"zigzag","t":3,"c":62,"ic":"⚡","name":"Viper Zigzag","action":"zigzag","desc":"Y / F: three damaging dashes · 7s cooldown","look":"Pink speed coils at the ankles"},
+    {"id":"iron_slam","t":3,"c":68,"ic":"💥","name":"Ironclad Leap","action":"iron_slam","desc":"Y / F: leap and ground slam · 10s cooldown","look":"Gold impact pistons on the boots"},
     {"id":"bullion","t":2,"c":30,"ic":"🥇","name":"Gold Bullion Ballast","heist":1,"desc":"+2 armor · +15% scrap","look":"A stolen gold bar strapped under the barrel","add":{"armor":2,"scrapPct":0.15},"wv":{"s":"bot","w":5}},
     {"id":"rail_spike","t":2,"c":32,"ic":"🔩","name":"Rail Spike Bayonet","heist":2,"desc":"+1 pierce · +3 base damage","look":"An iron rail spike lashed under the muzzle","add":{"pierce":1,"dmg":3},"wv":{"s":"bot","w":6}},
     {"id":"steam_piston","t":3,"c":58,"ic":"♨","name":"Steam Piston Rings","heist":3,"desc":"+25% fire rate · +10% move speed","look":"Brass piston rings on the barrel that puff steam","add":{"atkSpd":0.25,"speedPct":0.1},"wv":{"s":"wrap","w":3}},
     {"id":"firebox","t":3,"c":64,"ic":"🚂","name":"Locomotive Firebox","heist":4,"desc":"Shots ignite cops (+4 burn/sec) · +15% damage","look":"A glowing coal firebox under the gun","add":{"burn":4,"dmgPct":0.15},"wv":{"s":"bot","w":5}},
-    {"id":"headlamp","t":4,"c":110,"ic":"🔦","name":"Express Headlamp","heist":5,"desc":"+90 range · +12% crit · +25% damage","look":"A huge brass locomotive headlamp on top of the gun","add":{"rangeAdd":90,"crit":0.12,"dmgPct":0.25},"wv":{"s":"top","w":6}}
+    {"id":"headlamp","t":4,"c":110,"ic":"🔦","name":"Express Headlamp","heist":5,"desc":"+90 range · +12% crit · +25% damage","look":"A huge brass locomotive headlamp on top of the gun","add":{"rangeAdd":90,"crit":0.12,"dmgPct":0.25},"wv":{"s":"top","w":6}},
+    {"id":"ebola","t":2,"c":32,"ic":"🦠","name":"Ebola Ammo","desc":"Hits infect: 4 damage/sec per copy. Infected bodies infect enemies walking over them until the body fades.","look":"A sealed yellow biohazard magazine","add":{"ebola":1},"wv":{"s":"bot","w":3}}
   ]
 }

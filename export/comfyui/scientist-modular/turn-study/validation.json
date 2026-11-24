@@ -1,0 +1,13 @@
+{
+  "id": "39-right-front-left-turn",
+  "seconds": 5.0,
+  "fps": 24,
+  "steps": 16,
+  "reference_roles": [
+    "subject",
+    "item"
+  ],
+  "motion_reference": null,
+  "requested_output_frames": 120,
+  "note": "Prompt-driven turn study; no unrelated arm-sweep video is attached."
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "79-burning-loop",
+    "seconds": 5,
+    "fps": 24,
+    "subject_reference": "burning.png",
+    "item_reference": "proxy-grip.png",
+    "motion_reference": null,
+    "prompt": "subject_definitions:\n<Subject 1> is the mad scientist in <Picture 1>, exactly as drawn there.\n<Picture 2> is a color swatch only. Its object must NOT appear.\n\nsummary:\n[reference generation] A seamless looping panic while on fire. He is already burning in every frame.\n\nretention_analysis:\n<Picture 1> (character appearance): fully_preserved - identity, proportions, costume, palette, outlines and pixel-art style.\n<Picture 2> (swatch): not_preserved - never show it.\n\ndetailed_description:\nHe stays in this wide flailing stance for the whole shot, shouting. Hands shake and claw the air, head rattles, knees jitter, coat edges flap. Feet stay planted. Small flames on his hair, shoulders, cuffs, coat hem and shoes flicker and change shape rapidly but stay attached to the same places and the same size. The first and last frames match.\n\nEmpty hands, no gun, weapon or held object. Feet stay near the same canvas position. Constant body scale and limb lengths, five fingers per hand, no extra limbs. Keep flames small and attached to him. NO smoke clouds, NO loose embers or separate floating flames; the game draws those. He stays fully visible and his face is never covered.\n\nLocked orthographic-style camera, identical position, zoom and framing. Full body visible with generous margin on all sides. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames, crisp pixel edges, stable colors. No motion blur, ghosting, added texture, text or logos.\n\noverall_soundscape:\nSilent. No speech, sound effects or music.\n\nnon_diegetic_music:\nN/A"
+  },
+  {
+    "id": "80-defeat",
+    "seconds": 5,
+    "fps": 24,
+    "subject_reference": "scientist-small.png",
+    "item_reference": "proxy-grip.png",
+    "motion_reference": null,
+    "prompt": "subject_definitions:\n<Subject 1> is the mad scientist in <Picture 1>, exactly as drawn there.\n<Picture 2> is a color swatch only. Its object must NOT appear.\n\nsummary:\n[reference generation] A single cartoon defeat. He is drawn small with a lot of empty space around him and stays that small size.\n\nretention_analysis:\n<Picture 1> (character appearance): fully_preserved - identity, proportions, costume, palette, outlines and pixel-art style.\n<Picture 2> (swatch): not_preserved - never show it.\n\ndetailed_description:\nFacing three-quarter screen-right. Hold neutral 0.4 seconds. He clutches his chest and staggers, knees wobbling, until 1.20. His knees buckle and he drops to kneeling at 1.60, sways, then falls over sideways to lie on the ground by 2.40, curled slightly, coat spread. One tiny bounce. From 2.80 to 5.00 he lies completely still. He remains in the same area of the frame; his entire body, head to shoes, is always well inside the frame with wide empty margins.\n\nEmpty hands, no gun, weapon or held object. Feet stay near the same canvas position. Constant body scale and limb lengths, five fingers per hand, no extra limbs. No zooming in. No lightning, sparks, smoke, flashes or particles.\n\nLocked orthographic-style camera, identical position, zoom and framing. Full body visible with generous margin on all sides. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames, crisp pixel edges, stable colors. No motion blur, ghosting, added texture, text or logos.\n\noverall_soundscape:\nSilent. No speech, sound effects or music.\n\nnon_diegetic_music:\nN/A"
+  }
+]

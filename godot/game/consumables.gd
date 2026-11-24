@@ -1,14 +1,29 @@
 extends RefCounted
-## Y / Q uses a charge; D-pad Up / E selects a carried consumable. Supplies last for this run.
+## X / Q uses a charge; D-pad Up / E selects a carried consumable. Supplies last for this run.
 var grenades: Array = []
 var pads: Array[Vector2] = []
 var pads_armed := false
 var use_cd := 0.0
+var coils: Array = []
+const PILL_DURATION := 10.0
+const SHRINK_SCALE := 0.55
+const ENLARGE_SCALE := 1.6
+const COIL_DURATION := 15.0
+const COIL_RANGE := 240.0
 
 func reset() -> void:
-	grenades.clear(); pads.clear(); pads_armed = false; use_cd = 0.0
+	grenades.clear(); pads.clear(); pads_armed = false; use_cd = 0.0; coils.clear()
 
 func tick(a, dt: float, firing: bool) -> void:
+	if a.P.size_t>0.0:
+		a.P.size_t = maxf(0.0,a.P.size_t-dt)
+		if a.P.size_t<=0.0: set_size(a,1.0,"",0.0)
+	for coil in coils:
+		coil.life -= dt; coil.arc_t = maxf(0.0,coil.arc_t-dt); coil.pulse -= dt
+		if coil.position.distance_to(Vector2(a.P.x,a.P.y))>COIL_RANGE: coil.arc_t = 0.0
+		if coil.life>0.0 and coil.pulse<=0.0:
+			coil.pulse = randf_range(0.25,0.65); pulse_coil(a,coil)
+	coils = coils.filter(func(coil): return coil.life>0.0)
 	a.P.disguise_t = maxf(0.0, a.P.disguise_t - dt)
 	use_cd = maxf(0.0, use_cd - dt)
 	if firing and a.P.disguise_t > 0.0:
@@ -77,9 +92,46 @@ func activate(a) -> bool:
 			a.P.disguise_t = 0.0
 			grenades.append({"position":center, "velocity":Vector2.from_angle(a.P.aim) * 560.0, "t":0.85})
 			a.snd("throw")
+		"shrink_pill":
+			set_size(a,SHRINK_SCALE,id,PILL_DURATION); a.snd("shrink")
+		"enlarge_pill":
+			set_size(a,ENLARGE_SCALE,id,PILL_DURATION); a.snd("pick")
+		"tesla_coil":
+			coils.append({"position":center,"life":COIL_DURATION,"pulse":0.15,"arc_t":0.0,"seed":randf()*1000.0})
+			a.snd("pick")
 	return true
 
+func set_size(a, scale_factor: float, effect: String, duration: float) -> void:
+	a.P.size_t = duration; a.P.size_scale = scale_factor; a.P.size_effect = effect
+	a.P.r = 11.0*scale_factor
+	a.P.x = clampf(a.P.x,a.P.r+2,a.AW-a.P.r-2); a.P.y = clampf(a.P.y,a.P.r+2,a.AH-a.P.r-2)
+	if not a.walls.is_empty(): a.collide_walls(a.P,a.P.r)
+	a._sync_villain()
+
+func pulse_coil(a, coil: Dictionary) -> void:
+	var start: Vector2 = coil.position; var finish := Vector2(a.P.x,a.P.y)
+	var delta := finish-start; var distance := delta.length()
+	if distance<1.0 or distance>COIL_RANGE: return
+	var direction := delta/distance
+	if a.ray_len(start.x,start.y,direction.x,direction.y,distance)<distance-0.1: return
+	coil.arc_t = 0.13
+	for enemy in a.enemies.duplicate():
+		if enemy.dead or enemy.ally or enemy.civ: continue
+		var at := Vector2(enemy.x,enemy.y)
+		var closest := Geometry2D.get_closest_point_to_segment(at,start,finish)
+		if closest.distance_to(at)<=enemy.r+8.0:
+			a.hit(enemy,6.0+Run.D.dmg*0.35,{"element":"lightning","col":Color("#8beaff")})
+
 func draw_ground(a, g: Node2D) -> void:
+	for coil in coils:
+		var at: Vector2 = coil.position
+		g.draw_arc(at,COIL_RANGE,0.0,TAU,64,Color("#74cfff",0.12),1)
+		g.draw_circle(at+Vector2(0,3),15,Color(0,0,0,0.25))
+		g.draw_rect(Rect2(at+Vector2(-12,-3),Vector2(24,9)),Color("#343d4a"))
+		g.draw_rect(Rect2(at+Vector2(-8,-24),Vector2(16,22)),Color("#795338"))
+		for i in 5: g.draw_line(at+Vector2(-9,-21+i*4),at+Vector2(9,-21+i*4),Color("#d89a56"),2)
+		g.draw_circle(at+Vector2(0,-28),9,Color("#abb6c7"))
+		g.draw_line(at+Vector2(-6,-32),at+Vector2(5,-32),Color("#edf6ff"),2)
 	for i in pads.size():
 		var color := Color("#72d9ff") if i == 0 else Color("#bf88ff")
 		var radius := 23.0 + sin(a.time*5.0)*2.0
@@ -93,6 +145,20 @@ func draw_ground(a, g: Node2D) -> void:
 		g.draw_arc(grenade.position, 95.0, 0.0, TAU, 36, Color("#ffba53",0.25),1.0)
 
 func draw_fx(a, g: Node2D) -> void:
+	for coil in coils:
+		if coil.arc_t<=0.0 or coil.position.distance_to(Vector2(a.P.x,a.P.y))>COIL_RANGE: continue
+		var start: Vector2 = coil.position+Vector2(0,-28)
+		var finish: Vector2 = a.villain.anchor("chest")
+		var delta := finish-start
+		var normal := delta.normalized().orthogonal()
+		var previous := start
+		for i in range(1,9):
+			var f := i/8.0
+			var jitter := sin(coil.seed+i*3.9+a.time*35)*12.0 if i<8 else 0.0
+			var point := start+delta*f+normal*jitter
+			g.draw_line(previous,point,Color("#4a9dff"),4)
+			g.draw_line(previous,point,Color("#e8fbff"),1)
+			previous = point
 	for grenade in grenades:
 		var lift := sin((1.0-grenade.t/0.85)*PI)*26.0
 		var point: Vector2 = grenade.position - Vector2(0,lift)

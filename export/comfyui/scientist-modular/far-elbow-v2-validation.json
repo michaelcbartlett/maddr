@@ -1,0 +1,15 @@
+{
+  "base_take": "115037_00001_audio.mp4",
+  "study": "far elbow",
+  "frames": 120,
+  "fps": 24,
+  "seconds": 5,
+  "head_occlusion_test": "passed for all 120 frames",
+  "overlap_frames_tested": 50,
+  "fixed_shoulder_and_elbow_test": "passed",
+  "constant_forearm_length_test": "passed",
+  "steps": 16,
+  "fixed_seed": 15189716404291402000,
+  "lora_stack_preserved": true,
+  "model_inference_run": false
+}

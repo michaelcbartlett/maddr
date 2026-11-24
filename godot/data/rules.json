@@ -39,6 +39,14 @@
     "reroll_base": 1,
     "reroll_wave": 0.8
   },
+  "intel": {
+    "_note": "Villain Intel (game/intel.gd): a persistent meta currency. Each cop kill drops an Intel dossier with drop_chance (from min_wave on); bosses drop boss_drop dossiers. Points are assigned to modules on the RIG THE DEPOT screen (shop: Select/Back or the Intel button; Lab: the Intel button). A module's weight within its tier's offer pool is 1 + points*weight_per_point (unrigged modules weigh 1; points per module are capped at max_points_per_item, so max weight = 1 + cap*weight_per_point). Rigging changes the next roll (reroll or next shop).",
+    "drop_chance": 0.005,
+    "min_wave": 3,
+    "boss_drop": 1,
+    "weight_per_point": 0.5,
+    "max_points_per_item": 6
+  },
   "player": {
     "r": 11,
     "inv": 0.4,
@@ -58,6 +66,8 @@
   "parts": {
     "_note": "Shop offers that swap the MAIN gun's ammo or frame. t = shop tier (same weights as items), c = base price (wave-scaled like items). A slot becomes a part offer with probability `chance` (at most one per shop). Swapping trades in a bought part for the sell refund; a starting part is worth nothing.",
     "chance": 0.25,
+    "min_wave": 6,
+    "_min_wave": "No ammo/frame swaps in the shops before this wave (6 = the first shop after the wave-5 boss): early scrap goes to modules.",
     "ammo": {
       "laser": {
         "t": 1,
@@ -74,6 +84,18 @@
       "hook": {
         "t": 2,
         "c": 34
+      },
+      "knife": {
+        "t": 2,
+        "c": 36
+      },
+      "katana": {
+        "t": 3,
+        "c": 62
+      },
+      "whip": {
+        "t": 4,
+        "c": 44
       }
     },
     "frames": {
@@ -95,7 +117,7 @@
       }
     }
   },
-  "heist": {"waves":[7, 8, 9], "rewards":["bullion", "rail_spike", "steam_piston", "firebox", "headlamp"]},
+  "heist": {"waves":[7, 8, 9], "duration":180, "rewards":["bullion", "rail_spike", "steam_piston", "firebox", "headlamp"]},
   "bank": {"rewards":["vault_plating", "money_counter", "dye_pack", "tumbler_scope", "gold_reserve"]},
   "unlocks": [
     {"part":"item", "id":"bullion", "need":{"heist":1}},

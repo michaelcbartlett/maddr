@@ -65,15 +65,70 @@ func body_frame(index: int, armed: bool, hurt: bool = false) -> Dictionary:
 	if not bodies.has(key):
 		var pose = pose_at(index); pose.hurt = hurt
 		var frame = render_body(pose, {"armed":armed})
+		if body_skin != "": _apply_skin(frame, index, armed)
 		frame.texture = _texture(frame.img, frame.depth)
 		bodies[key] = frame
 	return bodies[key]
 
-func weapon_frame(bend: int, spec = null, off: bool = false) -> Dictionary:
+## Hand-drawn body skin (character/art/<skin>/body.*, built by tools/pixelstudio/import_scientist.py).
+## The procedural body still runs for its effect list; its pixels are swapped for the skin's and every
+## effect point moves with the nearest anchor. Empty string = the original procedural villain.
+static var body_skin := "scientist"
+const SKIN_ARM_REACH = 16   # shoulder -> grip for the shorter hand-drawn scientist (procedural villain: 22)
+static var _skins: Dictionary = {}
+
+static func _skin_data(skin: String) -> Dictionary:
+	if _skins.has(skin): return _skins[skin]
+	var dir = "res://character/art/%s/" % skin
+	var data = {}
+	if ResourceLoader.exists(dir+"body.png") and FileAccess.file_exists(dir+"body.json"):
+		data = JSON.parse_string(FileAccess.get_file_as_string(dir+"body.json"))
+		data.color = (load(dir+"body.png") as Texture2D).get_image()
+		data.height = (load(dir+"body_height.png") as Texture2D).get_image()
+		data.color.decompress(); data.height.decompress()
+	_skins[skin] = data
+	return data
+
+func _apply_skin(frame: Dictionary, index: int, armed: bool) -> void:
+	var skin = _skin_data(body_skin)
+	if skin.is_empty(): return
+	var w = int(skin.frameW); var h = int(skin.frameH)
+	var origin = Vector2i(index*w, (int(skin.rows.armed) if armed else int(skin.rows.free))*h)
+	var pixels = Pixels.new(w,h)
+	var scale = float(skin.heightScale)/255.0
+	for y in h:
+		for x in w:
+			var color: Color = skin.color.get_pixel(origin.x+x,origin.y+y)
+			if color.a == 0.0: continue
+			pixels.image.set_pixel(x,y,color)
+			pixels.depth[y*w+x] = skin.height.get_pixel(origin.x+x,origin.y+y).r8*scale
+			pixels.occupied[y*w+x] = 1
+	var old: Dictionary = frame.anchors
+	var anchors: Dictionary = skin.perFrame[index].anchors
+	var follow = func(point: Dictionary, keys: Array) -> void:
+		if not (point.get(keys[0]) is float or point.get(keys[0]) is int) or not (point.get(keys[1]) is float or point.get(keys[1]) is int): return
+		var best = ""; var best_d = INF
+		for name in old:
+			if not anchors.has(name): continue
+			var d = Vector2(point[keys[0]]-old[name].x,point[keys[1]]-old[name].y).length_squared()
+			if d < best_d: best_d = d; best = name
+		if best == "": return
+		point[keys[0]] += anchors[best].x-old[best].x; point[keys[1]] += anchors[best].y-old[best].y
+	for effect in frame.anims:
+		if effect.has("x") and effect.has("y"): follow.call(effect,["x","y"])
+		if effect.has("x2") and effect.has("y2"): follow.call(effect,["x2","y2"])
+	follow.call(frame.hand,["x","y"])
+	for foot in frame.feet: follow.call(foot,["x","y"])
+	var merged = old.duplicate()
+	for name in anchors: merged[name] = {"x":float(anchors[name].x),"y":float(anchors[name].y)}
+	frame.anchors = merged
+	frame.img = pixels.outlined_image(); frame.depth = pixels; frame.skin = body_skin
+
+func weapon_frame(bend: int, spec = null, off: bool = false, detached: bool = false) -> Dictionary:
 	var cache = off_weapons if off else weapons
-	var key = str(bend) + "/" + JSON.stringify(spec)
+	var key = str(bend) + "/" + JSON.stringify(spec) + "/" + str(detached)
 	if not cache.has(key):
-		var frame = render_weapon(bend, spec, off)
+		var frame = render_weapon(bend, spec, off, not detached)
 		var context = weapon_context(spec)
 		var flare = clampi(int(js_round(context.width/3.0)),2,22)
 		var nozzles: Array = []
@@ -179,7 +234,7 @@ func tinted_texture(frame: Dictionary, color: Color, weight: float, key: String)
 
 func xray_texture(frame: Dictionary) -> Texture2D:
 	if frame.has("xray"): return frame.xray
-	if not frame.pose.get("hurt",false):
+	if not frame.pose.get("hurt",false) and not frame.has("skin"):
 		var hurt = render_body(merge(frame.pose.duplicate(),{"hurt":true}),frame.opt)
 		frame.xray = xray_texture(hurt)
 		return frame.xray
@@ -1146,7 +1201,7 @@ func render_body(pose, opt = {}):
 	return {"img": c.outlined_image(), "depth": Z, "bob": b, "lean": ln, "hand": {"x": (hx_2 + ln), "y": ((hy + 1) + b)}, "feet": feet, "anims": anims, "anchors": AN, "pose": pose, "opt": opt}
 
 ## Lay out all hardware first, then paint stock, arm, receiver, modules and muzzle.
-func render_weapon(bend = WBEND0, spec = null, off = false):
+func render_weapon(bend = WBEND0, spec = null, off = false, include_arm: bool = true):
 	var c = Pixels.new(getv(WG, "w"), getv(WG, "h"))
 	var g = c
 	var Z = c
@@ -1193,7 +1248,7 @@ func render_weapon(bend = WBEND0, spec = null, off = false):
 	# Arm reach: shoulder -> grip. Downward bends (-1, -2) pull the whole gun in by 3/6 px so a gun aimed at
 	# the floor is held around mid-thigh instead of hanging below the feet; the elbow folds out to take the slack.
 	var pull = maxi(0, -int(bend)) * 3
-	var G = 22 - pull
+	var G = (SKIN_ARM_REACH if body_skin != "" else 22) - pull
 	# Modules occupy top, bottom and wrap rails; each stack gets its own slot.
 	var tops = []
 	var bots = []
@@ -1263,65 +1318,66 @@ func render_weapon(bend = WBEND0, spec = null, off = false):
 				P.call((G + 5), (y + 2), "#ffd76a")
 			else:
 				A2.call({"k": "saw", "x": (L + 3), "y": y, "r": 4})
-	layer.call(24, Profiles.dome(0, 0, 3, 3, 3))
-	ell.call(0, 0, 3, 3, coat)
-	R.call((-2), (-3), 4, 1, coatL)
-	R.call((-3), 1, 1, 2, coatD)
-	P.call(1, (-2), coatL)
 	var elb = js_round((G * 0.45))
 	var elbow_out = (bend if bend >= 0 else js_round(pull * 0.7))   # >0: elbow drops below the arm line
 	var ey = (js_round(((3 * elb) / float((G - 2)))) + elbow_out)
-	var ax = (G - 2)
-	var ay = 3
-	var armY = func(x = null):
-		return (((ey * x) / float(elb)) if truth((x <= elb)) else (ey + (((ay - ey) * (x - elb)) / float((ax - elb)))))
-	var x_2 = 0
-	while truth((x_2 <= ax)):
-		var y_2 = js_round(armY.call(x_2))
-		var th = (6 if truth((x_2 < elb)) else 5)
-		var top = ((y_2 - 3) + (6 - th))
-		layer.call(24, (Profiles.cap(0, 0, elb, ey, 3, 2.8) if truth((x_2 <= elb)) else Profiles.cap(elb, ey, ax, ay, 2.5, 2.8)))
-		R.call(x_2, top, 1, th, coat)
-		P.call(x_2, top, coatL)
-		if truth((fmod(x_2, 6) != 3)):
-			P.call(x_2, (top + 1), coatL)
-		P.call(x_2, ((top + th) - 2), coatM)
-		P.call(x_2, ((top + th) - 1), coatD)
-		x_2 += 1
-	layer.call(24.5, Profiles.dome(elb, ey, 3, 3, 2.8))
-	ell.call(elb, ey, 2, 2, coat)
-	P.call((elb - 1), (ey - 2), coatL)
-	P.call(elb, (ey + 2), coatM)
-	P.call((elb + 1), (ey + 2), coatD)
-	if truth((elbow_out >= 1)):
-		P.call(elb, (ey - 2), coatD)
-		P.call((elb + 1), (ey - 2), coatM)
-		P.call((elb - 1), (ey - 1), coatM)
-	else:
-		if truth((elbow_out <= (-1))):
-			P.call(elb, (ey + 1), coatD)
-			P.call((elb + 1), (ey + 1), coatD)
-			P.call((elb - 1), (ey + 1), coatM)
+	if include_arm:
+		layer.call(24, Profiles.dome(0, 0, 3, 3, 3))
+		ell.call(0, 0, 3, 3, coat)
+		R.call((-2), (-3), 4, 1, coatL)
+		R.call((-3), 1, 1, 2, coatD)
+		P.call(1, (-2), coatL)
+		var ax = (G - 2)
+		var ay = 3
+		var armY = func(x = null):
+			return (((ey * x) / float(elb)) if truth((x <= elb)) else (ey + (((ay - ey) * (x - elb)) / float((ax - elb)))))
+		var x_2 = 0
+		while truth((x_2 <= ax)):
+			var y_2 = js_round(armY.call(x_2))
+			var th = (6 if truth((x_2 < elb)) else 5)
+			var top = ((y_2 - 3) + (6 - th))
+			layer.call(24, (Profiles.cap(0, 0, elb, ey, 3, 2.8) if truth((x_2 <= elb)) else Profiles.cap(elb, ey, ax, ay, 2.5, 2.8)))
+			R.call(x_2, top, 1, th, coat)
+			P.call(x_2, top, coatL)
+			if truth((fmod(x_2, 6) != 3)):
+				P.call(x_2, (top + 1), coatL)
+			P.call(x_2, ((top + th) - 2), coatM)
+			P.call(x_2, ((top + th) - 1), coatD)
+			x_2 += 1
+		layer.call(24.5, Profiles.dome(elb, ey, 3, 3, 2.8))
+		ell.call(elb, ey, 2, 2, coat)
+		P.call((elb - 1), (ey - 2), coatL)
+		P.call(elb, (ey + 2), coatM)
+		P.call((elb + 1), (ey + 2), coatD)
+		if truth((elbow_out >= 1)):
+			P.call(elb, (ey - 2), coatD)
+			P.call((elb + 1), (ey - 2), coatM)
+			P.call((elb - 1), (ey - 1), coatM)
 		else:
-			R.call(elb, (ey - 2), 1, 4, coatD)
-			P.call((elb + 1), (ey + 1), coatM)
-	layer.call(25, Profiles.cylV((G - 2.5), 1.5, 1.5))
-	R.call((G - 4), 0, 3, 6, coatM)
-	R.call((G - 4), 0, 3, 1, coatL)
-	R.call((G - 2), 1, 1, 5, coatD)
+			if truth((elbow_out <= (-1))):
+				P.call(elb, (ey + 1), coatD)
+				P.call((elb + 1), (ey + 1), coatD)
+				P.call((elb - 1), (ey + 1), coatM)
+			else:
+				R.call(elb, (ey - 2), 1, 4, coatD)
+				P.call((elb + 1), (ey + 1), coatM)
+		layer.call(25, Profiles.cylV((G - 2.5), 1.5, 1.5))
+		R.call((G - 4), 0, 3, 6, coatM)
+		R.call((G - 4), 0, 3, 1, coatL)
+		R.call((G - 2), 1, 1, 5, coatD)
 	if truth(n.call("virus")):
 		layer.call(25, Profiles.slab(7, (-2), 10, 1, 1, 1))
 		box.call(7, (-2), 4, 4, "#c8e030")
 		P.call(8, (-1), "#222")
 		P.call(9, 0, "#222")
 		P.call(7, (-2), "#f0ff80")
-	if truth((lvl >= 2)):
+	if include_arm and truth((lvl >= 2)):
 		layer.call(26, Profiles.dome(0, (-1), 4, 3, 2.5))
 		ell.call(0, (-1), 4, 3, "#6a7282")
 		R.call((-2), (-3), 4, 1, "#9aa2b2")
 		P.call((-1), (-3), "#aab")
 		P.call(2, (-3), "#aab")
-	if truth((n.call("cryo") if truth(n.call("cryo")) else n.call("zero"))):
+	if include_arm and truth((n.call("cryo") if truth(n.call("cryo")) else n.call("zero"))):
 		layer.call(27, null)
 		R.call((-1), (-6), 1, 4, "#bff4ff")
 		R.call(0, (-5), 1, 3, "#e8ffff")
@@ -1450,21 +1506,22 @@ func render_weapon(bend = WBEND0, spec = null, off = false):
 			R.call(G, (-11), 8, 1, "#aab4be")
 			R.call(G, (-9), 8, 1, "#aab4be")
 			R.call((G + 3), (-6), 4, 1, "#111")
-	layer.call(30, Profiles.dome((G + 1.5), 4, 3.5, 3, 2.5))
-	box.call((G - 1), 2, 6, 5, skin)
-	R.call((G - 1), 2, 6, 1, skinL)
-	R.call((G + 4), 3, 1, 3, skinD)
-	R.call(G, 6, 4, 1, skinD)
-	P.call((G + 1), 4, skinD)
-	P.call((G + 3), 4, skinD)
-	P.call((G + 1), 5, skinD)
-	P.call((G + 3), 5, skinD)
-	layer.call(31, Profiles.dome((G - 1), 1.5, 1.5, 1, 1.5))
-	R.call((G - 2), 1, 3, 2, skin)
-	P.call((G - 2), 1, skinL)
-	P.call(G, 2, skinD)
-	if truth(getv(sk, "mut")):
-		P.call((G + 1), 3, "#bff08a")
+	if include_arm:
+		layer.call(30, Profiles.dome((G + 1.5), 4, 3.5, 3, 2.5))
+		box.call((G - 1), 2, 6, 5, skin)
+		R.call((G - 1), 2, 6, 1, skinL)
+		R.call((G + 4), 3, 1, 3, skinD)
+		R.call(G, 6, 4, 1, skinD)
+		P.call((G + 1), 4, skinD)
+		P.call((G + 3), 4, skinD)
+		P.call((G + 1), 5, skinD)
+		P.call((G + 3), 5, skinD)
+		layer.call(31, Profiles.dome((G - 1), 1.5, 1.5, 1, 1.5))
+		R.call((G - 2), 1, 3, 2, skin)
+		P.call((G - 2), 1, skinL)
+		P.call(G, 2, skinD)
+		if truth(getv(sk, "mut")):
+			P.call((G + 1), 3, "#bff08a")
 	var wx = (G + 15)
 	for it_2 in wraps:
 		var x_5 = wx
@@ -2021,6 +2078,22 @@ func draw_effect(p, a, o, t):
 				if truth((randf() < 0.5)):
 					R.call((m + 3), (-4), 2, 1, "#fff")
 					R.call((m + 3), 4, 2, 1, "#fff")
+
+## Firing face for the hand-drawn scientist: brows snap into a V, the grin opens into a yell and the
+## shades glint. Drawn around the skin's mouth anchor so it follows the bob of every frame.
+func draw_skin_shout(p, mouth: Dictionary, t):
+	var mx = int(mouth.x); var my = int(mouth.y)
+	var jit = int(fmod(floor(t*24),2))
+	for side in [-1,1]:
+		for step in 5:
+			var x = mx+side*(5-step); var y = my-10+mini(step,3)
+			p.P(x,y,"#e0def5" if step%2 == 0 else "#a4a6c6")
+	p.R(mx-4,my-1,8,4,"#3a1010")
+	p.R(mx-3,my-1,6,1,"#f0ece0")
+	p.R(mx-2,my+2,4,1,"#e0dccc")
+	p.R(mx-1,my+1,3,1,"#c84a5a")
+	p.P(mx,my,"#5a1818")
+	p.P(mx-3+jit*6,my-5,"#ffffff")
 
 func draw_shout(p, t):
 	var sk = skin_palette()

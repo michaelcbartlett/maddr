@@ -51,6 +51,21 @@ func _run() -> void:
 	# ---- the stage: a long train of connected cars ----
 	_start_heist(1)
 	_check(a.level == "train" and a.heist.active and a.AW > Levels.AW * 2 and a.AW == int(TrainLevel.size().x), "the heist wave builds the long train arena")
+	_check(TrainLevel.car_count() == 28, "the train has four times the original seven cars")
+	_check(a.heist.car_name(0) == "CABOOSE" and a.heist.car_name(27) == "VAULT CAR", "the extended train keeps the caboose first and vault last")
+	_check(a.wave_t == 180.0, "the heist gives 180 seconds to reach the vault")
+	var tiles: Array = a.arena_level._floor_tiles.filter(func(tile): return tile.visible)
+	_check(tiles.size() > 1 and tiles.all(func(tile): return tile.texture.get_width() <= 2048), "the long train renders in browser-safe floor texture tiles")
+	_check(tiles[-1].position.x + tiles[-1].texture.get_width() == a.AW, "floor tiles cover the entire train through its engine")
+	if OS.get_cmdline_user_args().has("--screenshots"):
+		var start := Vector2(a.P.x,a.P.y)
+		for car in [0,20,27]:
+			a.P.x = TrainLevel.car_rect(car).get_center().x; a.P.y = start.y
+			a.banner_t = 0; a.siren_t = 0; a.P.inv = 0; a._sync(0); a.cam.force_update_scroll()
+			await process_frame; await process_frame; await RenderingServer.frame_post_draw
+			DirAccess.make_dir_recursive_absolute("res://test-results")
+			root.get_texture().get_image().save_png("res://test-results/train-car-%d.png" % (car+1))
+		a.P.x = start.x; a.P.y = start.y; a._sync(0)
 	_check(a.cam.limit_right == a.AW and a.cam.limit_bottom == a.AH, "camera limits follow the train")
 	_check(Vector2(a.P.x, a.P.y) == TrainLevel.spawn() and a.heist.car_at(a.P.x) == 0, "the villain boards at the caboose")
 	_check(a.banner_txt.contains("TRAIN HEIST") and a.wave_t == run.wave_len(run.wave), "banner names the heist; the normal wave timer runs")
@@ -61,6 +76,15 @@ func _run() -> void:
 		var inside := false
 		for c in TrainLevel.car_count(): inside = inside or TrainLevel.car_rect(c).has_point(p)
 		_check(inside and not a.in_wall(p.x, p.y, 20) and p.distance_to(Vector2(a.P.x, a.P.y)) >= 200, "cops board inside a car near the villain")
+	var caboose := Vector2(a.P.x,a.P.y)
+	a.P.x = TrainLevel.car_rect(20).get_center().x
+	var late_boarding := true
+	for i in 30:
+		var point: Vector2 = a._outside_spawn()
+		var car: int = TrainLevel.car_at(point.x)
+		late_boarding = late_boarding and car >= 19 and car <= 22 and not a.in_wall(point.x,point.y,20)
+	_check(late_boarding, "boarding spawns follow the villain through the added cars")
+	a.P.x = caboose.x; a.P.y = caboose.y
 	await process_frame   # HUD draws the heist bar without errors
 	_check(scene.hud.visible, "HUD is up during the heist")
 	_check(not run.item_available(run.ITEM.bullion), "the Petty Crook reward isn't sold before it's won")

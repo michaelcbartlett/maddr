@@ -1,0 +1,51 @@
+{
+  "format": "enemy-edited-clip-v1",
+  "kind": "det",
+  "animation": "stunned",
+  "frame_width": 66,
+  "frame_height": 66,
+  "frame_count": 1,
+  "fps": 6,
+  "holds": [
+    1
+  ],
+  "origin": [
+    31.0,
+    62.0
+  ],
+  "anchors": [
+    {
+      "head": [
+        0.638,
+        -28.908
+      ],
+      "eye": [
+        7.412,
+        -25.427
+      ],
+      "eye_far": [
+        1.426,
+        -25.845
+      ],
+      "chest": [
+        -0.478,
+        -12.947
+      ],
+      "hand_n": [
+        -0.307,
+        3.063
+      ],
+      "hand_f": [
+        -8.877,
+        -7.52
+      ],
+      "muzzle": [
+        6.655,
+        16.611
+      ]
+    }
+  ],
+  "source_project": "export/pixelstudio/detective/detective.pixelstudio",
+  "source_sha256": "58b64f535439ccfff0603c4cbf54ecd921e50492190bc3bd57bdf30a71d86148",
+  "generated_by": "tools/pixelstudio/import_detective.py"
+}

@@ -40,6 +40,8 @@ const FLOOR_IDS := ["street","marble","gravel","tile","parquet","planks","grid"]
 const PropView = preload("res://levels/prop_view.gd")
 const FLOOR_SHADER = preload("res://levels/floor.gdshader")
 const TrainLevel = preload("res://levels/train_level.gd")
+const RainyStreet = preload("res://levels/rainy_street.gd")
+const ParkedVehicle = preload("res://levels/parked_vehicle.gd")
 
 var theme_id := "street"
 var theme: Dictionary = THEMES.street
@@ -54,10 +56,15 @@ var size := Vector2(AW, AH)    # world size of the current theme (the train heis
 var spawn := Levels.SPAWN       # where the villain starts the wave
 var _floors := {}
 var _floor_sprite: Sprite2D
+var _floor_tiles: Array[Sprite2D] = []
+var water_texture: Texture2D
+var parking_seed := -1
+const FLOOR_TILE_WIDTH := 2048  # The long train exceeds common GPU texture width limits.
 
 func _ready() -> void:
 	_floor_sprite = Sprite2D.new(); _floor_sprite.centered = false; _floor_sprite.z_index = -10; add_child(_floor_sprite)
 	var m := ShaderMaterial.new(); m.shader = FLOOR_SHADER; _floor_sprite.material = m
+	_floor_tiles.append(_floor_sprite)
 
 static func theme_for_wave(wave: int, order: Array = ORDER) -> String:
 	return order[(maxi(1,wave)-1) % order.size()]
@@ -65,11 +72,26 @@ static func theme_for_wave(wave: int, order: Array = ORDER) -> String:
 func build(id: String) -> void:
 	theme_id = id if THEMES.has(id) else "street"; theme = THEMES[theme_id]
 	if _floor_sprite == null: _ready()
+	for tile in _floor_tiles:
+		if tile.material == null:
+			var material := ShaderMaterial.new(); material.shader = FLOOR_SHADER; tile.material = material
 	decor.clear()
 	size = TrainLevel.size() if theme_id == "train" else Vector2(AW, AH)
 	spawn = TrainLevel.spawn() if theme_id == "train" else Levels.SPAWN
-	if not _floors.has(theme_id): _floors[theme_id] = {"tex": ImageTexture.create_from_image(TrainLevel.make_floor() if theme_id == "train" else _make_floor(theme_id)), "decor": decor.duplicate()}
-	_floor_sprite.texture = _floors[theme_id].tex; decor = _floors[theme_id].decor.duplicate()
+	if not _floors.has(theme_id):
+		var image: Image = TrainLevel.make_floor() if theme_id == "train" else _make_floor(theme_id)
+		var textures: Array = []
+		for x in range(0,image.get_width(),FLOOR_TILE_WIDTH):
+			textures.append(ImageTexture.create_from_image(image.get_region(Rect2i(x,0,mini(FLOOR_TILE_WIDTH,image.get_width()-x),image.get_height()))))
+		_floors[theme_id] = {"tiles":textures,"decor":decor.duplicate()}
+	var tiles: Array = _floors[theme_id].tiles
+	while _floor_tiles.size() < tiles.size():
+		var tile := Sprite2D.new(); tile.centered = false; tile.z_index = -10
+		tile.material = _floor_sprite.material.duplicate(); add_child(tile); _floor_tiles.append(tile)
+	for i in _floor_tiles.size():
+		_floor_tiles[i].visible = i < tiles.size()
+		if i < tiles.size(): _floor_tiles[i].texture = tiles[i]; _floor_tiles[i].position = Vector2(i*FLOOR_TILE_WIDTH,0)
+	decor = _floors[theme_id].decor.duplicate()
 	walls.clear(); props.clear(); lamps.clear()
 	for n in prop_nodes: n.queue_free()
 	prop_nodes.clear()
@@ -95,10 +117,76 @@ func build(id: String) -> void:
 		_spawn_prop(p)
 	for p in (ROAD_LAMP_SLOTS if theme_id == "street" else LAMP_SLOTS):
 		lamps.append(p)
-		if theme.floor in ["street", "planks"]: _spawn_prop({"rect": Rect2(p - Vector2(1, 1), Vector2(2, 2)), "kind": "lamp_post", "color": Color.WHITE, "variant": prop_nodes.size()})
+		if theme.floor in ["street", "planks"]: _spawn_streetlight(p)
 	navigation.configure(walls, size)
 	_update_floor_material()
 	queue_redraw()
+
+func build_blank() -> void:
+	if _floor_sprite == null: _ready()
+	theme_id = "blank"
+	theme = {"name":"CHARACTER STUDIO","ambient":Color(0.82,0.82,0.82),
+		"wall":Color("#303944"),"trim":Color("#39434f"),"lamp":Color.WHITE,"floor":"blank","prop":""}
+	size = Vector2(AW,AH); spawn = Levels.SPAWN
+	walls.clear(); props.clear(); lamps.clear(); decor.clear()
+	for node in prop_nodes: node.queue_free()
+	prop_nodes.clear()
+	if not _floors.has("blank"):
+		var image := Image.create(AW,AH,false,Image.FORMAT_RGBA8)
+		image.fill(Color("#303944"))
+		# A faint reference grid makes translation and foot sliding visible.
+		for x in range(0,AW,64): image.fill_rect(Rect2i(x,0,1,AH),Color("#343e49"))
+		for y in range(0,AH,64): image.fill_rect(Rect2i(0,y,AW,1),Color("#343e49"))
+		_floors.blank = ImageTexture.create_from_image(image)
+	for i in _floor_tiles.size(): _floor_tiles[i].visible = i == 0
+	_floor_sprite.texture = _floors.blank; _floor_sprite.position = Vector2.ZERO; _floor_sprite.material = null
+	# One street light to walk around, so his normal-mapped shading can be judged.
+	theme.lamp = Color("#ffd9a0")
+	var post := spawn+Vector2(120,-10)
+	lamps.append(post)
+	_spawn_streetlight(post,STUDIO_LAMP_SCALE)
+	navigation.configure(walls,size); queue_redraw()
+
+func build_rainy_street() -> void:
+	if _floor_sprite == null: _ready()
+	theme_id = "rainy_street"
+	theme = {"name":"RAINY STREETS","ambient":STUDIO_TIMES[0],"wall":Color("#303944"),
+		"trim":Color("#a39a71"),"lamp":Color("#ffd9a0"),"floor":"street","prop":""}
+	size = Vector2(RainyStreet.SIZE); spawn = RainyStreet.SPAWN
+	if water_texture==null: water_texture=ImageTexture.create_from_image(RainyStreet.water_image())
+	walls.clear(); props.clear(); lamps.clear(); decor.clear()
+	for node in prop_nodes: node.queue_free()
+	prop_nodes.clear()
+	if not _floors.has(theme_id):
+		var image := RainyStreet.make_floor(); var textures: Array = []
+		for x in range(0,image.get_width(),FLOOR_TILE_WIDTH):
+			textures.append(ImageTexture.create_from_image(image.get_region(Rect2i(x,0,mini(FLOOR_TILE_WIDTH,image.get_width()-x),image.get_height()))))
+		_floors[theme_id] = textures
+	var textures: Array = _floors[theme_id]
+	while _floor_tiles.size()<textures.size():
+		var tile := Sprite2D.new(); tile.centered = false; tile.z_index = -10; add_child(tile); _floor_tiles.append(tile)
+	for i in _floor_tiles.size():
+		var tile: Sprite2D = _floor_tiles[i]; tile.visible = i<textures.size()
+		if not tile.visible: continue
+		tile.texture = textures[i]; tile.position = Vector2(i*FLOOR_TILE_WIDTH,0)
+		var material := ShaderMaterial.new(); material.shader = FLOOR_SHADER; tile.material = material
+	lamps = RainyStreet.lamp_positions()
+	for post in lamps:
+		_spawn_streetlight(post,STUDIO_LAMP_SCALE)
+	if parking_seed<0: parking_seed=randi()
+	for parking in RainyStreet.parking_layout(parking_seed):
+		var data: Dictionary=parking.duplicate(true)
+		data.merge({"kind":"car","color":Color.WHITE,"police":data.vehicle_id=="police-sedan","h":ParkedVehicle.BODY_HEIGHT,
+			"hp":160.0,"max_hp":160.0,"material":"metal","flammable":true,"broken":false,
+			"marks":[],"burn_t":0.0,"burn_dps":0.0,"fuse":-1.0,"char":0.0,"flash":0.0,"wreck_t":0.0})
+		walls.append({"rect":data.rect,"open":false,"prop_index":props.size()}); props.append(data)
+		var vehicle:=ParkedVehicle.new(); vehicle.setup(data)
+		(prop_parent if prop_parent!=null else self).add_child(vehicle); prop_nodes.append(vehicle)
+	navigation.configure(walls,size); _update_floor_material(); queue_redraw()
+
+const STUDIO_LAMP_SCALE := 1.9   # in proportion to the 128px scientist
+const STUDIO_LAMP_BULB := Vector2(18,-63)*STUDIO_LAMP_SCALE
+const STUDIO_TIMES := [Color(0.45,0.49,0.61),Color(0.56,0.52,0.56),Color(0.82,0.82,0.82)]   # night, dusk, day
 
 func shatter_case(p: Dictionary) -> void:
 	break_prop(p)
@@ -114,24 +202,83 @@ func _spawn_prop(p: Dictionary) -> void:
 	var n := PropView.new(); n.setup(p, theme)
 	(prop_parent if prop_parent != null else self).add_child(n); prop_nodes.append(n)
 
+func _spawn_streetlight(post: Vector2, size_scale := 1.0) -> void:
+	_spawn_prop({"rect":Rect2(post-Vector2.ONE,Vector2(2,2)),"kind":"lamp_post","color":Color("#2a3038"),"h":64.0})
+	var node: Node2D=prop_nodes[-1]; node.position=post; node.scale=Vector2.ONE*size_scale
+	# Match the drawn metal foot (-5,-6 .. 5,0), rather than blocking the
+	# elevated bulb, arm or the whole visible height of the pole.
+	walls.append({"rect":Rect2(post+Vector2(-5,-6)*size_scale,Vector2(10,6)*size_scale),
+		"open":false,"kind":"lamp_post"})
+
 ## Floor shader: per-theme animation, bump from the albedo, prop shadows and wall occlusion.
 func _update_floor_material() -> void:
-	var m: ShaderMaterial = _floor_sprite.material
-	m.set_shader_parameter("theme_id", FLOOR_IDS.find(theme.floor))
-	m.set_shader_parameter("world_size", size)
-	var rects: Array = []; var hs: Array = []
-	for i in 8:
-		var r: Rect2 = props[i].rect if i < props.size() else Rect2(-999, -999, 1, 1)
-		rects.append(Vector4(r.position.x, r.position.y, r.end.x, r.end.y)); hs.append(props[i].h if i < props.size() else 0.0)
-	m.set_shader_parameter("prop_rects", rects); m.set_shader_parameter("prop_h", PackedFloat32Array(hs))
-	m.set_shader_parameter("prop_count", props.size())
-	m.set_shader_parameter("lamp_col", theme.lamp)
+	for tile in _floor_tiles:
+		if not tile.visible: continue
+		var m: ShaderMaterial = tile.material
+		m.set_shader_parameter("theme_id", FLOOR_IDS.find(theme.floor))
+		m.set_shader_parameter("world_size", size)
+		m.set_shader_parameter("floor_origin", tile.position)
+		m.set_shader_parameter("floor_size", tile.texture.get_size())
+		var nearby := props.filter(func(p): return p.rect.intersects(Rect2(tile.position,tile.texture.get_size()).grow(128)))
+		var rects: Array = []; var hs: Array = []
+		for i in 8:
+			var r: Rect2 = nearby[i].rect if i < nearby.size() else Rect2(-999,-999,1,1)
+			rects.append(Vector4(r.position.x,r.position.y,r.end.x,r.end.y)); hs.append(nearby[i].h if i < nearby.size() else 0.0)
+		m.set_shader_parameter("prop_rects",rects); m.set_shader_parameter("prop_h",PackedFloat32Array(hs))
+		m.set_shader_parameter("prop_count",mini(nearby.size(),8)); m.set_shader_parameter("lamp_col",theme.lamp)
+		m.set_shader_parameter("street_preview",theme_id=="rainy_street")
+		m.set_shader_parameter("use_water_map",theme_id=="rainy_street")
+		if theme_id=="rainy_street":
+			m.set_shader_parameter("water_map",water_texture); m.set_shader_parameter("water_world_size",size)
+		var positions := PackedVector2Array()
+		for i in 24: positions.append(lamps[i] if i<lamps.size() else Vector2(-9999,-9999))
+		m.set_shader_parameter("street_lamps",positions)
+		m.set_shader_parameter("street_lamp_count",mini(lamps.size(),24) if theme_id=="rainy_street" else 0)
 
 func _prop_color(rng: RandomNumberGenerator) -> Color:
 	match theme.prop:
 		"car": return [Color("#b83232"),Color("#2f5fb8"),Color("#d8c040"),Color("#e8e8e8"),Color("#3a8a4a")][rng.randi() % 5]
 		"container": return [Color("#b8452a"),Color("#2a6ab8"),Color("#3a8a5a"),Color("#c89a2a")][rng.randi() % 4]
 	return theme.trim
+
+## Beam and bolt reflections use the actual visual endpoints, never gameplay hits.
+## Updating shader uniforms cannot emit a shot or repeat its damage.
+func update_wet_reflections(beams: Array, projectiles: Array, clock: float, emitters: Array=[]) -> void:
+	if theme.floor != "street": return
+	var rays: Array[Vector4] = []; var colors := PackedVector4Array()
+	for beam in beams:
+		if rays.size()>=16: break
+		if float(beam.get("t",0.0))<=0.0: continue
+		rays.append(Vector4(beam.x1,beam.y1,beam.x2,beam.y2))
+		var color: Color = beam.col
+		colors.append(Vector4(color.r,color.g,color.b,clampf(float(beam.t)/maxf(float(beam.m),0.001),0.0,1.0)))
+	for shot in projectiles:
+		if rays.size()>=16: break
+		if shot.get("type","")!="bolt" or float(shot.get("life",0.0))<=0.0: continue
+		var head := Vector2(shot.x,shot.y)
+		var tail := head-Vector2(shot.vx,shot.vy).normalized()*28.0
+		rays.append(Vector4(tail.x,tail.y,head.x,head.y))
+		var color: Color = shot.get("color",Color("#ff4a4a"))
+		colors.append(Vector4(color.r,color.g,color.b,1.0))
+	var count := rays.size()
+	while rays.size()<16: rays.append(Vector4.ZERO); colors.append(Vector4.ZERO)
+	var glow_points:=PackedVector4Array(); var glow_colors:=PackedVector4Array()
+	for emitter in emitters.slice(0,8):
+		glow_points.append(Vector4(emitter.pos.x,emitter.pos.y,28.0,12.0))
+		var color: Color=emitter.col
+		glow_colors.append(Vector4(color.r,color.g,color.b,clampf(float(emitter.e)/1.5,0.0,1.0)))
+	var glow_count:=glow_points.size()
+	while glow_points.size()<8: glow_points.append(Vector4.ZERO); glow_colors.append(Vector4.ZERO)
+	for tile in _floor_tiles:
+		if not tile.visible or tile.material==null: continue
+		var material: ShaderMaterial = tile.material
+		material.set_shader_parameter("wet_rays",rays)
+		material.set_shader_parameter("wet_ray_colors",colors)
+		material.set_shader_parameter("wet_ray_count",count)
+		material.set_shader_parameter("preview_clock",clock)
+		material.set_shader_parameter("wet_glow_points",glow_points)
+		material.set_shader_parameter("wet_glow_colors",glow_colors)
+		material.set_shader_parameter("wet_glow_count",glow_count)
 
 # ---------------- floors (baked once per theme) ----------------
 static func _blend(g: Image, r: Rect2i, c: Color) -> void:

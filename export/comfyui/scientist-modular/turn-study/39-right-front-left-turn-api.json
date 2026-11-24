@@ -1,0 +1,376 @@
+{
+  "2568": {
+    "class_type": "DaSiWa_EnhancedVideoCombine",
+    "inputs": {
+      "frame_rate": 24,
+      "codec": "Auto",
+      "container": "Auto",
+      "bit_depth": "Auto",
+      "quality": 25,
+      "log_level": "Standard",
+      "pingpong": false,
+      "save_metadata": true,
+      "filename_prefix": "video/mad-villain-sprite/batch/39-right-front-left-turn/%date:hhmmss%",
+      "save_output": true,
+      "pass_frames": false,
+      "crop_to_audio": false,
+      "audio_codec": "Auto",
+      "audio_bitrate": "192k",
+      "save_first_frame": false,
+      "save_last_frame": false,
+      "free_memory_if_needed": false,
+      "images": [
+        "1512:2671",
+        0
+      ],
+      "audio": [
+        "1512:2671",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "DaSiWa Enhanced Video Combine"
+    }
+  },
+  "2678": {
+    "class_type": "DaSiWa_LTX2LoraLoader",
+    "inputs": {
+      "stack_data": "[{\"on\":true,\"lora\":\"H3_Combat_V2.safetensors\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"Motion_Repair_V2.safetensors\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1}]",
+      "model_type": "Basic",
+      "use_cache": false,
+      "model": [
+        "2730",
+        5
+      ],
+      "clip": [
+        "1512:2587",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Advanced LoRA Loader"
+    }
+  },
+  "2730": {
+    "class_type": "MiniMaxH3Director",
+    "inputs": {
+      "mode": "REF2VA",
+      "prompt": "subject_definitions:\n<Subject 1> is the mad scientist in <Picture 1>.\n<Picture 1> defines his appearance, proportions, costume and pixel-art style.\n<Picture 2> defines only the rigid matte green calibration pistol.\n\nsummary:\n[reference generation] A slow, continuous, in-place body-turn reference: three-quarter screen-right, front-facing, then three-quarter screen-left. Show the intermediate front view clearly for a modular sprite turn transition.\n\nretention_analysis:\n<Picture 1> (character appearance): fully_preserved - retain his bald crown, wild white hair, thick eyebrows, black glasses, grin, burgundy shirt, white laboratory coat, dark trousers, shoes, palette and pixel shading.\n<Picture 2> (held object): fully_preserved - same rigid matte green proxy, size, shape and hand grip throughout.\n\ndetailed_description:\nOne scientist, full body visible, turning slowly in place around his own vertical body axis. The CHARACTER turns; the camera does not move. Preserve the same scientist through every intermediate view, including the frontal face. This is a deliberate slow reference study from which only a few turn frames will be selected for a short game transition.\n\n0.00-0.75 seconds: hold the original three-quarter SCREEN-RIGHT-facing stance.\n0.75-2.00 seconds: smoothly turn head, shoulders and torso toward the viewer. Show genuine intermediate views with changing shoulder depth, not a mirrored sprite switch or a dissolving image.\n2.00-3.00 seconds: hold a clear FRONT-FACING view. Both shoulder sockets, both elbows and both hands must be readable and anatomically attached.\n3.00-4.25 seconds: continue the same turn smoothly into the matching three-quarter SCREEN-LEFT-facing stance.\n4.25-5.00 seconds: hold the finished left-facing stance. Do not turn away from the viewer, complete a full spin, or return to the starting pose.\n\nKeep the pelvis in the same place and the feet at the same ground position. Small planted heel/toe pivots are allowed; no walking, running, jumping, sliding or travelling. Keep body height, limb lengths, silhouette scale and expression consistent.\n\nKeep both arms low in a relaxed ready position, slightly separated from the sides of the torso so the elbows, cuffs and hands remain visible. The same anatomical hand holds the green proxy for the entire shot. Start with it in the foreground near hand shown in the initial right-facing view; retain that same hand as its depth changes during the turn. The other hand stays empty. Do not exchange the prop between hands. Hands and proxy follow the body naturally during THIS reference study; do not independently aim, wave, point, recoil or make a dramatic gesture. Keep the proxy low and clear of the face and chest so the head and torso can be extracted as separate layers.\n\nCorrect depth through the turn: far arm behind the torso, near arm in front where appropriate. As the body turns through the front view, allow the shoulder depths and occlusion to change naturally. Keep hands attached to forearms and the held handle attached to the same palm. No extra arms, hands, fingers or objects.\n\nLocked orthographic-style camera, identical position, framing and zoom throughout. No camera orbit, pan, tracking, roll, zoom, cuts, crossfades or automatic reframing. Full character centered at about 70 percent of square canvas height, ground line at 90 percent from the top. Leave margin around hair, elbows, shoes and the prop; nothing clips any edge. Flat uniform dark blue-gray background. Crisp pixel-art frames with stable colors and shading. No motion blur, frame blending, ghost trails, crosshatching, added textures, costume changes, firing, flashes, particles, smoke, dialogue, text or logos.\n\noverall_soundscape:\nSilent. No speech, sound effects or music.\n\nnon_diegetic_music:\nN/A",
+      "width": 768,
+      "height": 768,
+      "duration": 5.0,
+      "ref_image_size": "match",
+      "timeline_data": "{\"version\":1,\"items\":[{\"id\":\"batch-subject\",\"type\":\"image\",\"value\":\"MadVillain_Modular_Queue/63fb2379f6f624d8_scientist.png\",\"enabled\":true,\"slot\":0,\"start\":0,\"order\":0,\"duration\":1,\"forge_label\":\"character-1\",\"forge_role\":\"subject\",\"prompt\":\"<Subject 1> is the mad scientist in <Picture 1>.\\n<Picture 1> defines his appearance, proportions, costume and pixel-art style.\\n<Picture 2> defines only the rigid matte green calibration pistol.\"},{\"id\":\"batch-item\",\"type\":\"image\",\"value\":\"MadVillain_Modular_Queue/9b875825009d81a2_proxy-grip.png\",\"enabled\":true,\"slot\":1,\"start\":1,\"order\":1,\"duration\":1,\"forge_label\":\"custom\",\"forge_role\":\"custom\",\"prompt\":\"<Subject 1> is the mad scientist in <Picture 1>.\\n<Picture 1> defines his appearance, proportions, costume and pixel-art style.\\n<Picture 2> defines only the rigid matte green calibration pistol.\"}],\"prompt_blocks\":[],\"builder_state\":{\"version\":2,\"mode\":\"REF2VA\",\"duration\":5.0,\"prompt_mode\":\"simple\",\"simple_prompt\":\"subject_definitions:\\n<Subject 1> is the mad scientist in <Picture 1>.\\n<Picture 1> defines his appearance, proportions, costume and pixel-art style.\\n<Picture 2> defines only the rigid matte green calibration pistol.\\n\\nsummary:\\n[reference generation] A slow, continuous, in-place body-turn reference: three-quarter screen-right, front-facing, then three-quarter screen-left. Show the intermediate front view clearly for a modular sprite turn transition.\\n\\nretention_analysis:\\n<Picture 1> (character appearance): fully_preserved - retain his bald crown, wild white hair, thick eyebrows, black glasses, grin, burgundy shirt, white laboratory coat, dark trousers, shoes, palette and pixel shading.\\n<Picture 2> (held object): fully_preserved - same rigid matte green proxy, size, shape and hand grip throughout.\\n\\ndetailed_description:\\nOne scientist, full body visible, turning slowly in place around his own vertical body axis. The CHARACTER turns; the camera does not move. Preserve the same scientist through every intermediate view, including the frontal face. This is a deliberate slow reference study from which only a few turn frames will be selected for a short game transition.\\n\\n0.00-0.75 seconds: hold the original three-quarter SCREEN-RIGHT-facing stance.\\n0.75-2.00 seconds: smoothly turn head, shoulders and torso toward the viewer. Show genuine intermediate views with changing shoulder depth, not a mirrored sprite switch or a dissolving image.\\n2.00-3.00 seconds: hold a clear FRONT-FACING view. Both shoulder sockets, both elbows and both hands must be readable and anatomically attached.\\n3.00-4.25 seconds: continue the same turn smoothly into the matching three-quarter SCREEN-LEFT-facing stance.\\n4.25-5.00 seconds: hold the finished left-facing stance. Do not turn away from the viewer, complete a full spin, or return to the starting pose.\\n\\nKeep the pelvis in the same place and the feet at the same ground position. Small planted heel/toe pivots are allowed; no walking, running, jumping, sliding or travelling. Keep body height, limb lengths, silhouette scale and expression consistent.\\n\\nKeep both arms low in a relaxed ready position, slightly separated from the sides of the torso so the elbows, cuffs and hands remain visible. The same anatomical hand holds the green proxy for the entire shot. Start with it in the foreground near hand shown in the initial right-facing view; retain that same hand as its depth changes during the turn. The other hand stays empty. Do not exchange the prop between hands. Hands and proxy follow the body naturally during THIS reference study; do not independently aim, wave, point, recoil or make a dramatic gesture. Keep the proxy low and clear of the face and chest so the head and torso can be extracted as separate layers.\\n\\nCorrect depth through the turn: far arm behind the torso, near arm in front where appropriate. As the body turns through the front view, allow the shoulder depths and occlusion to change naturally. Keep hands attached to forearms and the held handle attached to the same palm. No extra arms, hands, fingers or objects.\\n\\nLocked orthographic-style camera, identical position, framing and zoom throughout. No camera orbit, pan, tracking, roll, zoom, cuts, crossfades or automatic reframing. Full character centered at about 70 percent of square canvas height, ground line at 90 percent from the top. Leave margin around hair, elbows, shoes and the prop; nothing clips any edge. Flat uniform dark blue-gray background. Crisp pixel-art frames with stable colors and shading. No motion blur, frame blending, ghost trails, crosshatching, added textures, costume changes, firing, flashes, particles, smoke, dialogue, text or logos.\\n\\noverall_soundscape:\\nSilent. No speech, sound effects or music.\\n\\nnon_diegetic_music:\\nN/A\",\"ref\":{\"subject_definitions\":\"<Subject 1> is the mad scientist in <Picture 1>.\\n<Picture 1> defines his appearance, proportions, costume and pixel-art style.\\n<Picture 2> defines only the rigid matte green calibration pistol.\",\"summary\":\"[reference generation] A slow, continuous, in-place body-turn reference: three-quarter screen-right, front-facing, then three-quarter screen-left. Show the intermediate front view clearly for a modular sprite turn transition.\",\"retention_analysis\":\"<Picture 1> (character appearance): fully_preserved - retain his bald crown, wild white hair, thick eyebrows, black glasses, grin, burgundy shirt, white laboratory coat, dark trousers, shoes, palette and pixel shading.\\n<Picture 2> (held object): fully_preserved - same rigid matte green proxy, size, shape and hand grip throughout.\",\"detailed_description\":\"One scientist, full body visible, turning slowly in place around his own vertical body axis. The CHARACTER turns; the camera does not move. Preserve the same scientist through every intermediate view, including the frontal face. This is a deliberate slow reference study from which only a few turn frames will be selected for a short game transition.\\n\\n0.00-0.75 seconds: hold the original three-quarter SCREEN-RIGHT-facing stance.\\n0.75-2.00 seconds: smoothly turn head, shoulders and torso toward the viewer. Show genuine intermediate views with changing shoulder depth, not a mirrored sprite switch or a dissolving image.\\n2.00-3.00 seconds: hold a clear FRONT-FACING view. Both shoulder sockets, both elbows and both hands must be readable and anatomically attached.\\n3.00-4.25 seconds: continue the same turn smoothly into the matching three-quarter SCREEN-LEFT-facing stance.\\n4.25-5.00 seconds: hold the finished left-facing stance. Do not turn away from the viewer, complete a full spin, or return to the starting pose.\\n\\nKeep the pelvis in the same place and the feet at the same ground position. Small planted heel/toe pivots are allowed; no walking, running, jumping, sliding or travelling. Keep body height, limb lengths, silhouette scale and expression consistent.\\n\\nKeep both arms low in a relaxed ready position, slightly separated from the sides of the torso so the elbows, cuffs and hands remain visible. The same anatomical hand holds the green proxy for the entire shot. Start with it in the foreground near hand shown in the initial right-facing view; retain that same hand as its depth changes during the turn. The other hand stays empty. Do not exchange the prop between hands. Hands and proxy follow the body naturally during THIS reference study; do not independently aim, wave, point, recoil or make a dramatic gesture. Keep the proxy low and clear of the face and chest so the head and torso can be extracted as separate layers.\\n\\nCorrect depth through the turn: far arm behind the torso, near arm in front where appropriate. As the body turns through the front view, allow the shoulder depths and occlusion to change naturally. Keep hands attached to forearms and the held handle attached to the same palm. No extra arms, hands, fingers or objects.\\n\\nLocked orthographic-style camera, identical position, framing and zoom throughout. No camera orbit, pan, tracking, roll, zoom, cuts, crossfades or automatic reframing. Full character centered at about 70 percent of square canvas height, ground line at 90 percent from the top. Leave margin around hair, elbows, shoes and the prop; nothing clips any edge. Flat uniform dark blue-gray background. Crisp pixel-art frames with stable colors and shading. No motion blur, frame blending, ghost trails, crosshatching, added textures, costume changes, firing, flashes, particles, smoke, dialogue, text or logos.\",\"overall_soundscape\":\"Silent. No speech, sound effects or music.\",\"non_diegetic_music\":\"N/A\",\"soundscape\":\"Silent. No speech, sound effects or music.\",\"music\":\"N/A\"}},\"resolved_prompt\":\"subject_definitions:\\n<Subject 1> is the mad scientist in <Picture 1>.\\n<Picture 1> defines his appearance, proportions, costume and pixel-art style.\\n<Picture 2> defines only the rigid matte green calibration pistol.\\n\\nsummary:\\n[reference generation] A slow, continuous, in-place body-turn reference: three-quarter screen-right, front-facing, then three-quarter screen-left. Show the intermediate front view clearly for a modular sprite turn transition.\\n\\nretention_analysis:\\n<Picture 1> (character appearance): fully_preserved - retain his bald crown, wild white hair, thick eyebrows, black glasses, grin, burgundy shirt, white laboratory coat, dark trousers, shoes, palette and pixel shading.\\n<Picture 2> (held object): fully_preserved - same rigid matte green proxy, size, shape and hand grip throughout.\\n\\ndetailed_description:\\nOne scientist, full body visible, turning slowly in place around his own vertical body axis. The CHARACTER turns; the camera does not move. Preserve the same scientist through every intermediate view, including the frontal face. This is a deliberate slow reference study from which only a few turn frames will be selected for a short game transition.\\n\\n0.00-0.75 seconds: hold the original three-quarter SCREEN-RIGHT-facing stance.\\n0.75-2.00 seconds: smoothly turn head, shoulders and torso toward the viewer. Show genuine intermediate views with changing shoulder depth, not a mirrored sprite switch or a dissolving image.\\n2.00-3.00 seconds: hold a clear FRONT-FACING view. Both shoulder sockets, both elbows and both hands must be readable and anatomically attached.\\n3.00-4.25 seconds: continue the same turn smoothly into the matching three-quarter SCREEN-LEFT-facing stance.\\n4.25-5.00 seconds: hold the finished left-facing stance. Do not turn away from the viewer, complete a full spin, or return to the starting pose.\\n\\nKeep the pelvis in the same place and the feet at the same ground position. Small planted heel/toe pivots are allowed; no walking, running, jumping, sliding or travelling. Keep body height, limb lengths, silhouette scale and expression consistent.\\n\\nKeep both arms low in a relaxed ready position, slightly separated from the sides of the torso so the elbows, cuffs and hands remain visible. The same anatomical hand holds the green proxy for the entire shot. Start with it in the foreground near hand shown in the initial right-facing view; retain that same hand as its depth changes during the turn. The other hand stays empty. Do not exchange the prop between hands. Hands and proxy follow the body naturally during THIS reference study; do not independently aim, wave, point, recoil or make a dramatic gesture. Keep the proxy low and clear of the face and chest so the head and torso can be extracted as separate layers.\\n\\nCorrect depth through the turn: far arm behind the torso, near arm in front where appropriate. As the body turns through the front view, allow the shoulder depths and occlusion to change naturally. Keep hands attached to forearms and the held handle attached to the same palm. No extra arms, hands, fingers or objects.\\n\\nLocked orthographic-style camera, identical position, framing and zoom throughout. No camera orbit, pan, tracking, roll, zoom, cuts, crossfades or automatic reframing. Full character centered at about 70 percent of square canvas height, ground line at 90 percent from the top. Leave margin around hair, elbows, shoes and the prop; nothing clips any edge. Flat uniform dark blue-gray background. Crisp pixel-art frames with stable colors and shading. No motion blur, frame blending, ghost trails, crosshatching, added textures, costume changes, firing, flashes, particles, smoke, dialogue, text or logos.\\n\\noverall_soundscape:\\nSilent. No speech, sound effects or music.\\n\\nnon_diegetic_music:\\nN/A\",\"resolution\":{\"aspect\":\"1:1\",\"resolution\":\"custom\",\"custom_mode\":\"fixed\",\"custom_width\":768,\"custom_height\":768,\"input_scaling\":\"Auto\"},\"refmods\":[]}",
+      "builder_state": "{\"version\":2,\"mode\":\"REF2VA\",\"duration\":5.0,\"prompt_mode\":\"simple\",\"simple_prompt\":\"subject_definitions:\\n<Subject 1> is the mad scientist in <Picture 1>.\\n<Picture 1> defines his appearance, proportions, costume and pixel-art style.\\n<Picture 2> defines only the rigid matte green calibration pistol.\\n\\nsummary:\\n[reference generation] A slow, continuous, in-place body-turn reference: three-quarter screen-right, front-facing, then three-quarter screen-left. Show the intermediate front view clearly for a modular sprite turn transition.\\n\\nretention_analysis:\\n<Picture 1> (character appearance): fully_preserved - retain his bald crown, wild white hair, thick eyebrows, black glasses, grin, burgundy shirt, white laboratory coat, dark trousers, shoes, palette and pixel shading.\\n<Picture 2> (held object): fully_preserved - same rigid matte green proxy, size, shape and hand grip throughout.\\n\\ndetailed_description:\\nOne scientist, full body visible, turning slowly in place around his own vertical body axis. The CHARACTER turns; the camera does not move. Preserve the same scientist through every intermediate view, including the frontal face. This is a deliberate slow reference study from which only a few turn frames will be selected for a short game transition.\\n\\n0.00-0.75 seconds: hold the original three-quarter SCREEN-RIGHT-facing stance.\\n0.75-2.00 seconds: smoothly turn head, shoulders and torso toward the viewer. Show genuine intermediate views with changing shoulder depth, not a mirrored sprite switch or a dissolving image.\\n2.00-3.00 seconds: hold a clear FRONT-FACING view. Both shoulder sockets, both elbows and both hands must be readable and anatomically attached.\\n3.00-4.25 seconds: continue the same turn smoothly into the matching three-quarter SCREEN-LEFT-facing stance.\\n4.25-5.00 seconds: hold the finished left-facing stance. Do not turn away from the viewer, complete a full spin, or return to the starting pose.\\n\\nKeep the pelvis in the same place and the feet at the same ground position. Small planted heel/toe pivots are allowed; no walking, running, jumping, sliding or travelling. Keep body height, limb lengths, silhouette scale and expression consistent.\\n\\nKeep both arms low in a relaxed ready position, slightly separated from the sides of the torso so the elbows, cuffs and hands remain visible. The same anatomical hand holds the green proxy for the entire shot. Start with it in the foreground near hand shown in the initial right-facing view; retain that same hand as its depth changes during the turn. The other hand stays empty. Do not exchange the prop between hands. Hands and proxy follow the body naturally during THIS reference study; do not independently aim, wave, point, recoil or make a dramatic gesture. Keep the proxy low and clear of the face and chest so the head and torso can be extracted as separate layers.\\n\\nCorrect depth through the turn: far arm behind the torso, near arm in front where appropriate. As the body turns through the front view, allow the shoulder depths and occlusion to change naturally. Keep hands attached to forearms and the held handle attached to the same palm. No extra arms, hands, fingers or objects.\\n\\nLocked orthographic-style camera, identical position, framing and zoom throughout. No camera orbit, pan, tracking, roll, zoom, cuts, crossfades or automatic reframing. Full character centered at about 70 percent of square canvas height, ground line at 90 percent from the top. Leave margin around hair, elbows, shoes and the prop; nothing clips any edge. Flat uniform dark blue-gray background. Crisp pixel-art frames with stable colors and shading. No motion blur, frame blending, ghost trails, crosshatching, added textures, costume changes, firing, flashes, particles, smoke, dialogue, text or logos.\\n\\noverall_soundscape:\\nSilent. No speech, sound effects or music.\\n\\nnon_diegetic_music:\\nN/A\",\"ref\":{\"subject_definitions\":\"<Subject 1> is the mad scientist in <Picture 1>.\\n<Picture 1> defines his appearance, proportions, costume and pixel-art style.\\n<Picture 2> defines only the rigid matte green calibration pistol.\",\"summary\":\"[reference generation] A slow, continuous, in-place body-turn reference: three-quarter screen-right, front-facing, then three-quarter screen-left. Show the intermediate front view clearly for a modular sprite turn transition.\",\"retention_analysis\":\"<Picture 1> (character appearance): fully_preserved - retain his bald crown, wild white hair, thick eyebrows, black glasses, grin, burgundy shirt, white laboratory coat, dark trousers, shoes, palette and pixel shading.\\n<Picture 2> (held object): fully_preserved - same rigid matte green proxy, size, shape and hand grip throughout.\",\"detailed_description\":\"One scientist, full body visible, turning slowly in place around his own vertical body axis. The CHARACTER turns; the camera does not move. Preserve the same scientist through every intermediate view, including the frontal face. This is a deliberate slow reference study from which only a few turn frames will be selected for a short game transition.\\n\\n0.00-0.75 seconds: hold the original three-quarter SCREEN-RIGHT-facing stance.\\n0.75-2.00 seconds: smoothly turn head, shoulders and torso toward the viewer. Show genuine intermediate views with changing shoulder depth, not a mirrored sprite switch or a dissolving image.\\n2.00-3.00 seconds: hold a clear FRONT-FACING view. Both shoulder sockets, both elbows and both hands must be readable and anatomically attached.\\n3.00-4.25 seconds: continue the same turn smoothly into the matching three-quarter SCREEN-LEFT-facing stance.\\n4.25-5.00 seconds: hold the finished left-facing stance. Do not turn away from the viewer, complete a full spin, or return to the starting pose.\\n\\nKeep the pelvis in the same place and the feet at the same ground position. Small planted heel/toe pivots are allowed; no walking, running, jumping, sliding or travelling. Keep body height, limb lengths, silhouette scale and expression consistent.\\n\\nKeep both arms low in a relaxed ready position, slightly separated from the sides of the torso so the elbows, cuffs and hands remain visible. The same anatomical hand holds the green proxy for the entire shot. Start with it in the foreground near hand shown in the initial right-facing view; retain that same hand as its depth changes during the turn. The other hand stays empty. Do not exchange the prop between hands. Hands and proxy follow the body naturally during THIS reference study; do not independently aim, wave, point, recoil or make a dramatic gesture. Keep the proxy low and clear of the face and chest so the head and torso can be extracted as separate layers.\\n\\nCorrect depth through the turn: far arm behind the torso, near arm in front where appropriate. As the body turns through the front view, allow the shoulder depths and occlusion to change naturally. Keep hands attached to forearms and the held handle attached to the same palm. No extra arms, hands, fingers or objects.\\n\\nLocked orthographic-style camera, identical position, framing and zoom throughout. No camera orbit, pan, tracking, roll, zoom, cuts, crossfades or automatic reframing. Full character centered at about 70 percent of square canvas height, ground line at 90 percent from the top. Leave margin around hair, elbows, shoes and the prop; nothing clips any edge. Flat uniform dark blue-gray background. Crisp pixel-art frames with stable colors and shading. No motion blur, frame blending, ghost trails, crosshatching, added textures, costume changes, firing, flashes, particles, smoke, dialogue, text or logos.\",\"overall_soundscape\":\"Silent. No speech, sound effects or music.\",\"non_diegetic_music\":\"N/A\",\"soundscape\":\"Silent. No speech, sound effects or music.\",\"music\":\"N/A\"}}",
+      "frame_rate": 24,
+      "fl2va_model": [
+        "1512:1536",
+        0
+      ],
+      "ref2va_model": [
+        "1512:2663",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Scientist: Subject + Item + Motion / 01-near-shoulder"
+    }
+  },
+  "2737": {
+    "class_type": "ModelPreviewOverrideKJ",
+    "inputs": {
+      "max_resolution": 512,
+      "jpeg_quality": 80,
+      "suppress_default_preview": false,
+      "preview_frames": 120,
+      "preview_fps": 8,
+      "tiny_vae": "taeh3.safetensors",
+      "model": [
+        "1512:2692",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Preview Override"
+    }
+  },
+  "2739": {
+    "class_type": "DaSiWa_SeedControl",
+    "inputs": {
+      "seed_value": 15189716404291402000,
+      "seed_control_state": "{\"mode\": \"fixed\", \"last_seed\": \"15189716404291402000\", \"recent\": [\"15189716404291402000\"]}"
+    },
+    "_meta": {
+      "title": "Seed Control"
+    }
+  },
+  "2797": {
+    "class_type": "DaSiWaH3ContinuityPublish",
+    "inputs": {
+      "filename": [
+        "2568",
+        1
+      ],
+      "ticket": [
+        "1512:2796",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "MiniMaxH3 Continuity • Publish Export"
+    }
+  },
+  "1512:2586": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "dasiwa_minimax_h3_ref2va_v5xs_pruned_graviton_int8_row-wise_convrot_runtime_mixed.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "1512:2587": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_heretic_minimax_h3_nvfp4.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "1512:2584": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "_meta": {
+      "title": "Load VAE Video"
+    }
+  },
+  "1512:2720": {
+    "class_type": "ModelAttentionBackend",
+    "inputs": {
+      "attention": "comfy kitchen attention",
+      "model": [
+        "1512:2588",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Attention Backend",
+      "cnr_id": "comfy-core"
+    }
+  },
+  "1512:2719": {
+    "class_type": "ModelAttentionBackend",
+    "inputs": {
+      "attention": "comfy kitchen attention",
+      "model": [
+        "1512:2586",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Attention Backend",
+      "cnr_id": "comfy-core"
+    }
+  },
+  "1512:1536": {
+    "class_type": "ModelPatchTorchSettings",
+    "inputs": {
+      "enable_fp16_accumulation": true,
+      "model": [
+        "1512:2719",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Patch Torch Settings",
+      "cnr_id": "comfyui-kjnodes",
+      "ver": "1.2.6"
+    }
+  },
+  "1512:2663": {
+    "class_type": "ModelPatchTorchSettings",
+    "inputs": {
+      "enable_fp16_accumulation": true,
+      "model": [
+        "1512:2720",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Patch Torch Settings",
+      "cnr_id": "comfyui-kjnodes",
+      "ver": "1.2.6"
+    }
+  },
+  "1512:2671": {
+    "class_type": "DaSiWaH3ContinuitySegmentDecode",
+    "inputs": {
+      "latent": [
+        "1512:2796",
+        0
+      ],
+      "vae": [
+        "1512:2584",
+        0
+      ],
+      "audio_vae": [
+        "1512:2585",
+        0
+      ],
+      "context": [
+        "1512:2796",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "MiniMaxH3 Continuity • Segment Decode"
+    }
+  },
+  "1512:2588": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "dasiwa_minimax_h3_ref2va_v5xs_pruned_graviton_int8_row-wise_convrot_runtime_mixed.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "1512:2590": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "scheduler": "simple",
+      "steps": 16,
+      "denoise": 1.0,
+      "model": [
+        "2678",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "1512:2598": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "1512:2585": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "_meta": {
+      "title": "Load VAE Audio"
+    }
+  },
+  "1512:2592": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "2737",
+        0
+      ],
+      "conditioning": [
+        "1512:2701",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Basic Guider"
+    }
+  },
+  "1512:2692": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "shift_video": 10.0,
+      "shift_audio": 3.0,
+      "model": [
+        "2678",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "ModelSamplingMiniMaxH3"
+    }
+  },
+  "1512:2701": {
+    "class_type": "MiniMaxH3DirectorGuide",
+    "inputs": {
+      "clip": [
+        "2678",
+        1
+      ],
+      "vae": [
+        "1512:2584",
+        0
+      ],
+      "guide": [
+        "2730",
+        0
+      ],
+      "audio_vae": [
+        "1512:2585",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "MiniMaxH3 Director Guide"
+    }
+  },
+  "1512:2591": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "2739",
+        1
+      ],
+      "guider": [
+        "1512:2592",
+        0
+      ],
+      "sampler": [
+        "1512:2598",
+        0
+      ],
+      "sigmas": [
+        "1512:2590",
+        0
+      ],
+      "latent_image": [
+        "1512:2701",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "1512:2796": {
+    "class_type": "DaSiWaH3ContinuitySegmentPrepare",
+    "inputs": {
+      "sampled": [
+        "1512:2591",
+        0
+      ],
+      "context": [
+        "1512:2701",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "MiniMaxH3 Continuity • Segment Prepare"
+    }
+  }
+}

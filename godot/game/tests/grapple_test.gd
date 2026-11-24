@@ -30,7 +30,7 @@ func _run() -> void:
 	_check(run.has_hook() and run.S.guns[0] == "hook", "the main gun fires the grapple")
 	_check(not run.item_available(run.ITEM.split), "Split Shot isn't offered with the grapple (one hook)")
 	_check(run.AMMO[run.off_ammo()].id != "hook", "the rear gun never gets grapple ammo")
-	run.build.ammo = hook - 1; _check(run.AMMO[run.off_ammo()].id == ("laser" if hook == run.AMMO.size() - 1 else run.AMMO[hook + 1].id), "the rear gun skips the grapple")
+	run.build.ammo = hook - 1; _check(run.AMMO[run.off_ammo()].id == "laser", "the rear gun skips the grapple and melee primaries")
 	run.build.ammo = hook; run.recompute()
 
 	scene = load("res://game/main.tscn").instantiate(); root.add_child(scene); current_scene = scene

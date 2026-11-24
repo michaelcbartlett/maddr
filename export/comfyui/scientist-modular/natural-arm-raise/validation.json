@@ -1,0 +1,8 @@
+{
+  "jobs": 2,
+  "seconds_each": 5,
+  "fps": 24,
+  "steps": 16,
+  "guide_frames": 240,
+  "queued": false
+}

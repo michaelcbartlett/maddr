@@ -1,0 +1,7 @@
+{
+  "shots": 36,
+  "automated_tests": 14,
+  "native_director_loading_tests": 36,
+  "live_server_schema_check": "passed on 127.0.0.1:8188",
+  "generation_jobs_submitted": 0
+}

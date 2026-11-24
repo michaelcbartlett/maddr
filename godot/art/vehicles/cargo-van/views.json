@@ -1,0 +1,82 @@
+{
+  "id": "cargo-van",
+  "name": "1980s Cargo Van",
+  "sheet": "res://art/vehicles/cargo-van/cargo-van-8way-v1.png",
+  "world_length": 255,
+  "world_width": 112,
+  "police": false,
+  "frames": {
+    "front_left": {
+      "region": [
+        64,
+        55,
+        336,
+        331
+      ],
+      "opaque_pixels": 66535
+    },
+    "front": {
+      "region": [
+        546,
+        40,
+        226,
+        346
+      ],
+      "opaque_pixels": 64324
+    },
+    "front_right": {
+      "region": [
+        929,
+        55,
+        332,
+        331
+      ],
+      "opaque_pixels": 66422
+    },
+    "left": {
+      "region": [
+        1343,
+        120,
+        376,
+        228
+      ],
+      "opaque_pixels": 70592
+    },
+    "rear_left": {
+      "region": [
+        70,
+        493,
+        330,
+        318
+      ],
+      "opaque_pixels": 65119
+    },
+    "rear": {
+      "region": [
+        544,
+        485,
+        227,
+        326
+      ],
+      "opaque_pixels": 62780
+    },
+    "rear_right": {
+      "region": [
+        918,
+        493,
+        325,
+        318
+      ],
+      "opaque_pixels": 65069
+    },
+    "right": {
+      "region": [
+        1346,
+        544,
+        382,
+        231
+      ],
+      "opaque_pixels": 72550
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "workflow_graphs_validated": 36,
+  "installed_director_reference_load_tests": 4,
+  "motion_guides": 3,
+  "frames_per_guide": 120,
+  "fps": 24,
+  "model_inference_run": false,
+  "note": "Graph/reference preparation verified; generation quality and GPU model execution remain untested."
+}

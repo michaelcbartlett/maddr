@@ -1,7 +1,8 @@
 extends Node
 ## Autoload "Controls": input map (registered at startup), aim source, rumble, controller status.
 ## Controller-first. Left stick moves, ONLY the right stick aims, RT fires the main gun, LT the off-hand gun,
-## X / LB / RB detonate mines, Start pauses, A selects, Y rerolls. There is no autofire.
+## B dashes (hold to sprint), X uses a consumable, Y uses an equipped ability, LB / RB detonate mines,
+## Start pauses, A selects, Y rerolls in the shop. There is no autofire.
 ## Mouse/keyboard fallback: WASD, mouse aim, left/right click, Space, Esc.
 ## Godot maps every pad to the SDL "standard" layout (so an 8BitDo in DirectInput mode is handled by SDL's
 ## controller database). joy_status() reports whether the connected pad is recognised.
@@ -52,12 +53,20 @@ func _setup_actions() -> void:
 	_add("aim_down", [_ja(JOY_AXIS_RIGHT_Y, 1)], 0.0)
 	_add("fire", [_ja(JOY_AXIS_TRIGGER_RIGHT, 1), _mb(MOUSE_BUTTON_LEFT)], DZ_TRIG)
 	_add("fire_off", [_ja(JOY_AXIS_TRIGGER_LEFT, 1), _mb(MOUSE_BUTTON_RIGHT)], DZ_TRIG)
-	_add("detonate", [_jb(JOY_BUTTON_X), _jb(JOY_BUTTON_LEFT_SHOULDER), _jb(JOY_BUTTON_RIGHT_SHOULDER), _key(KEY_SPACE)])
-	_add("boss_action", [_jb(JOY_BUTTON_B), _key(KEY_SHIFT)])
+	_add("detonate", [_jb(JOY_BUTTON_LEFT_SHOULDER), _jb(JOY_BUTTON_RIGHT_SHOULDER), _key(KEY_SPACE)])
+	_add("dash", [_jb(JOY_BUTTON_B), _key(KEY_SHIFT)])
+	_add("boss_action", [_jb(JOY_BUTTON_Y), _key(KEY_F)])
 	_add("pause", [_jb(JOY_BUTTON_START), _key(KEY_ESCAPE), _key(KEY_P)])
 	_add("select", [_jb(JOY_BUTTON_A), _key(KEY_ENTER)])
+	_add("menu_back", [_jb(JOY_BUTTON_B), _key(KEY_ESCAPE), _key(KEY_BACKSPACE)])
+	# Native Control focus activation: A presses the currently highlighted button.
+	_add("ui_accept", [_jb(JOY_BUTTON_A), _key(KEY_ENTER), _key(KEY_SPACE)])
+	_add("ui_left", [_jb(JOY_BUTTON_DPAD_LEFT), _key(KEY_LEFT), _ja(JOY_AXIS_LEFT_X, -1)])
+	_add("ui_right", [_jb(JOY_BUTTON_DPAD_RIGHT), _key(KEY_RIGHT), _ja(JOY_AXIS_LEFT_X, 1)])
+	_add("ui_up", [_jb(JOY_BUTTON_DPAD_UP), _key(KEY_UP), _ja(JOY_AXIS_LEFT_Y, -1)])
+	_add("ui_down", [_jb(JOY_BUTTON_DPAD_DOWN), _key(KEY_DOWN), _ja(JOY_AXIS_LEFT_Y, 1)])
 	_add("reroll", [_jb(JOY_BUTTON_Y), _key(KEY_R)])
-	_add("consume", [_jb(JOY_BUTTON_Y), _key(KEY_Q)])
+	_add("consume", [_jb(JOY_BUTTON_X), _key(KEY_Q)])
 	_add("consume_cycle", [_jb(JOY_BUTTON_DPAD_UP), _key(KEY_E)])
 	_add("mute", [_key(KEY_M)])
 

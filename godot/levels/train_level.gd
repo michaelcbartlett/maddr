@@ -14,6 +14,7 @@ const DOOR := 136.0          # gangway door height
 const ENGINE_LEN := 560.0
 const HEIGHT := 760.0
 const GOAL_LEN := 150.0      # the vault strongroom at the front of the last car
+const LENGTH_MULTIPLIER := 4
 ## name, floor style, props [kind, x offset in the car, y, turned]
 const CARS := [
 	{"name":"CABOOSE", "floor":"wood", "props":[["desk", 380, 300, false]]},
@@ -25,9 +26,14 @@ const CARS := [
 	{"name":"VAULT CAR", "floor":"steel", "props":[["pillar", 160, 300, false], ["pillar", 160, 460, false], ["server", 330, 380, false]]},
 ]
 
-static func car_count() -> int: return CARS.size()
+static func car_count() -> int: return CARS.size() * LENGTH_MULTIPLIER
+## Keep one caboose and one final vault, with more passenger/dining/mail/freight/first-class cars between.
+static func car_def(i: int) -> Dictionary:
+	if i <= 0: return CARS[0]
+	if i >= car_count()-1: return CARS[CARS.size()-1]
+	return CARS[1+(i-1) % (CARS.size()-2)]
 static func car_x(i: int) -> float: return START + i * (CAR_LEN + GAP)
-static func train_end() -> float: return car_x(CARS.size() - 1) + CAR_LEN
+static func train_end() -> float: return car_x(car_count() - 1) + CAR_LEN
 static func size() -> Vector2: return Vector2(train_end() + ENGINE_LEN + 160.0, HEIGHT)
 static func spawn() -> Vector2: return Vector2(START + 90.0, (TOP + BOT) / 2.0)
 static func goal_rect() -> Rect2: return Rect2(train_end() - GOAL_LEN, TOP, GOAL_LEN, BOT - TOP)
@@ -35,7 +41,7 @@ static func car_rect(i: int) -> Rect2: return Rect2(car_x(i), TOP, CAR_LEN, BOT 
 
 ## Which car (0-based) a world x lies in; a gangway counts as the car behind it.
 static func car_at(x: float) -> int:
-	return clampi(floori((x - START) / (CAR_LEN + GAP)), 0, CARS.size() - 1)
+	return clampi(floori((x - START) / (CAR_LEN + GAP)), 0, car_count() - 1)
 
 ## 0 at the caboose door, 1 at the vault.
 static func progress(x: float) -> float:
@@ -49,7 +55,7 @@ static func walls() -> Array:
 	out.append({"rect": Rect2(0, TOP, START, BOT - TOP), "open": false})
 	out.append({"rect": Rect2(train_end(), TOP, s.x - train_end(), BOT - TOP), "open": false})
 	var door_top := (TOP + BOT - DOOR) / 2.0; var door_bot := door_top + DOOR
-	for i in CARS.size() - 1:
+	for i in car_count() - 1:
 		var x := car_x(i) + CAR_LEN
 		out.append({"rect": Rect2(x, TOP, GAP, door_top - TOP), "open": false})
 		out.append({"rect": Rect2(x, door_bot, GAP, BOT - door_bot), "open": false})
@@ -59,8 +65,8 @@ static func walls() -> Array:
 static func build(level) -> void:
 	for w in walls(): level.walls.append(w)
 	var rng := RandomNumberGenerator.new(); rng.seed = 7171
-	for i in CARS.size():
-		for spec in CARS[i].props:
+	for i in car_count():
+		for spec in car_def(i).props:
 			var kind: String = spec[0]
 			var s: Vector2 = level.PROP_SIZE[kind]
 			if spec[3]: s = Vector2(s.y, s.x)
@@ -93,16 +99,16 @@ static func make_floor() -> Image:
 		g.fill_rect(Rect2i(0, y, W, 6), Color("#8a9098")); g.fill_rect(Rect2i(0, y, W, 2), Color("#c8ccd0"))
 	# cars
 	var livery := Color("#5a1e22"); var trim := Color("#c9a227")
-	for i in CARS.size():
+	for i in car_count():
 		var x0 := int(car_x(i)); var x1 := int(car_x(i) + CAR_LEN)
 		g.fill_rect(Rect2i(x0 - 6, int(TOP) - 30, x1 - x0 + 12, int(BOT - TOP) + 60), livery)
 		g.fill_rect(Rect2i(x0 - 6, int(TOP) - 30, x1 - x0 + 12, 4), trim); g.fill_rect(Rect2i(x0 - 6, int(BOT) + 26, x1 - x0 + 12, 4), trim)
 		for wx in range(x0 + 30, x1 - 40, 90):   # windows in the side walls
 			for wy in [int(TOP) - 22, int(BOT) + 6]:
 				g.fill_rect(Rect2i(wx, wy, 52, 14), Color("#1a2630")); g.fill_rect(Rect2i(wx + 2, wy + 2, 48, 4), Color("#7fb4d0"))
-		_car_floor(g, Rect2i(x0, int(TOP), x1 - x0, int(BOT - TOP)), CARS[i].floor, rng)
+		_car_floor(g, Rect2i(x0, int(TOP), x1 - x0, int(BOT - TOP)), car_def(i).floor, rng)
 		g.fill_rect(Rect2i(x0, int(TOP), x1 - x0, 3), Color(0, 0, 0, 0.5)); g.fill_rect(Rect2i(x0, int(BOT) - 3, x1 - x0, 3), Color(0, 0, 0, 0.5))
-		if i < CARS.size() - 1:   # gangway: steel plate between rubber bellows
+		if i < car_count() - 1:   # gangway: steel plate between rubber bellows
 			var door_top := int((TOP + BOT - DOOR) / 2.0)
 			g.fill_rect(Rect2i(x1, door_top - 14, int(GAP), int(DOOR) + 28), Color("#1a1a1c"))
 			for bx in range(x1 + 4, x1 + int(GAP) - 4, 8):

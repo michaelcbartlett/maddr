@@ -1,6 +1,9 @@
 [
  {"id":"laser","name":"Laser","noun":"Laser","col":"#ff4a4a","desc":"Fast, precise red bolts. +15% fire rate.","add":{"dmg":8,"atkSpd":0.15}},
- {"id":"bullet","name":"Bullets","noun":"Slug","col":"#ffd76a","desc":"Fast, hard-hitting slugs.","add":{"dmg":11}},
+ {"id":"bullet","name":"Bullets","noun":"Slug","col":"#ffd76a","desc":"Heavy slugs: harder hits that pierce 1 cop, +10% crit chance.","add":{"dmg":11,"pierce":1,"crit":0.1}},
  {"id":"razor","name":"Razor Blades","noun":"Razor","col":"#dfe6ec","desc":"Spinning blades. Pierce 2, wall ricochets and light bleeding. 15% slower to throw.","add":{"dmg":5,"pierce":2,"bleed":0.4,"atkSpd":-0.15}},
- {"id":"hook","name":"Shock Grapple","noun":"Grapple","col":"#7df9ff","desc":"Wall grapple · electrified chain","add":{"dmg":9}}
+ {"id":"hook","name":"Shock Grapple","noun":"Grapple","col":"#7df9ff","desc":"Wall grapple · electrified chain","add":{"dmg":9}},
+ {"id":"knife","name":"Switchblade","noun":"Switchblade","col":"#e8eef4","melee":"knife","desc":"PRIMARY KNIFE · sweep the right stick or mouse to cut. Fast, heavy strikes.","add":{"dmg":8}},
+ {"id":"katana","name":"Mad Sword","noun":"Sword","col":"#ff5ad0","melee":"katana","desc":"PRIMARY SWORD · sweep the right stick or mouse. Heavy cuts through groups.","add":{"dmg":8}},
+ {"id":"whip","name":"Shock Whip","noun":"Whip","col":"#7df9ff","melee":"whip","no_start":true,"desc":"PRIMARY WHIP · sweep the right stick or mouse. Long, stunning lashes.","add":{"dmg":8}}
 ]

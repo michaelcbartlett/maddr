@@ -16,7 +16,7 @@ func _check(ok: bool, label: String) -> void:
 
 func _run() -> void:
 	var sheet := Sheets.build("cop")
-	for state in ["idle", "walk", "attack"]:
+	for state in Sheets.EditedArt.manifest().cop:
 		var source := Edited.clip(state)
 		_check(sheet.frames[state].size() == int(source.metadata.frame_count), state + " frame count")
 		for i in sheet.frames[state].size():
@@ -47,14 +47,8 @@ func _run() -> void:
 			for pixel in range(0, data.size(), 4):
 				if data[pixel + 3] > 0: data[pixel] = 255 - data[pixel]
 			_check(data == normal.get_data(), "%s/%d left-facing normals mirror correctly" % [state, i])
-	# Unsupplied cop states continue to use their existing procedural art.
-	for state in ["hurt", "death", "frozen", "stunned"]:
-		for i in sheet.frames[state].size():
-			var original = Painter.new().paint("cop", state, i)
-			var rect := Rect2i(sheet.frames[state][i])
-			_check(sheet.albedo.get_region(rect).get_data() == original.outlined_image().get_data(), state + " artwork is unchanged")
-			_check(sheet.normal.get_region(rect).get_data() == original.normal_image().get_data(), state + " normals are unchanged")
-	_check(Edited.fps("walk") == 7.2 and Edited.fps("idle") == 6.0, "saved loop playback rates are retained")
+	for state in Painter.states("cop"): _check(Sheets.EditedArt.has("cop",state),state+" has imported art")
+	_check(Edited.fps("walk") == 24.0 and Edited.fps("idle") == 24.0, "new cop uses 24 fps")
 	var cached := Sheets.cached("cop")
 	_check(cached.albedo.get_data() == sheet.albedo.get_data(), "disk cache includes edited artwork")
 	_check(cached.normal.get_data() == sheet.normal.get_data(), "disk cache includes matched normals")

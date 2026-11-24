@@ -1,0 +1,379 @@
+{
+  "2568": {
+    "class_type": "DaSiWa_EnhancedVideoCombine",
+    "inputs": {
+      "frame_rate": [
+        "2730",
+        8
+      ],
+      "codec": "Auto",
+      "container": "Auto",
+      "bit_depth": "Auto",
+      "quality": 25,
+      "log_level": "Standard",
+      "pingpong": false,
+      "save_metadata": true,
+      "filename_prefix": "video/mad-villain-sprite/01-near-shoulder/%date:hhmmss%",
+      "save_output": true,
+      "pass_frames": false,
+      "crop_to_audio": false,
+      "audio_codec": "Auto",
+      "audio_bitrate": "192k",
+      "save_first_frame": false,
+      "save_last_frame": false,
+      "free_memory_if_needed": false,
+      "images": [
+        "1512:2671",
+        0
+      ],
+      "audio": [
+        "1512:2671",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "DaSiWa Enhanced Video Combine"
+    }
+  },
+  "2678": {
+    "class_type": "DaSiWa_LTX2LoraLoader",
+    "inputs": {
+      "stack_data": "[{\"on\":true,\"lora\":\"H3_Combat_V2.safetensors\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"Motion_Repair_V2.safetensors\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1},{\"on\":true,\"lora\":\"None\",\"str\":1,\"vs\":1,\"as\":1}]",
+      "model_type": "Basic",
+      "use_cache": false,
+      "model": [
+        "2730",
+        5
+      ],
+      "clip": [
+        "1512:2587",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Advanced LoRA Loader"
+    }
+  },
+  "2730": {
+    "class_type": "MiniMaxH3Director",
+    "inputs": {
+      "mode": "REF2VA",
+      "prompt": "\n01-near-shoulder | 5 seconds | 24 fps | prop: proxy-grip.png | motion: shoulder\n\nsubject_definitions:\n<Subject 1> is the mad scientist shown in <Picture 1>.\n<Picture 1> defines the scientist's appearance and visual style.\n<Picture 2> defines only the held green calibration prop.\n<Video 1> is a colored mannequin motion guide, not the target character.\n\nsummary:\n[reference generation] Animate <Subject 1> using the supplied character, prop and optional motion references.\n\nretention_analysis:\n<Picture 1> (character appearance): fully_preserved - retain face, hair, glasses, clothing, proportions and pixel-art style.\n<Picture 2> (held object): fully_preserved - retain prop shape, matte green color, scale and grip orientation.\n<Video 1> (motion and composition): partially_preserved - transfer joint poses, motion timing, fixed camera and grounding; ignore mannequin colors, shapes and surface appearance.\n\ndetailed_description:\nOne continuous fixed-camera sprite animation study. Preserve the scientist from <Picture 1>: same face, wild white hair, black glasses, grin, burgundy shirt, white laboratory coat, trousers, shoes, proportions, palette and pixel-art shading. Do not add a mustache or redesign any part. Use <Picture 2> only for the held calibration prop. Keep it matte green, rigid and at a consistent size; fingers wrap around its handle and correctly occlude it. The prop must not merge with the hand or sleeve. The near arm is the foreground arm; the far arm is behind the torso. Use the same three-quarter right-facing view throughout. Locked orthographic-style camera, identical zoom and framing, no cuts, no orbit, no tracking, no perspective change. Full character occupies about 75 percent of the square canvas height, centered, with the ground line at 91 percent from the top. Leave room for fully extended arms and props. Flat uniform dark blue-gray background. Keep identity, body scale and limb lengths stable. Move only the parts explicitly requested below. No extra fingers or limbs, detached parts, costume changes, dialogue, text or logos.\n[Shot 1] Only the foreground near arm moves. Follow the shoulder sweep and elbow positions in <Video 1>. All other body parts, feet and expression stay still. Grip the proxy throughout. Transfer motion only from <Video 1>; never render the colored mannequin in the output.\n\noverall_soundscape:\nSilent. No speech, sound effects or music.\n\nnon_diegetic_music:\nN/A",
+      "width": 768,
+      "height": 768,
+      "duration": 5.0,
+      "ref_image_size": "match",
+      "timeline_data": "{\"version\":1,\"items\":[{\"id\":\"image-1795451391260-2\",\"enabled\":true,\"order\":0,\"slot\":0,\"start\":0,\"duration\":1,\"type\":\"image\",\"value\":\"scientist.png\",\"thumbnail\":null,\"source_width\":1254,\"source_height\":1254},{\"id\":\"image-1795451394885-2\",\"enabled\":true,\"order\":1,\"slot\":1,\"start\":1,\"duration\":1,\"type\":\"image\",\"value\":\"proxy-grip.png\",\"thumbnail\":null,\"source_width\":768,\"source_height\":768},{\"id\":\"video-1795452034185-2\",\"enabled\":true,\"order\":2,\"slot\":0,\"start\":0,\"duration\":5,\"type\":\"video\",\"value\":\"puppet-shoulder-behind-head-v2.mp4\",\"thumbnail\":\"data:image/jpeg;base64,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\",\"source_width\":768,\"source_height\":768,\"source_duration\":5,\"trim_start\":0,\"trim_end\":5}],\"prompt_blocks\":[],\"builder_state\":{\"version\":2,\"mode\":\"REF2VA\",\"duration\":5,\"ref\":{\"subject_definitions\":\"<Subject 1> is the mad scientist shown in <Picture 1>.\\n<Picture 1> defines the scientist's appearance and visual style.\\n<Picture 2> defines only the held green calibration prop.\\n<Video 1> is a colored mannequin motion guide, not the target character.\",\"summary\":\"[reference generation] Animate <Subject 1> using the supplied character, prop and optional motion references.\",\"retention_analysis\":\"<Picture 1> (character appearance): fully_preserved - retain face, hair, glasses, clothing, proportions and pixel-art style.\\n<Picture 2> (held object): fully_preserved - retain prop shape, matte green color, scale and grip orientation.\\n<Video 1> (motion and composition): partially_preserved - transfer joint poses, motion timing, fixed camera and grounding; ignore mannequin colors, shapes and surface appearance.\",\"detailed_description\":\"One continuous fixed-camera sprite animation study. Preserve the scientist from <Picture 1>: same face, wild white hair, black glasses, grin, burgundy shirt, white laboratory coat, trousers, shoes, proportions, palette and pixel-art shading. Do not add a mustache or redesign any part. Use <Picture 2> only for the held calibration prop. Keep it matte green, rigid and at a consistent size; fingers wrap around its handle and correctly occlude it. The prop must not merge with the hand or sleeve. The near arm is the foreground arm; the far arm is behind the torso. Use the same three-quarter right-facing view throughout. Locked orthographic-style camera, identical zoom and framing, no cuts, no orbit, no tracking, no perspective change. Full character occupies about 75 percent of the square canvas height, centered, with the ground line at 91 percent from the top. Leave room for fully extended arms and props. Flat uniform dark blue-gray background. Keep identity, body scale and limb lengths stable. Move only the parts explicitly requested below. No extra fingers or limbs, detached parts, costume changes, dialogue, text or logos.\\n[Shot 1] Only the foreground near arm moves. Follow the shoulder sweep and elbow positions in <Video 1>. All other body parts, feet and expression stay still. Grip the proxy throughout. Transfer motion only from <Video 1>; never render the colored mannequin in the output.\",\"soundscape\":\"Silent. No speech, sound effects or music.\",\"music\":\"N/A\",\"overall_soundscape\":\"Silent. No speech, sound effects or music.\",\"non_diegetic_music\":\"N/A\"},\"prompt_mode\":\"simple\",\"simple_prompt\":\"\\n01-near-shoulder | 5 seconds | 24 fps | prop: proxy-grip.png | motion: shoulder\\n\\nsubject_definitions:\\n<Subject 1> is the mad scientist shown in <Picture 1>.\\n<Picture 1> defines the scientist's appearance and visual style.\\n<Picture 2> defines only the held green calibration prop.\\n<Video 1> is a colored mannequin motion guide, not the target character.\\n\\nsummary:\\n[reference generation] Animate <Subject 1> using the supplied character, prop and optional motion references.\\n\\nretention_analysis:\\n<Picture 1> (character appearance): fully_preserved - retain face, hair, glasses, clothing, proportions and pixel-art style.\\n<Picture 2> (held object): fully_preserved - retain prop shape, matte green color, scale and grip orientation.\\n<Video 1> (motion and composition): partially_preserved - transfer joint poses, motion timing, fixed camera and grounding; ignore mannequin colors, shapes and surface appearance.\\n\\ndetailed_description:\\nOne continuous fixed-camera sprite animation study. Preserve the scientist from <Picture 1>: same face, wild white hair, black glasses, grin, burgundy shirt, white laboratory coat, trousers, shoes, proportions, palette and pixel-art shading. Do not add a mustache or redesign any part. Use <Picture 2> only for the held calibration prop. Keep it matte green, rigid and at a consistent size; fingers wrap around its handle and correctly occlude it. The prop must not merge with the hand or sleeve. The near arm is the foreground arm; the far arm is behind the torso. Use the same three-quarter right-facing view throughout. Locked orthographic-style camera, identical zoom and framing, no cuts, no orbit, no tracking, no perspective change. Full character occupies about 75 percent of the square canvas height, centered, with the ground line at 91 percent from the top. Leave room for fully extended arms and props. Flat uniform dark blue-gray background. Keep identity, body scale and limb lengths stable. Move only the parts explicitly requested below. No extra fingers or limbs, detached parts, costume changes, dialogue, text or logos.\\n[Shot 1] Only the foreground near arm moves. Follow the shoulder sweep and elbow positions in <Video 1>. All other body parts, feet and expression stay still. Grip the proxy throughout. Transfer motion only from <Video 1>; never render the colored mannequin in the output.\\n\\noverall_soundscape:\\nSilent. No speech, sound effects or music.\\n\\nnon_diegetic_music:\\nN/A\"},\"resolution\":{\"aspect\":\"1:1\",\"resolution\":\"custom\",\"input_scaling\":\"Auto\",\"custom_mode\":\"fixed\",\"custom_width\":768,\"custom_height\":768},\"resolved_prompt\":\"\\n01-near-shoulder | 5 seconds | 24 fps | prop: proxy-grip.png | motion: shoulder\\n\\nsubject_definitions:\\n<Subject 1> is the mad scientist shown in <Picture 1>.\\n<Picture 1> defines the scientist's appearance and visual style.\\n<Picture 2> defines only the held green calibration prop.\\n<Video 1> is a colored mannequin motion guide, not the target character.\\n\\nsummary:\\n[reference generation] Animate <Subject 1> using the supplied character, prop and optional motion references.\\n\\nretention_analysis:\\n<Picture 1> (character appearance): fully_preserved - retain face, hair, glasses, clothing, proportions and pixel-art style.\\n<Picture 2> (held object): fully_preserved - retain prop shape, matte green color, scale and grip orientation.\\n<Video 1> (motion and composition): partially_preserved - transfer joint poses, motion timing, fixed camera and grounding; ignore mannequin colors, shapes and surface appearance.\\n\\ndetailed_description:\\nOne continuous fixed-camera sprite animation study. Preserve the scientist from <Picture 1>: same face, wild white hair, black glasses, grin, burgundy shirt, white laboratory coat, trousers, shoes, proportions, palette and pixel-art shading. Do not add a mustache or redesign any part. Use <Picture 2> only for the held calibration prop. Keep it matte green, rigid and at a consistent size; fingers wrap around its handle and correctly occlude it. The prop must not merge with the hand or sleeve. The near arm is the foreground arm; the far arm is behind the torso. Use the same three-quarter right-facing view throughout. Locked orthographic-style camera, identical zoom and framing, no cuts, no orbit, no tracking, no perspective change. Full character occupies about 75 percent of the square canvas height, centered, with the ground line at 91 percent from the top. Leave room for fully extended arms and props. Flat uniform dark blue-gray background. Keep identity, body scale and limb lengths stable. Move only the parts explicitly requested below. No extra fingers or limbs, detached parts, costume changes, dialogue, text or logos.\\n[Shot 1] Only the foreground near arm moves. Follow the shoulder sweep and elbow positions in <Video 1>. All other body parts, feet and expression stay still. Grip the proxy throughout. Transfer motion only from <Video 1>; never render the colored mannequin in the output.\\n\\noverall_soundscape:\\nSilent. No speech, sound effects or music.\\n\\nnon_diegetic_music:\\nN/A\",\"refmods\":[],\"continuity\":{\"version\":3,\"output_mode\":\"full\",\"source_kind\":\"checkpoint\",\"source_id\":\"\",\"source_video_id\":\"\",\"source_video\":null,\"use_references\":false,\"operation\":\"new\",\"capture\":false,\"session\":\"sprite_cf4d8edf8d1a4da7808ff53cf9a15132\",\"overlap_frames\":22,\"continuation_prompt\":\"\\n01-near-shoulder | 5 seconds | 24 fps | prop: proxy-grip.png | motion: shoulder\\n\\nsubject_definitions:\\n<Subject 1> is the mad scientist shown in <Picture 1>.\\n<Picture 1> defines the scientist's appearance and visual style.\\n<Picture 2> defines only the held green calibration prop.\\n<Video 1> is a colored mannequin motion guide, not the target character.\\n\\nsummary:\\n[reference generation] Animate <Subject 1> using the supplied character, prop and optional motion references.\\n\\nretention_analysis:\\n<Picture 1> (character appearance): fully_preserved - retain face, hair, glasses, clothing, proportions and pixel-art style.\\n<Picture 2> (held object): fully_preserved - retain prop shape, matte green color, scale and grip orientation.\\n<Video 1> (motion and composition): partially_preserved - transfer joint poses, motion timing, fixed camera and grounding; ignore mannequin colors, shapes and surface appearance.\\n\\ndetailed_description:\\nOne continuous fixed-camera sprite animation study. Preserve the scientist from <Picture 1>: same face, wild white hair, black glasses, grin, burgundy shirt, white laboratory coat, trousers, shoes, proportions, palette and pixel-art shading. Do not add a mustache or redesign any part. Use <Picture 2> only for the held calibration prop. Keep it matte green, rigid and at a consistent size; fingers wrap around its handle and correctly occlude it. The prop must not merge with the hand or sleeve. The near arm is the foreground arm; the far arm is behind the torso. Use the same three-quarter right-facing view throughout. Locked orthographic-style camera, identical zoom and framing, no cuts, no orbit, no tracking, no perspective change. Full character occupies about 75 percent of the square canvas height, centered, with the ground line at 91 percent from the top. Leave room for fully extended arms and props. Flat uniform dark blue-gray background. Keep identity, body scale and limb lengths stable. Move only the parts explicitly requested below. No extra fingers or limbs, detached parts, costume changes, dialogue, text or logos.\\n[Shot 1] Only the foreground near arm moves. Follow the shoulder sweep and elbow positions in <Video 1>. All other body parts, feet and expression stay still. Grip the proxy throughout. Transfer motion only from <Video 1>; never render the colored mannequin in the output.\\n\\noverall_soundscape:\\nSilent. No speech, sound effects or music.\\n\\nnon_diegetic_music:\\nN/A\",\"idea\":\"\"},\"field_heights\":{}}",
+      "builder_state": "{\"version\":2,\"mode\":\"REF2VA\",\"duration\":5,\"ref\":{\"subject_definitions\":\"<Subject 1> is the mad scientist shown in <Picture 1>.\\n<Picture 1> defines the scientist's appearance and visual style.\\n<Picture 2> defines only the held green calibration prop.\\n<Video 1> is a colored mannequin motion guide, not the target character.\",\"summary\":\"[reference generation] Animate <Subject 1> using the supplied character, prop and optional motion references.\",\"retention_analysis\":\"<Picture 1> (character appearance): fully_preserved - retain face, hair, glasses, clothing, proportions and pixel-art style.\\n<Picture 2> (held object): fully_preserved - retain prop shape, matte green color, scale and grip orientation.\\n<Video 1> (motion and composition): partially_preserved - transfer joint poses, motion timing, fixed camera and grounding; ignore mannequin colors, shapes and surface appearance.\",\"detailed_description\":\"One continuous fixed-camera sprite animation study. Preserve the scientist from <Picture 1>: same face, wild white hair, black glasses, grin, burgundy shirt, white laboratory coat, trousers, shoes, proportions, palette and pixel-art shading. Do not add a mustache or redesign any part. Use <Picture 2> only for the held calibration prop. Keep it matte green, rigid and at a consistent size; fingers wrap around its handle and correctly occlude it. The prop must not merge with the hand or sleeve. The near arm is the foreground arm; the far arm is behind the torso. Use the same three-quarter right-facing view throughout. Locked orthographic-style camera, identical zoom and framing, no cuts, no orbit, no tracking, no perspective change. Full character occupies about 75 percent of the square canvas height, centered, with the ground line at 91 percent from the top. Leave room for fully extended arms and props. Flat uniform dark blue-gray background. Keep identity, body scale and limb lengths stable. Move only the parts explicitly requested below. No extra fingers or limbs, detached parts, costume changes, dialogue, text or logos.\\n[Shot 1] Only the foreground near arm moves. Follow the shoulder sweep and elbow positions in <Video 1>. All other body parts, feet and expression stay still. Grip the proxy throughout. Transfer motion only from <Video 1>; never render the colored mannequin in the output.\",\"soundscape\":\"Silent. No speech, sound effects or music.\",\"music\":\"N/A\",\"overall_soundscape\":\"Silent. No speech, sound effects or music.\",\"non_diegetic_music\":\"N/A\"},\"prompt_mode\":\"simple\",\"simple_prompt\":\"\\n01-near-shoulder | 5 seconds | 24 fps | prop: proxy-grip.png | motion: shoulder\\n\\nsubject_definitions:\\n<Subject 1> is the mad scientist shown in <Picture 1>.\\n<Picture 1> defines the scientist's appearance and visual style.\\n<Picture 2> defines only the held green calibration prop.\\n<Video 1> is a colored mannequin motion guide, not the target character.\\n\\nsummary:\\n[reference generation] Animate <Subject 1> using the supplied character, prop and optional motion references.\\n\\nretention_analysis:\\n<Picture 1> (character appearance): fully_preserved - retain face, hair, glasses, clothing, proportions and pixel-art style.\\n<Picture 2> (held object): fully_preserved - retain prop shape, matte green color, scale and grip orientation.\\n<Video 1> (motion and composition): partially_preserved - transfer joint poses, motion timing, fixed camera and grounding; ignore mannequin colors, shapes and surface appearance.\\n\\ndetailed_description:\\nOne continuous fixed-camera sprite animation study. Preserve the scientist from <Picture 1>: same face, wild white hair, black glasses, grin, burgundy shirt, white laboratory coat, trousers, shoes, proportions, palette and pixel-art shading. Do not add a mustache or redesign any part. Use <Picture 2> only for the held calibration prop. Keep it matte green, rigid and at a consistent size; fingers wrap around its handle and correctly occlude it. The prop must not merge with the hand or sleeve. The near arm is the foreground arm; the far arm is behind the torso. Use the same three-quarter right-facing view throughout. Locked orthographic-style camera, identical zoom and framing, no cuts, no orbit, no tracking, no perspective change. Full character occupies about 75 percent of the square canvas height, centered, with the ground line at 91 percent from the top. Leave room for fully extended arms and props. Flat uniform dark blue-gray background. Keep identity, body scale and limb lengths stable. Move only the parts explicitly requested below. No extra fingers or limbs, detached parts, costume changes, dialogue, text or logos.\\n[Shot 1] Only the foreground near arm moves. Follow the shoulder sweep and elbow positions in <Video 1>. All other body parts, feet and expression stay still. Grip the proxy throughout. Transfer motion only from <Video 1>; never render the colored mannequin in the output.\\n\\noverall_soundscape:\\nSilent. No speech, sound effects or music.\\n\\nnon_diegetic_music:\\nN/A\"}",
+      "frame_rate": 24.0,
+      "fl2va_model": [
+        "1512:1536",
+        0
+      ],
+      "ref2va_model": [
+        "1512:2663",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Scientist: Subject + Item + Motion / 01-near-shoulder"
+    }
+  },
+  "2737": {
+    "class_type": "ModelPreviewOverrideKJ",
+    "inputs": {
+      "max_resolution": 512,
+      "jpeg_quality": 80,
+      "suppress_default_preview": false,
+      "preview_frames": 120,
+      "preview_fps": 8,
+      "tiny_vae": "taeh3.safetensors",
+      "model": [
+        "1512:2692",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Preview Override"
+    }
+  },
+  "2739": {
+    "class_type": "DaSiWa_SeedControl",
+    "inputs": {
+      "seed_value": 15189716404291402000,
+      "seed_control_state": "{\"mode\":\"random\",\"last_seed\":\"15189716404291402554\",\"recent\":[\"15189716404291402554\",\"16163098128516915011\",\"1073766285531682523\",\"14719050624468405091\",\"1411386264200088967\",\"18198207011397161696\",\"14371646594546444493\",\"1176002127602395864\",\"16312356272260500506\",\"10692305977776190887\"]}"
+    },
+    "_meta": {
+      "title": "Seed Control"
+    }
+  },
+  "2797": {
+    "class_type": "DaSiWaH3ContinuityPublish",
+    "inputs": {
+      "filename": [
+        "2568",
+        1
+      ],
+      "ticket": [
+        "1512:2796",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "MiniMaxH3 Continuity \u2022 Publish Export"
+    }
+  },
+  "1512:2586": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "dasiwa_minimax_h3_ref2va_v5xs_pruned_graviton_int8_row-wise_convrot_runtime_mixed.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "1512:2587": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_heretic_minimax_h3_nvfp4.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "1512:2584": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "_meta": {
+      "title": "Load VAE Video"
+    }
+  },
+  "1512:2720": {
+    "class_type": "ModelAttentionBackend",
+    "inputs": {
+      "attention": "comfy kitchen attention",
+      "model": [
+        "1512:2588",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Attention Backend",
+      "cnr_id": "comfy-core"
+    }
+  },
+  "1512:2719": {
+    "class_type": "ModelAttentionBackend",
+    "inputs": {
+      "attention": "comfy kitchen attention",
+      "model": [
+        "1512:2586",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Attention Backend",
+      "cnr_id": "comfy-core"
+    }
+  },
+  "1512:1536": {
+    "class_type": "ModelPatchTorchSettings",
+    "inputs": {
+      "enable_fp16_accumulation": true,
+      "model": [
+        "1512:2719",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Patch Torch Settings",
+      "cnr_id": "comfyui-kjnodes",
+      "ver": "1.2.6"
+    }
+  },
+  "1512:2663": {
+    "class_type": "ModelPatchTorchSettings",
+    "inputs": {
+      "enable_fp16_accumulation": true,
+      "model": [
+        "1512:2720",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Model Patch Torch Settings",
+      "cnr_id": "comfyui-kjnodes",
+      "ver": "1.2.6"
+    }
+  },
+  "1512:2671": {
+    "class_type": "DaSiWaH3ContinuitySegmentDecode",
+    "inputs": {
+      "latent": [
+        "1512:2796",
+        0
+      ],
+      "vae": [
+        "1512:2584",
+        0
+      ],
+      "audio_vae": [
+        "1512:2585",
+        0
+      ],
+      "context": [
+        "1512:2796",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "MiniMaxH3 Continuity \u2022 Segment Decode"
+    }
+  },
+  "1512:2588": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "dasiwa_minimax_h3_ref2va_v5xs_pruned_graviton_int8_row-wise_convrot_runtime_mixed.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "1512:2590": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "scheduler": "simple",
+      "steps": 16,
+      "denoise": 1.0,
+      "model": [
+        "2678",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "1512:2598": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "1512:2585": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "_meta": {
+      "title": "Load VAE Audio"
+    }
+  },
+  "1512:2592": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "2737",
+        0
+      ],
+      "conditioning": [
+        "1512:2701",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Basic Guider"
+    }
+  },
+  "1512:2692": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "shift_video": 10.0,
+      "shift_audio": 3.0,
+      "model": [
+        "2678",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "ModelSamplingMiniMaxH3"
+    }
+  },
+  "1512:2701": {
+    "class_type": "MiniMaxH3DirectorGuide",
+    "inputs": {
+      "clip": [
+        "2678",
+        1
+      ],
+      "vae": [
+        "1512:2584",
+        0
+      ],
+      "guide": [
+        "2730",
+        0
+      ],
+      "audio_vae": [
+        "1512:2585",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "MiniMaxH3 Director Guide"
+    }
+  },
+  "1512:2591": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "2739",
+        1
+      ],
+      "guider": [
+        "1512:2592",
+        0
+      ],
+      "sampler": [
+        "1512:2598",
+        0
+      ],
+      "sigmas": [
+        "1512:2590",
+        0
+      ],
+      "latent_image": [
+        "1512:2701",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "1512:2796": {
+    "class_type": "DaSiWaH3ContinuitySegmentPrepare",
+    "inputs": {
+      "sampled": [
+        "1512:2591",
+        0
+      ],
+      "context": [
+        "1512:2701",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "MiniMaxH3 Continuity \u2022 Segment Prepare"
+    }
+  }
+}

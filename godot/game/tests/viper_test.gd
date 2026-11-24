@@ -108,11 +108,11 @@ func _run() -> void:
 	# B input, committed dash hits, cooldown and independent secondary equipment.
 	_start(); run.build.items = ["zigzag"]; run.recompute()
 	var controls = root.get_node("Controls")
-	_check(InputMap.action_get_events("boss_action").any(func(e): return e is InputEventJoypadButton and e.button_index == JOY_BUTTON_B),"B is bound to the boss action")
+	_check(InputMap.action_get_events("boss_action").any(func(e): return e is InputEventJoypadButton and e.button_index == JOY_BUTTON_Y),"Y is bound to the boss action")
 	var victim = a.make_enemy("riot",900,485); victim.hp = 1000
 	await process_frame
 	Input.action_press("boss_action"); a._update_play(0.01); Input.action_release("boss_action")
-	_check(not a.boss_move.is_empty() and a.boss_move.kind == "zigzag","B starts the equipped zigzag action")
+	_check(not a.boss_move.is_empty() and a.boss_move.kind == "zigzag","Y starts the equipped zigzag action")
 	for frame in 80: Abilities.update_action(a,0.016)
 	_check(a.boss_move.is_empty() and a.P.x > 1090 and victim.hp < 1000,"zigzag completes three damaging dashes")
 	_check(not Abilities.start_action(a,"zigzag"),"B action cannot restart during cooldown")

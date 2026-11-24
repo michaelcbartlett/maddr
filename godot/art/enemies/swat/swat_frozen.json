@@ -1,0 +1,50 @@
+{
+  "format": "enemy-edited-clip-v1",
+  "kind": "swat",
+  "animation": "frozen",
+  "frame_width": 66,
+  "frame_height": 66,
+  "frame_count": 1,
+  "fps": 6,
+  "holds": [
+    1
+  ],
+  "origin": [
+    31.0,
+    62.0
+  ],
+  "anchors": [
+    {
+      "chest": [
+        0.0,
+        -28.200000762939503
+      ],
+      "eye": [
+        5.400001525878899,
+        -39.0
+      ],
+      "eye_far": [
+        1.4000015258788991,
+        -39.0
+      ],
+      "hand_f": [
+        12.866973876953097,
+        -18.808662414550803
+      ],
+      "hand_n": [
+        8.768020629882798,
+        -19.6081581115723
+      ],
+      "head": [
+        1.0,
+        -40.0
+      ],
+      "muzzle": [
+        21.648021697997997,
+        -24.9281578063965
+      ]
+    }
+  ],
+  "source_project": "export/pixelstudio/swat-frozen-improved/swat-frozen-matched-normals.pixelstudio",
+  "source_sha256": "50dcb68d556daa12caa61ab09368bffd400099f17335d07bbc407473de5c295a"
+}

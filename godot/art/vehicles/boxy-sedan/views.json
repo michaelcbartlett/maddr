@@ -1,0 +1,82 @@
+{
+  "id": "boxy-sedan",
+  "name": "1980s Sedan",
+  "sheet": "res://art/vehicles/boxy-sedan/boxy-sedan-8way-v1.png",
+  "world_length": 235,
+  "world_width": 96,
+  "police": false,
+  "frames": {
+    "front_left": {
+      "region": [
+        49,
+        73,
+        358,
+        314
+      ],
+      "opaque_pixels": 64969
+    },
+    "front": {
+      "region": [
+        544,
+        48,
+        239,
+        322
+      ],
+      "opaque_pixels": 62331
+    },
+    "front_right": {
+      "region": [
+        919,
+        73,
+        354,
+        314
+      ],
+      "opaque_pixels": 64341
+    },
+    "left": {
+      "region": [
+        1335,
+        124,
+        397,
+        228
+      ],
+      "opaque_pixels": 71650
+    },
+    "rear_left": {
+      "region": [
+        52,
+        505,
+        355,
+        307
+      ],
+      "opaque_pixels": 62725
+    },
+    "rear": {
+      "region": [
+        544,
+        492,
+        239,
+        313
+      ],
+      "opaque_pixels": 61083
+    },
+    "rear_right": {
+      "region": [
+        910,
+        504,
+        348,
+        308
+      ],
+      "opaque_pixels": 62385
+    },
+    "right": {
+      "region": [
+        1336,
+        547,
+        401,
+        233
+      ],
+      "opaque_pixels": 73950
+    }
+  }
+}

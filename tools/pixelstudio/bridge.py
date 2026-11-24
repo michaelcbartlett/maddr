@@ -19,6 +19,8 @@ import webbrowser
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 SOURCE = Path("enemies/enemy_painter.gd")
+DOCTOR_SOURCE = Path("character/villain.gd")
+DOCTOR_SETUPS = ("primary-sword", "primary-knife", "dual-sword", "dual-knife")
 PORT = 8766
 
 
@@ -37,6 +39,10 @@ def instrument(source: str) -> str:
     humanoid = replace_once(source[start:end], 'var c := Pixels.new(cell.w, cell.h); var p := Pen.new(c, 0, 0)',
                             'var c := Capture.new(cell.w, cell.h); var p := Pen.new(c, 0, 0)')
     source = source[:start] + humanoid + source[end:]
+    source = replace_once(source, '\t\t_cape(p, s.cape, sh_back, sh_front, hip_y, fy, pose.cape, lean, hero)',
+                          '\t\tc.part("cape", sh_back, "torso")\n\t\t_cape(p, s.cape, sh_back, sh_front, hip_y, fy, pose.cape, lean, hero)')
+    source = replace_once(source, '\tif s.hair_style == "long": _long_hair(p, s.hair, head, hr, hip_y)',
+                          '\tif s.hair_style == "long":\n\t\tc.part("back-hair", head, "torso")\n\t\t_long_hair(p, s.hair, head, hr, hip_y)')
     source = replace_once(source, '\t# torso\n\t_torso', '\t# torso\n\tc.part("torso", Vector2(cx, hip_y))\n\t_torso')
     source = replace_once(source, '\t# head\n\t_head', '\t# head\n\tc.part("head", Vector2(head.x, top_y + 2), "torso")\n\t_head')
     for call, key in [('_hair(p, s, h, r)', 'hair'), ('_face(p, s, kind, h, r, pose)', 'face'), ('_hat(p, s, h, r)', 'hat')]:
@@ -85,39 +91,63 @@ def copy_dependencies(project: Path, destination: Path, relative: Path, seen: se
         copy_dependencies(project, destination, Path(dependency), seen)
 
 
-def export_character(project: Path, godot: str, animation: str, output: Path) -> dict:
-    if animation not in {"idle", "walk", "attack"}:
-        raise ValueError("Choose idle, walk or attack for the basic cop.")
+def _job(project: Path, parent: Path, adapted: str) -> tempfile.TemporaryDirectory:
+    temp = tempfile.TemporaryDirectory(prefix="godot-character-", dir=parent)
+    job = Path(temp.name)
+    copy_dependencies(project, job, SOURCE, set())
+    (job / "project.godot").write_text('config_version=5\n[application]\nconfig/name="PixelStudio Character Bridge"\n', encoding="utf-8")
+    (job / "adapter_painter.gd").write_text(adapted, encoding="utf-8")
+    for name in ["capture_canvas.gd", "export_character.gd"]:
+        shutil.copyfile(HERE / name, job / name)
+    return temp
+
+
+def _run(godot: str, job: Path, *args: str) -> str:
+    command = [godot, "--headless", "--path", str(job), "--log-file", str(job / "godot.log"),
+               "--script", "res://export_character.gd", "--", *args]
+    result = subprocess.run(command, capture_output=True, text=True, timeout=180,
+                            creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+    log = result.stdout + result.stderr
+    if result.returncode or "SCRIPT ERROR:" in log or "ERROR:" in log:
+        raise ValueError("Godot could not export the character. " + log[-3500:])
+    return log
+
+
+def character_catalog(project: Path, godot: str) -> list[dict]:
+    """Every kind and state the game's enemy painter bakes, read from the painter itself."""
+    parent = REPO / ".local"
+    parent.mkdir(exist_ok=True)
+    adapted = instrument((project / SOURCE).read_text(encoding="utf-8-sig"))
+    with _job(project, parent, adapted) as temp:
+        log = _run(godot, Path(temp), "--catalog")
+    line = next(l for l in log.splitlines() if l.startswith("CATALOG:"))
+    return json.loads(line[len("CATALOG:"):])
+
+
+def export_character(project: Path, godot: str, animation: str, output: Path, kind: str = "cop") -> dict:
+    if not re.fullmatch(r"[a-z_]+", kind) or not re.fullmatch(r"[a-z_]+", animation):
+        raise ValueError("Unknown character or animation.")
     source = (project / SOURCE).read_text(encoding="utf-8-sig")
     adapted = instrument(source)
     output.parent.mkdir(parents=True, exist_ok=True)
     # The isolated helper contains only required drawing scripts: no game's autoloads,
     # project import, user saves, or changes to the game's resource cache.
-    with tempfile.TemporaryDirectory(prefix="godot-cop-", dir=output.parent) as temp:
-        job = Path(temp)
-        copy_dependencies(project, job, SOURCE, set())
-        (job / "project.godot").write_text('config_version=5\n[application]\nconfig/name="PixelStudio Character Bridge"\n', encoding="utf-8")
-        (job / "adapter_painter.gd").write_text(adapted, encoding="utf-8")
-        for name in ["capture_canvas.gd", "export_character.gd"]:
-            shutil.copyfile(HERE / name, job / name)
-        command = [godot, "--headless", "--quit-after", "2", "--path", str(job), "--log-file", str(job / "godot.log"),
-                   "--script", "res://export_character.gd", "--", animation, str(output)]
-        result = subprocess.run(command, capture_output=True, text=True, timeout=90,
-                                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
-        log = result.stdout + result.stderr
-        if result.returncode or "SCRIPT ERROR:" in log or "ERROR:" in log or not output.is_file():
-            raise ValueError("Godot could not export the character. " + log[-3500:])
+    output.unlink(missing_ok=True)
+    with _job(project, output.parent, adapted) as temp:
+        _run(godot, Path(temp), kind, animation, str(output))
+    if not output.is_file():
+        raise ValueError("Godot did not write the character project.")
     data = json.loads(output.read_text(encoding="utf-8"))
     data["godotSource"].update(project=str(project), sha256=hashlib.sha256(source.encode()).hexdigest())
     output.write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
     return data
 
 
-def current_edited_character(project: Path, animation: str):
+def current_edited_character(project: Path, animation: str, kind: str = 'cop'):
     """Prefer the editable source that is installed in the game's current art metadata."""
-    if animation not in {"idle", "walk", "attack"}:
-        raise ValueError("Choose walk, idle or attack.")
-    metadata_file = project / 'art' / 'enemies' / 'cop' / f'cop_{animation}.json'
+    if not re.fullmatch(r"[a-z_]+", kind) or not re.fullmatch(r"[a-z_]+", animation):
+        raise ValueError("Unknown character or animation.")
+    metadata_file = project / 'art' / 'enemies' / kind / f'{kind}_{animation}.json'
     if not metadata_file.is_file():
         return None
     metadata = json.loads(metadata_file.read_text(encoding='utf-8'))
@@ -125,12 +155,74 @@ def current_edited_character(project: Path, animation: str):
     relative = Path(metadata.get('source_project', ''))
     source = (root / relative).resolve()
     if relative.is_absolute() or not source.is_relative_to(root) or source.suffix != '.pixelstudio' or not source.is_file():
-        raise ValueError('The edited cop source project is missing. Restore the source_project named in its game art metadata.')
+        raise ValueError(f'The edited {kind} source project is missing. Restore the source_project named in its game art metadata.')
     data = json.loads(source.read_text(encoding='utf-8'))
     if (data.get('format'), data.get('version'), data.get('width'), data.get('height'), len(data.get('frames', []))) != (
             'pixel-motion-studio', 2, metadata['frame_width'], metadata['frame_height'], metadata['frame_count']):
-        raise ValueError('The edited cop source does not match the installed game clip.')
+        raise ValueError(f'The edited {kind} source does not match the installed game clip.')
     return data, source
+
+
+def export_doctor(project: Path, godot: str, setup: str, output: Path) -> dict:
+    if setup not in DOCTOR_SETUPS:
+        raise ValueError("Choose a primary or dual sword/knife setup.")
+    source = (project / DOCTOR_SOURCE).read_text(encoding='utf-8-sig')
+    marker = 'for segment in [[Vector2.ZERO,elbow],[elbow,grip]]:'
+    capture = '''var part_index := 0
+\tfor segment in [[Vector2.ZERO,elbow],[elbow,grip]]:
+\t\tif p.target.has_method("part"):
+\t\t\tvar prefix: String = p.target.get_meta("hand")
+\t\t\tvar joint := Vector2(p.ox,p.oy)+(Vector2.ZERO if part_index == 0 else elbow)
+\t\t\tp.target.part(prefix+("upper-arm" if part_index == 0 else "forearm"),joint,"doctor-body" if part_index == 0 else prefix+"upper-arm")
+\t\tpart_index += 1'''
+    adapted = replace_once(source, marker, capture)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='godot-doctor-', dir=output.parent) as temp:
+        job = Path(temp)
+        copy_dependencies(project, job, DOCTOR_SOURCE, set())
+        (job / DOCTOR_SOURCE).write_text(adapted, encoding='utf-8')
+        gear = job / 'character' / 'art' / 'gear.json'
+        gear.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(project / 'character' / 'art' / 'gear.json', gear)
+        for name in ['capture_canvas.gd', 'export_doctor.gd']:
+            shutil.copyfile(HERE / name, job / name)
+        (job / 'project.godot').write_text('config_version=5\n[application]\nconfig/name="Doctor Melee Editor"\n', encoding='utf-8')
+        # Hand-drawn body skins (art_renderer.gd body_skin) are textures, so they must be imported first.
+        for skin in (project / 'character' / 'art').iterdir():
+            if skin.is_dir() and (skin / 'body.json').is_file():
+                target = job / 'character' / 'art' / skin.name
+                target.mkdir(parents=True, exist_ok=True)
+                for name in ['body.json', 'body.png', 'body_height.png']:
+                    shutil.copyfile(skin / name, target / name)
+                subprocess.run([godot, '--headless', '--path', str(job), '--import'], capture_output=True, text=True, timeout=120,
+                               creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+                break
+        result = subprocess.run([godot, '--headless', '--path', str(job), '--log-file', str(job / 'godot.log'),
+                                 '--script', 'res://export_doctor.gd', '--', setup, str(output)],
+                                capture_output=True, text=True, timeout=90,
+                                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+        log = result.stdout + result.stderr
+        if result.returncode or 'SCRIPT ERROR:' in log or 'ERROR:' in log or not output.is_file():
+            raise ValueError('Could not export the doctor: ' + log[-3500:])
+    data = json.loads(output.read_text(encoding='utf-8'))
+    data['godotSource'].update(project=str(project), sha256=hashlib.sha256(source.encode()).hexdigest())
+    output.write_text(json.dumps(data, separators=(',', ':')), encoding='utf-8')
+    return data
+
+
+NAMES = {"cop": "Basic cop", "swat": "SWAT", "det": "Detective", "riot": "Riot cop", "dog": "K9 dog",
+         "drone": "Police drone", "undercover_hood": "Undercover (hood)", "swat_shield": "SWAT shield",
+         "robodog": "Robo-dog", "vex_sentry": "Vex sentry", "vex_mine": "Vex mine"}
+
+
+def display_name(kind: str) -> str:
+    if kind in NAMES:
+        return NAMES[kind]
+    if kind.startswith("hero_"):
+        return "Hero · " + kind[5:].capitalize()
+    if kind.startswith("civ_"):
+        return "Civilian · " + kind[4:].capitalize()
+    return kind.replace("_", " ").capitalize()
 
 
 class BridgeServer(ThreadingHTTPServer):
@@ -141,6 +233,7 @@ class BridgeServer(ThreadingHTTPServer):
         self.project, self.editor, self.godot = project, editor, godot
         self.token = secrets.token_urlsafe(32)
         self.export_lock = threading.Lock()
+        self.kinds = {entry["id"]: entry for entry in character_catalog(project, godot)}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -188,7 +281,12 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/godot/catalog":
             self.send(200, {"bridge": "pixelstudio-godot-v1", "token": self.server.token,
                             "project": str(self.server.project), "script": SOURCE.as_posix(),
-                            "characters": [{"id": "cop", "name": "Basic cop", "animations": ["walk", "idle", "attack"]}]})
+                            "characters": [
+                                {"id": kind, "name": display_name(kind), "script": SOURCE.as_posix(),
+                                 "family": entry["family"], "animations": list(entry["states"]),
+                                 "frames": entry["states"]} for kind, entry in self.server.kinds.items()] + [
+                                {"id": "doctor", "name": "Doctor · editable melee", "script": DOCTOR_SOURCE.as_posix(),
+                                 "animations": list(DOCTOR_SETUPS)}]})
         elif route in {"/", "/index.html"}:
             text = (self.server.editor / "index.html").read_text(encoding="utf-8-sig")
             if 'src="godot-character.js"' not in text:
@@ -213,27 +311,39 @@ class Handler(BaseHTTPRequestHandler):
             if not 0 < length <= 300_000:
                 raise ValueError("The Godot request is too large or empty.")
             request = json.loads(self.rfile.read(length))
-            if request.get("character", "cop") != "cop" or request.get("script", SOURCE.as_posix()) != SOURCE.as_posix():
-                raise ValueError("This adapter opens enemies/enemy_painter.gd → Basic cop. Other scripts need their own adapter.")
+            character = request.get('character', 'cop')
+            if character != 'doctor' and character not in self.server.kinds:
+                raise ValueError('Choose a character from the list.')
+            source_path = DOCTOR_SOURCE if character == 'doctor' else SOURCE
+            if request.get('script', source_path.as_posix()) != source_path.as_posix():
+                raise ValueError('Choose the matching character script: ' + source_path.as_posix())
             if request.get("source") is not None:
                 selected = request["source"].replace("\r\n", "\n").lstrip("\ufeff")
-                actual = (self.server.project / SOURCE).read_text(encoding="utf-8-sig").replace("\r\n", "\n")
+                actual = (self.server.project / source_path).read_text(encoding="utf-8-sig").replace("\r\n", "\n")
                 if selected != actual:
-                    raise ValueError("Choose this project's enemies/enemy_painter.gd. The selected file does not match it.")
+                    raise ValueError("Choose this project's " + source_path.as_posix() + '. The selected file does not match it.')
             if not self.server.export_lock.acquire(blocking=False):
                 self.send(409, {"error": "Godot is already preparing a character. Wait for that import to finish."})
                 return
             try:
-                animation = request.get("animation", "walk")
-                if animation not in {"walk", "idle", "attack"}:
-                    raise ValueError("Choose walk, idle or attack.")
-                current = current_edited_character(self.server.project, animation)
-                if current is not None:
-                    data, output = current
+                animation = request.get('animation', 'dual-sword' if character == 'doctor' else 'walk')
+                if character == 'doctor':
+                    if animation not in DOCTOR_SETUPS:
+                        raise ValueError('Choose a primary or dual sword/knife setup.')
+                    output = REPO / 'export' / 'pixelstudio' / 'doctor-melee' / f'doctor-{animation}.pixelstudio'
+                    if output.is_file():
+                        data = json.loads(output.read_text(encoding='utf-8'))
+                    else:
+                        data = export_doctor(self.server.project,self.server.godot,animation,output)
                 else:
-                    output = REPO / "export" / "pixelstudio" / f"cop-{animation}" / f"cop-{animation}.pixelstudio"
-                    output.unlink(missing_ok=True)
-                    data = export_character(self.server.project, self.server.godot, animation, output)
+                    if animation not in self.server.kinds[character]['states']:
+                        raise ValueError('Choose one of ' + ', '.join(self.server.kinds[character]['states']))
+                    current = current_edited_character(self.server.project, animation, character)
+                    if current is not None:
+                        data, output = current
+                    else:
+                        output = REPO / 'export' / 'pixelstudio' / f'{character}-{animation}' / f'{character}-{animation}.pixelstudio'
+                        data = export_character(self.server.project, self.server.godot, animation, output, character)
                 self.send(200, {"project": data, "file": str(output)})
             finally:
                 self.server.export_lock.release()
@@ -248,19 +358,32 @@ def main():
     parser.add_argument("--godot")
     parser.add_argument("--port", type=int, default=PORT)
     parser.add_argument("--open", action="store_true")
-    parser.add_argument("--export", choices=["walk", "idle", "attack"])
+    parser.add_argument("--export", metavar="STATE", help="export one clip, e.g. walk; use with --character")
+    parser.add_argument('--export-doctor', choices=DOCTOR_SETUPS)
+    parser.add_argument('--character', default='cop', help="doctor, or any enemy_painter kind (cop, swat, hero_vex...)")
+    parser.add_argument('--animation')
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     project = args.project.resolve()
     if not (project / SOURCE).is_file():
         parser.error("Project must contain enemies/enemy_painter.gd.")
     godot = find_godot(args.godot)
+    if args.export_doctor:
+        output = (args.output or REPO / 'export' / 'pixelstudio' / 'doctor-melee' / f'doctor-{args.export_doctor}.pixelstudio').resolve()
+        data = export_doctor(project,godot,args.export_doctor,output)
+        print(f'Saved {output}: {len(data["layers"])} editable layers.')
+        return
     if args.export:
-        output = (args.output or REPO / "export" / "pixelstudio" / f"cop-{args.export}" / f"cop-{args.export}.pixelstudio").resolve()
-        data = export_character(project, godot, args.export, output)
+        kind = args.character
+        output = (args.output or REPO / "export" / "pixelstudio" / f"{kind}-{args.export}" / f"{kind}-{args.export}.pixelstudio").resolve()
+        data = export_character(project, godot, args.export, output, kind)
         print(f"Saved {output}: {len(data['frames'])} frames, {len(data['layers'])} linked parts.")
         return
     editor = args.editor.resolve()
+    animation = args.animation or ('dual-sword' if args.character == 'doctor' else 'walk')
+    if args.character == 'doctor' and animation not in DOCTOR_SETUPS:
+        parser.error('Choose a valid doctor setup.')
+    editor_url = f'http://127.0.0.1:{args.port}/?godot={args.character}&animation={animation}'
     if not (editor / "index.html").is_file():
         parser.error("PixelStudio index.html was not found. Supply --editor FOLDER.")
     try:
@@ -275,10 +398,10 @@ def main():
                 raise ValueError("A different service is using the bridge port.")
         except Exception:
             raise SystemExit(f"Could not start PixelStudio on port {args.port}: {error}") from error
-        if args.open: webbrowser.open(f"http://127.0.0.1:{args.port}/?godot=cop&animation=walk")
+        if args.open: webbrowser.open(editor_url)
         return
     print(f"PixelStudio + Godot: http://127.0.0.1:{args.port}/", flush=True)
-    if args.open: webbrowser.open(f"http://127.0.0.1:{args.port}/?godot=cop&animation=walk")
+    if args.open: webbrowser.open(editor_url)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

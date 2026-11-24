@@ -1,0 +1,144 @@
+{
+  "format": "enemy-edited-clip-v1",
+  "kind": "det",
+  "animation": "death",
+  "frame_width": 66,
+  "frame_height": 66,
+  "frame_count": 4,
+  "fps": 6,
+  "holds": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "origin": [
+    31.0,
+    62.0
+  ],
+  "anchors": [
+    {
+      "head": [
+        -8.942,
+        -31.393
+      ],
+      "eye": [
+        -1.424,
+        -30.176
+      ],
+      "eye_far": [
+        -7.246,
+        -28.724
+      ],
+      "chest": [
+        -4.829,
+        -14.898
+      ],
+      "hand_n": [
+        -12.449,
+        -39.262
+      ],
+      "hand_f": [
+        -11.14,
+        -7.141
+      ],
+      "muzzle": [
+        -19.411,
+        -52.81
+      ]
+    },
+    {
+      "head": [
+        -11.335,
+        -27.92
+      ],
+      "eye": [
+        -4.263,
+        -30.749
+      ],
+      "eye_far": [
+        -8.506,
+        -26.506
+      ],
+      "chest": [
+        0.686,
+        -15.899
+      ],
+      "hand_n": [
+        -5.598,
+        -36.758
+      ],
+      "hand_f": [
+        -0.728,
+        -6.0
+      ],
+      "muzzle": [
+        -10.355,
+        -51.228
+      ]
+    },
+    {
+      "head": [
+        -21.0,
+        -14.0
+      ],
+      "eye": [
+        -18.0,
+        -21.0
+      ],
+      "eye_far": [
+        -18.0,
+        -15.0
+      ],
+      "chest": [
+        -4.0,
+        -14.0
+      ],
+      "hand_n": [
+        9.91,
+        -19.586
+      ],
+      "hand_f": [
+        2.0,
+        -6.0
+      ],
+      "muzzle": [
+        19.034,
+        -31.782
+      ]
+    },
+    {
+      "head": [
+        -22.0,
+        -13.0
+      ],
+      "eye": [
+        -19.0,
+        -20.0
+      ],
+      "eye_far": [
+        -19.0,
+        -14.0
+      ],
+      "chest": [
+        -5.0,
+        -13.0
+      ],
+      "hand_n": [
+        10.378,
+        -15.901
+      ],
+      "hand_f": [
+        1.0,
+        -5.0
+      ],
+      "muzzle": [
+        21.481,
+        -26.327
+      ]
+    }
+  ],
+  "source_project": "export/pixelstudio/detective/detective.pixelstudio",
+  "source_sha256": "58b64f535439ccfff0603c4cbf54ecd921e50492190bc3bd57bdf30a71d86148",
+  "generated_by": "tools/pixelstudio/import_detective.py"
+}

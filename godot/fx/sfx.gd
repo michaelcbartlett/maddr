@@ -30,6 +30,14 @@ const P := {
 	"logo": [110, .35, "saw", .08, .5, false], "logo2": [1760, .25, "tri", .05, .6, false],   # AngryRatGames name sting
 }
 
+## Recorded or built weapon sounds: res://audio/weapons/<group>_1.wav (or .ogg) .. _N. Drop in replacements with
+## the same names. group: [volume dB, throttle ms]
+const GROUPS := {
+	"gun_pistol": [-9.0, 45], "gun_blunder": [-7.0, 60], "gun_rifle": [-8.0, 60], "gun_repeater": [-11.0, 40],
+	"blade": [-10.0, 45], "blade_ping": [-14.0, 60], "sword": [-9.0, 60], "knife": [-10.0, 50], "ricochet": [-17.0, 70], "bullet_hit": [-14.0, 45],
+}
+var _groups := {}
+var _last_variant := {}
 var _streams := {}
 var _last := {}
 var _players: Array[AudioStreamPlayer] = []
@@ -40,6 +48,26 @@ func _ready() -> void:
 	for i in 16:
 		var p := AudioStreamPlayer.new(); add_child(p); _players.append(p)
 	for k in P: _streams[k] = _render(P[k])
+	for group in GROUPS:
+		_groups[group] = []
+		for i in range(1,17):
+			for extension in ["wav","ogg"]:
+				var path := "res://audio/weapons/%s_%d.%s" % [group,i,extension]
+				if ResourceLoader.exists(path): _groups[group].append(load(path)); break
+
+## Plays a random variant, never the same one twice in a row, with slight pitch and level drift.
+func play_group(group: String) -> bool:
+	var list: Array = _groups.get(group,[])
+	if list.is_empty(): return false
+	var now := Time.get_ticks_msec()
+	if _last.has(group) and now-_last[group] < int(GROUPS[group][1]): return true
+	_last[group] = now
+	var index := randi()%list.size()
+	if list.size()>1 and index == int(_last_variant.get(group,-1)): index = (index+1+randi()%(list.size()-1))%list.size()
+	_last_variant[group] = index
+	var p := _players[_next]; _next = (_next + 1) % _players.size()
+	p.stream = list[index]; p.pitch_scale = randf_range(0.96,1.04); p.volume_db = float(GROUPS[group][0])+randf_range(-1.0,0.6); p.play()
+	return true
 
 func _render(d: Array) -> AudioStreamWAV:
 	var f0: float = d[0]; var dur: float = d[1] + 0.02; var wave: String = d[2]; var vol: float = d[3]; var slide: float = d[4]
@@ -68,11 +96,15 @@ func _render(d: Array) -> AudioStreamWAV:
 	var w := AudioStreamWAV.new(); w.format = AudioStreamWAV.FORMAT_16_BITS; w.mix_rate = RATE; w.stereo = false; w.data = data
 	return w
 
+## Synth names that now have recordings.
+const RECORDED := {"slash":"sword","stab":"knife"}
+
 func play(name: String, pitch := 1.0) -> void:
 	if not P.has(name): return
+	if RECORDED.has(name) and play_group(RECORDED[name]): return
 	var now := Time.get_ticks_msec()
 	if P[name][5]:
 		if _last.has(name) and now - _last[name] < 55: return
 		_last[name] = now
 	var p := _players[_next]; _next = (_next + 1) % _players.size()
-	p.stream = _streams[name]; p.pitch_scale = pitch; p.play()
+	p.stream = _streams[name]; p.pitch_scale = pitch; p.volume_db = 0.0; p.play()

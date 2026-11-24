@@ -1,0 +1,82 @@
+{
+  "id": "delorean",
+  "name": "DeLorean DMC-12",
+  "sheet": "res://art/vehicles/delorean/delorean-8way-v1.png",
+  "world_length": 220,
+  "world_width": 92,
+  "police": false,
+  "frames": {
+    "front_left": {
+      "region": [
+        60,
+        76,
+        338,
+        298
+      ],
+      "opaque_pixels": 58328
+    },
+    "front": {
+      "region": [
+        545,
+        50,
+        240,
+        320
+      ],
+      "opaque_pixels": 62385
+    },
+    "front_right": {
+      "region": [
+        932,
+        76,
+        337,
+        298
+      ],
+      "opaque_pixels": 58286
+    },
+    "left": {
+      "region": [
+        1330,
+        124,
+        387,
+        214
+      ],
+      "opaque_pixels": 65673
+    },
+    "rear_left": {
+      "region": [
+        69,
+        512,
+        329,
+        287
+      ],
+      "opaque_pixels": 56298
+    },
+    "rear": {
+      "region": [
+        545,
+        500,
+        240,
+        299
+      ],
+      "opaque_pixels": 58017
+    },
+    "rear_right": {
+      "region": [
+        930,
+        512,
+        328,
+        287
+      ],
+      "opaque_pixels": 55995
+    },
+    "right": {
+      "region": [
+        1330,
+        555,
+        387,
+        215
+      ],
+      "opaque_pixels": 66358
+    }
+  }
+}

@@ -1,0 +1,27 @@
+subject_definitions:
+<Subject 1> is the cartoon detective in <Picture 1>, exactly as drawn there.
+<Picture 2> is a color swatch only. Its object must NOT appear.
+
+summary:
+[reference generation] A seamless looping relaxed idle.
+
+retention_analysis:
+<Picture 1> (character appearance): fully_preserved - oversized head, brown fedora with dark purple band, messy brown hair, X-shaped cheek scar, thick scowling eyebrows, stubble, tan trench coat with turned-up collar, buttons and loose belt, white shirt, dark red tie, badge on a neck chain, dark trousers, brown shoes, blue-steel revolver, palette, thick black outlines, pixel-art style and scale.
+<Picture 2> (swatch): not_preserved - never show it.
+
+detailed_description:
+One detective, full body, three-quarter SCREEN-RIGHT-facing view in every frame. Exactly one revolver, always the same size and shape.
+
+He stays exactly in place horizontally; the game moves him. He stands with the revolver lowered in his far hand beside his leg, near hand in his coat pocket, breathing slowly, coat tails swaying slightly. Feet planted. First and last frames match.
+
+No muzzle flash, bullets, smoke, sparks, stars, dust, speed lines, glow, impact marks, blood or particles of any kind; the game adds effects. The revolver is an inert toy prop that never emits anything.
+
+Keep the same face, costume details, limb lengths, head size and body scale in every frame. The fedora stays on unless stated. No extra weapons, badges, limbs or fingers. No turning to face the camera.
+
+Locked orthographic-style camera, identical position, zoom and framing. Full body, hat, coat and revolver always inside the frame with margin. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames with crisp pixel edges and stable colors. No motion blur, ghost trails, frame blending, added texture, text or logos.
+
+overall_soundscape:
+Silent. No speech, sound effects or music.
+
+non_diegetic_music:
+N/A

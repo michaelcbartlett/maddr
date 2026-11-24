@@ -56,6 +56,9 @@ func _run() -> void:
 			var e = a.make_enemy(type,800-facing*200,550); e.spr = sprite
 			e.face = facing; e.aim_dir = Vector2(facing,0); e.shoot_cd = 0
 			e.tick(0.01)
+			# The detective steadies his aim first.
+			for i in 40:
+				if sprite == "det" and a.ebul.is_empty(): e.tick(0.0166)
 			_check(not a.ebul.is_empty(), "%s facing %d fires" % [sprite,facing])
 			if a.ebul.is_empty(): continue
 			var muzzle := EnemyView.muzzle_world(e)
@@ -121,7 +124,7 @@ func _run() -> void:
 	_start(); run.scrap = 1000
 	for kind in run.CONSUMABLE_IDS:
 		_check(not run.buy_consumable(kind), "%s refills need its kit first" % kind)
-	for kit in ["kit_disguise","kit_grenade"]:
+	for kit in ["kit_disguise","kit_grenade","kit_shrink_pill","kit_enlarge_pill","kit_tesla_coil"]:
 		var it: Dictionary = run.ITEM[kit]
 		_check(run.item_available(it), "%s is offered before it is owned" % kit)
 		run.offers = [{"it":it,"price":run.wave_price(it.c),"sold":false}]
@@ -161,7 +164,7 @@ func _run() -> void:
 	var far = a.make_enemy("riot",1200,550); far.hp = 1000
 	await process_frame
 	Input.action_press("consume"); a.consumables.tick(a,0.01,false); Input.action_release("consume")
-	_check(a.consumables.grenades.size() == 1 and run.consumable_charges.grenade == 0, "Y / Q throws one paid grenade")
+	_check(a.consumables.grenades.size() == 1 and run.consumable_charges.grenade == 0, "X / Q throws one paid grenade")
 	for frame in 60: a.consumables.tick(a,1.0/60.0,false)
 	_check(near.hp < 1000 and far.hp == 1000 and a.consumables.grenades.is_empty(), "grenade explodes after its fuse and only damages foes in the blast")
 	# Teleport Pads are a B action now (not a supply): two placements, one traversal either way, then a long cooldown.

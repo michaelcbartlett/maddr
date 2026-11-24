@@ -1,0 +1,23 @@
+subject_definitions:
+<Subject 1> is the mad scientist in <Picture 1>, exactly as drawn there.
+<Picture 2> is a color swatch only. Its object must NOT appear.
+
+summary:
+[reference generation] A seamless looping electrocution. He is already in the X-ray pose in every frame.
+
+retention_analysis:
+<Picture 1> (character appearance): fully_preserved - identity, proportions, costume, palette, outlines and pixel-art style.
+<Picture 2> (swatch): not_preserved - never show it.
+
+detailed_description:
+He stays in this exact splayed X-ray skeleton pose for the whole shot: bones showing inside the dark body, head, hair, glasses, coat edges and shoes drawn normally. He trembles violently in short stiff jerks: fingers twitching and curling, shoulders and knees shaking, head rattling, jaw chattering, coat edges quivering. Legs stay apart and feet planted. The bone drawing stays the same from frame to frame. The first and last frames match.
+
+Empty hands, no gun, weapon or held object. Feet stay near the same canvas position. Constant body scale and limb lengths, five fingers per hand, no extra limbs. Keep one thin even cyan glow hugging the outline. NO lightning bolts, arcs or sparks separate from the body; the game draws those.
+
+Locked orthographic-style camera, identical position, zoom and framing. Full body visible with generous margin on all sides. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames, crisp pixel edges, stable colors. No motion blur, ghosting, added texture, text or logos.
+
+overall_soundscape:
+Silent. No speech, sound effects or music.
+
+non_diegetic_music:
+N/A

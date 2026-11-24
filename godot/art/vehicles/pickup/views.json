@@ -1,0 +1,82 @@
+{
+  "id": "pickup",
+  "name": "1980s Pickup",
+  "sheet": "res://art/vehicles/pickup/pickup-8way-v1.png",
+  "world_length": 250,
+  "world_width": 108,
+  "police": false,
+  "frames": {
+    "front_left": {
+      "region": [
+        67,
+        70,
+        332,
+        311
+      ],
+      "opaque_pixels": 59302
+    },
+    "front": {
+      "region": [
+        557,
+        60,
+        216,
+        321
+      ],
+      "opaque_pixels": 56178
+    },
+    "front_right": {
+      "region": [
+        932,
+        69,
+        327,
+        312
+      ],
+      "opaque_pixels": 58130
+    },
+    "left": {
+      "region": [
+        1345,
+        128,
+        389,
+        224
+      ],
+      "opaque_pixels": 65429
+    },
+    "rear_left": {
+      "region": [
+        68,
+        501,
+        326,
+        316
+      ],
+      "opaque_pixels": 59536
+    },
+    "rear": {
+      "region": [
+        556,
+        506,
+        217,
+        301
+      ],
+      "opaque_pixels": 53684
+    },
+    "rear_right": {
+      "region": [
+        932,
+        501,
+        314,
+        316
+      ],
+      "opaque_pixels": 57608
+    },
+    "right": {
+      "region": [
+        1342,
+        547,
+        393,
+        231
+      ],
+      "opaque_pixels": 68039
+    }
+  }
+}

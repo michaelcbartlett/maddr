@@ -1,0 +1,656 @@
+[
+  {
+    "id": "delorean",
+    "name": "DeLorean DMC-12",
+    "sheet": "res://art/vehicles/delorean/delorean-8way-v1.png",
+    "world_length": 220,
+    "world_width": 92,
+    "police": false,
+    "frames": {
+      "front_left": {
+        "region": [
+          60,
+          76,
+          338,
+          298
+        ],
+        "opaque_pixels": 58328
+      },
+      "front": {
+        "region": [
+          545,
+          50,
+          240,
+          320
+        ],
+        "opaque_pixels": 62385
+      },
+      "front_right": {
+        "region": [
+          932,
+          76,
+          337,
+          298
+        ],
+        "opaque_pixels": 58286
+      },
+      "left": {
+        "region": [
+          1330,
+          124,
+          387,
+          214
+        ],
+        "opaque_pixels": 65673
+      },
+      "rear_left": {
+        "region": [
+          69,
+          512,
+          329,
+          287
+        ],
+        "opaque_pixels": 56298
+      },
+      "rear": {
+        "region": [
+          545,
+          500,
+          240,
+          299
+        ],
+        "opaque_pixels": 58017
+      },
+      "rear_right": {
+        "region": [
+          930,
+          512,
+          328,
+          287
+        ],
+        "opaque_pixels": 55995
+      },
+      "right": {
+        "region": [
+          1330,
+          555,
+          387,
+          215
+        ],
+        "opaque_pixels": 66358
+      }
+    }
+  },
+  {
+    "id": "grand-wagoneer",
+    "name": "1980s Jeep Grand Wagoneer",
+    "sheet": "res://art/vehicles/grand-wagoneer/grand-wagoneer-8way-v1.png",
+    "world_length": 245,
+    "world_width": 105,
+    "police": false,
+    "frames": {
+      "front_left": {
+        "region": [
+          63,
+          40,
+          349,
+          347
+        ],
+        "opaque_pixels": 69932
+      },
+      "front": {
+        "region": [
+          546,
+          35,
+          236,
+          346
+        ],
+        "opaque_pixels": 64305
+      },
+      "front_right": {
+        "region": [
+          925,
+          43,
+          343,
+          344
+        ],
+        "opaque_pixels": 68651
+      },
+      "left": {
+        "region": [
+          1340,
+          97,
+          398,
+          254
+        ],
+        "opaque_pixels": 76851
+      },
+      "rear_left": {
+        "region": [
+          54,
+          484,
+          354,
+          326
+        ],
+        "opaque_pixels": 70142
+      },
+      "rear": {
+        "region": [
+          549,
+          481,
+          228,
+          334
+        ],
+        "opaque_pixels": 62862
+      },
+      "rear_right": {
+        "region": [
+          914,
+          485,
+          352,
+          325
+        ],
+        "opaque_pixels": 69600
+      },
+      "right": {
+        "region": [
+          1339,
+          532,
+          404,
+          263
+        ],
+        "opaque_pixels": 81974
+      }
+    }
+  },
+  {
+    "id": "boxy-sedan",
+    "name": "1980s Sedan",
+    "sheet": "res://art/vehicles/boxy-sedan/boxy-sedan-8way-v1.png",
+    "world_length": 235,
+    "world_width": 96,
+    "police": false,
+    "frames": {
+      "front_left": {
+        "region": [
+          49,
+          73,
+          358,
+          314
+        ],
+        "opaque_pixels": 64969
+      },
+      "front": {
+        "region": [
+          544,
+          48,
+          239,
+          322
+        ],
+        "opaque_pixels": 62331
+      },
+      "front_right": {
+        "region": [
+          919,
+          73,
+          354,
+          314
+        ],
+        "opaque_pixels": 64341
+      },
+      "left": {
+        "region": [
+          1335,
+          124,
+          397,
+          228
+        ],
+        "opaque_pixels": 71650
+      },
+      "rear_left": {
+        "region": [
+          52,
+          505,
+          355,
+          307
+        ],
+        "opaque_pixels": 62725
+      },
+      "rear": {
+        "region": [
+          544,
+          492,
+          239,
+          313
+        ],
+        "opaque_pixels": 61083
+      },
+      "rear_right": {
+        "region": [
+          910,
+          504,
+          348,
+          308
+        ],
+        "opaque_pixels": 62385
+      },
+      "right": {
+        "region": [
+          1336,
+          547,
+          401,
+          233
+        ],
+        "opaque_pixels": 73950
+      }
+    }
+  },
+  {
+    "id": "compact-hatchback",
+    "name": "1980s Compact",
+    "sheet": "res://art/vehicles/compact-hatchback/compact-hatchback-8way-v1.png",
+    "world_length": 195,
+    "world_width": 82,
+    "police": false,
+    "frames": {
+      "front_left": {
+        "region": [
+          71,
+          72,
+          329,
+          304
+        ],
+        "opaque_pixels": 60275
+      },
+      "front": {
+        "region": [
+          547,
+          63,
+          232,
+          305
+        ],
+        "opaque_pixels": 57254
+      },
+      "front_right": {
+        "region": [
+          932,
+          72,
+          320,
+          304
+        ],
+        "opaque_pixels": 59541
+      },
+      "left": {
+        "region": [
+          1351,
+          119,
+          353,
+          223
+        ],
+        "opaque_pixels": 61995
+      },
+      "rear_left": {
+        "region": [
+          80,
+          517,
+          313,
+          278
+        ],
+        "opaque_pixels": 54612
+      },
+      "rear": {
+        "region": [
+          548,
+          505,
+          231,
+          290
+        ],
+        "opaque_pixels": 53767
+      },
+      "rear_right": {
+        "region": [
+          929,
+          516,
+          311,
+          279
+        ],
+        "opaque_pixels": 54025
+      },
+      "right": {
+        "region": [
+          1359,
+          555,
+          365,
+          224
+        ],
+        "opaque_pixels": 63923
+      }
+    }
+  },
+  {
+    "id": "cargo-van",
+    "name": "1980s Cargo Van",
+    "sheet": "res://art/vehicles/cargo-van/cargo-van-8way-v1.png",
+    "world_length": 255,
+    "world_width": 112,
+    "police": false,
+    "frames": {
+      "front_left": {
+        "region": [
+          64,
+          55,
+          336,
+          331
+        ],
+        "opaque_pixels": 66535
+      },
+      "front": {
+        "region": [
+          546,
+          40,
+          226,
+          346
+        ],
+        "opaque_pixels": 64324
+      },
+      "front_right": {
+        "region": [
+          929,
+          55,
+          332,
+          331
+        ],
+        "opaque_pixels": 66422
+      },
+      "left": {
+        "region": [
+          1343,
+          120,
+          376,
+          228
+        ],
+        "opaque_pixels": 70592
+      },
+      "rear_left": {
+        "region": [
+          70,
+          493,
+          330,
+          318
+        ],
+        "opaque_pixels": 65119
+      },
+      "rear": {
+        "region": [
+          544,
+          485,
+          227,
+          326
+        ],
+        "opaque_pixels": 62780
+      },
+      "rear_right": {
+        "region": [
+          918,
+          493,
+          325,
+          318
+        ],
+        "opaque_pixels": 65069
+      },
+      "right": {
+        "region": [
+          1346,
+          544,
+          382,
+          231
+        ],
+        "opaque_pixels": 72550
+      }
+    }
+  },
+  {
+    "id": "pickup",
+    "name": "1980s Pickup",
+    "sheet": "res://art/vehicles/pickup/pickup-8way-v1.png",
+    "world_length": 250,
+    "world_width": 108,
+    "police": false,
+    "frames": {
+      "front_left": {
+        "region": [
+          67,
+          70,
+          332,
+          311
+        ],
+        "opaque_pixels": 59302
+      },
+      "front": {
+        "region": [
+          557,
+          60,
+          216,
+          321
+        ],
+        "opaque_pixels": 56178
+      },
+      "front_right": {
+        "region": [
+          932,
+          69,
+          327,
+          312
+        ],
+        "opaque_pixels": 58130
+      },
+      "left": {
+        "region": [
+          1345,
+          128,
+          389,
+          224
+        ],
+        "opaque_pixels": 65429
+      },
+      "rear_left": {
+        "region": [
+          68,
+          501,
+          326,
+          316
+        ],
+        "opaque_pixels": 59536
+      },
+      "rear": {
+        "region": [
+          556,
+          506,
+          217,
+          301
+        ],
+        "opaque_pixels": 53684
+      },
+      "rear_right": {
+        "region": [
+          932,
+          501,
+          314,
+          316
+        ],
+        "opaque_pixels": 57608
+      },
+      "right": {
+        "region": [
+          1342,
+          547,
+          393,
+          231
+        ],
+        "opaque_pixels": 68039
+      }
+    }
+  },
+  {
+    "id": "police-sedan",
+    "name": "1980s Police Cruiser",
+    "sheet": "res://art/vehicles/police-sedan/police-sedan-8way-v1.png",
+    "world_length": 245,
+    "world_width": 100,
+    "police": true,
+    "frames": {
+      "front_left": {
+        "region": [
+          48,
+          73,
+          360,
+          307
+        ],
+        "opaque_pixels": 64234,
+        "bulbs": [
+          [
+            179,
+            40
+          ],
+          [
+            224,
+            66
+          ]
+        ]
+      },
+      "front": {
+        "region": [
+          545,
+          47,
+          236,
+          327
+        ],
+        "opaque_pixels": 61435,
+        "bulbs": [
+          [
+            85,
+            91
+          ],
+          [
+            153,
+            91
+          ]
+        ]
+      },
+      "front_right": {
+        "region": [
+          922,
+          73,
+          356,
+          307
+        ],
+        "opaque_pixels": 63794,
+        "bulbs": [
+          [
+            136,
+            65
+          ],
+          [
+            184,
+            39
+          ]
+        ]
+      },
+      "left": {
+        "region": [
+          1347,
+          109,
+          387,
+          234
+        ],
+        "opaque_pixels": 69000,
+        "bulbs": [
+          [
+            207,
+            32
+          ],
+          [
+            207,
+            69
+          ]
+        ]
+      },
+      "rear_left": {
+        "region": [
+          48,
+          505,
+          359,
+          318
+        ],
+        "opaque_pixels": 66456,
+        "bulbs": [
+          [
+            146,
+            53
+          ],
+          [
+            193,
+            77
+          ]
+        ]
+      },
+      "rear": {
+        "region": [
+          541,
+          492,
+          246,
+          330
+        ],
+        "opaque_pixels": 65804,
+        "bulbs": [
+          [
+            90,
+            91
+          ],
+          [
+            155,
+            92
+          ]
+        ]
+      },
+      "rear_right": {
+        "region": [
+          918,
+          505,
+          352,
+          319
+        ],
+        "opaque_pixels": 65461,
+        "bulbs": [
+          [
+            208,
+            52
+          ],
+          [
+            169,
+            79
+          ]
+        ]
+      },
+      "right": {
+        "region": [
+          1347,
+          553,
+          391,
+          233
+        ],
+        "opaque_pixels": 70107,
+        "bulbs": [
+          [
+            184,
+            23
+          ],
+          [
+            184,
+            66
+          ]
+        ]
+      }
+    }
+  }
+]

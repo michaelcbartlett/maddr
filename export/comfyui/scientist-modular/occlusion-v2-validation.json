@@ -1,0 +1,80 @@
+{
+  "base_take": "113525_00001_audio.mp4",
+  "effective_submitted_seed": 1073766285531682600,
+  "fixed_seed": true,
+  "preserved_loras": [
+    {
+      "on": true,
+      "lora": "H3_Combat_V2.safetensors",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    },
+    {
+      "on": true,
+      "lora": "Motion_Repair_V2.safetensors",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    },
+    {
+      "on": true,
+      "lora": "None",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    },
+    {
+      "on": true,
+      "lora": "None",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    },
+    {
+      "on": true,
+      "lora": "None",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    },
+    {
+      "on": true,
+      "lora": "None",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    },
+    {
+      "on": true,
+      "lora": "None",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    },
+    {
+      "on": true,
+      "lora": "None",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    },
+    {
+      "on": true,
+      "lora": "None",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    },
+    {
+      "on": true,
+      "lora": "None",
+      "str": 1,
+      "vs": 1,
+      "as": 1
+    }
+  ],
+  "head_occludes_hand_test": "passed",
+  "initial_pose_pixel_identity": "passed",
+  "generation_quality_verified": false
+}

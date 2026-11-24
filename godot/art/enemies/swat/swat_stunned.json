@@ -1,0 +1,50 @@
+{
+  "format": "enemy-edited-clip-v1",
+  "kind": "swat",
+  "animation": "stunned",
+  "frame_width": 66,
+  "frame_height": 66,
+  "frame_count": 1,
+  "fps": 6,
+  "holds": [
+    1
+  ],
+  "origin": [
+    31.0,
+    62.0
+  ],
+  "anchors": [
+    {
+      "chest": [
+        -1.0,
+        -27.200000762939503
+      ],
+      "eye": [
+        5.400001525878899,
+        -37.0
+      ],
+      "eye_far": [
+        1.4000015258788991,
+        -37.0
+      ],
+      "hand_f": [
+        8.718818664550803,
+        -16.480846405029297
+      ],
+      "hand_n": [
+        -7.1536674499512,
+        -16.0285415649414
+      ],
+      "head": [
+        1.0,
+        -38.0
+      ],
+      "muzzle": [
+        -3.1536674499512003,
+        -3.028541564941399
+      ]
+    }
+  ],
+  "source_project": "export/pixelstudio/swat-stunned-improved/swat-stunned-matched-normals.pixelstudio",
+  "source_sha256": "650991d710b58ec523b25319cbaa02cae40a460aa342f9e8b8102f647fdd8388"
+}

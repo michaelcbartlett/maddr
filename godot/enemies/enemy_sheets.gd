@@ -3,8 +3,22 @@ class_name EnemySheets
 ## Bakes every enemy sprite key into one atlas: albedo + OpenGL normal map (CanvasTexture) and a white
 ## silhouette used for the hit-flash / frozen / mind-control / sickness tints.
 const Painter = preload("res://enemies/enemy_painter.gd")
-const CopEditedArt = preload("res://enemies/cop_edited_art.gd")
+const EditedArt = preload("res://enemies/edited_art.gd")
 const COLUMNS := 8
+
+## Edited clips may add states or replace the painter's original frame counts.
+static func states(kind: String) -> Dictionary:
+	var result: Dictionary = Painter.states(kind).duplicate()
+	for state in EditedArt.manifest().get(kind, []):
+		var source := EditedArt.clip(kind, state)
+		if not source.is_empty(): result[state] = int(source.metadata.frame_count)
+	return result
+
+static func frame_origin(sheet: Dictionary, state: String) -> Vector2:
+	var source := EditedArt.clip(sheet.kind, state)
+	if source.is_empty(): return sheet.origin
+	var point: Array = source.metadata.origin
+	return Vector2(float(point[0]), float(point[1]))
 
 ## Sheet dictionary:
 ##   tex: CanvasTexture (diffuse + normal), sil: ImageTexture (white silhouette, same layout)
@@ -12,21 +26,34 @@ const COLUMNS := 8
 ##   origin: foot point inside a cell, foot: world px from the node origin down to the feet, cell: Vector2
 static func build(kind: String) -> Dictionary:
 	var painter := Painter.new()
-	var states: Dictionary = Painter.states(kind)
+	var states: Dictionary = states(kind)
 	var cell: Dictionary = Painter.CELLS[Painter.family(kind)]
 	var cw: int = cell.w + 2; var ch: int = cell.h + 2
-	var total := 0
-	for st in states: total += int(states[st])
-	var rows := int(ceil(total / float(COLUMNS)))
-	var albedo := Image.create(cw * COLUMNS, ch * rows, false, Image.FORMAT_RGBA8)
-	var normal := Image.create(cw * COLUMNS, ch * rows, false, Image.FORMAT_RGBA8)
+	# Keep imported pixels at their native resolution; atlas slots fit the largest clip.
+	for st in states:
+		var source := EditedArt.clip(kind, st)
+		if not source.is_empty():
+			cw = maxi(cw, source.cell.x); ch = maxi(ch, source.cell.y)
+	# Shelf packing: each state uses its own cell size, so a few wide death frames
+	# do not inflate every walking frame.
+	var sizes := {}; var width := cw * COLUMNS; var pen := Vector2i.ZERO; var shelf := 0
+	var places := {}
+	for st in states:
+		var source := EditedArt.clip(kind, st)
+		var slot: Vector2i = source.cell if not source.is_empty() else Vector2i(cell.w + 2, cell.h + 2)
+		sizes[st] = slot; places[st] = []
+		for i in int(states[st]):
+			if pen.x + slot.x > width: pen = Vector2i(0, pen.y + shelf); shelf = 0
+			places[st].append(pen); pen.x += slot.x; shelf = maxi(shelf, slot.y)
+	var albedo := Image.create(width, pen.y + shelf, false, Image.FORMAT_RGBA8)
+	var normal := Image.create(width, pen.y + shelf, false, Image.FORMAT_RGBA8)
 	var origin := Vector2(cell.cx + 1, cell.fy + 1)
 	var frames := {}; var anchors := {}
 	var n := 0
 	for st in states:
 		frames[st] = []; anchors[st] = []
 		for i in int(states[st]):
-			var replacement := CopEditedArt.frame(st, i) if kind == "cop" else {}
+			var replacement := EditedArt.frame(kind, st, i)
 			var img: Image
 			var nrm: Image
 			var local := {}
@@ -39,10 +66,10 @@ static func build(kind: String) -> Dictionary:
 				img = canvas.outlined_image()
 				nrm = canvas.normal_image()
 				for name in painter.anchors: local[name] = painter.anchors[name] + Vector2.ONE - origin
-			var at := Vector2i((n % COLUMNS) * cw, (n / COLUMNS) * ch)
+			var at: Vector2i = places[st][i]
 			albedo.blit_rect(img, Rect2i(Vector2i.ZERO, img.get_size()), at)
 			normal.blit_rect(nrm, Rect2i(Vector2i.ZERO, nrm.get_size()), at)
-			frames[st].append(Rect2(Vector2(at), Vector2(cw, ch)))
+			frames[st].append(Rect2(Vector2(at), Vector2(img.get_size())))
 			anchors[st].append(local)
 			n += 1
 	return _finish({"kind": kind, "albedo": albedo, "normal": normal,
@@ -93,13 +120,13 @@ static func anchor(sheet: Dictionary, state: String, index: int, name: String, f
 ## Baking every sheet takes a few seconds of GDScript pixel work, so finished atlases are cached in
 ## user://enemy_sheets/. The key covers the painter/sheet sources (when readable) plus ART_VERSION;
 ## bump ART_VERSION after art changes if scripts are exported as binary tokens.
-const ART_VERSION := 7
+const ART_VERSION := 8
 static var _cache_dir := ""
 
 static func cache_dir() -> String:
 	if _cache_dir != "": return _cache_dir
 	var src := FileAccess.get_file_as_string("res://enemies/enemy_painter.gd") + FileAccess.get_file_as_string("res://enemies/enemy_sheets.gd") + FileAccess.get_file_as_string("res://enemies/machine_painter.gd")
-	src += CopEditedArt.cache_signature()
+	src += EditedArt.cache_signature()
 	_cache_dir = "user://enemy_sheets/v%d_%x" % [ART_VERSION, src.hash() & 0x7fffffff]
 	return _cache_dir
 

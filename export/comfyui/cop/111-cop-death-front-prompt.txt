@@ -1,0 +1,27 @@
+subject_definitions:
+<Subject 1> is the cartoon police officer in <Picture 1>, exactly as drawn there.
+<Picture 2> is a color swatch only. Its object must NOT appear.
+
+summary:
+[reference generation] A single cartoon defeat collapsing forward.
+
+retention_analysis:
+<Picture 1> (character appearance): fully_preserved - stocky proportions, oversized head, navy peaked cap with gold badge, thick brown mustache and eyebrows, navy uniform with gold buttons, shoulder bars and star badge, black belt with pouches and silver buckle, black boots, wooden baton, palette, thick black outlines, chunky pixel-art style and scale.
+<Picture 2> (swatch): not_preserved - never show it.
+
+detailed_description:
+One police officer, full body, three-quarter SCREEN-RIGHT-facing view in every frame. He holds the one wooden baton in the same hand for the whole shot: his far hand, on the right side of the screen. The near hand stays an empty fist.
+
+He is drawn small with wide empty space around him and stays that size. Neutral until 0.4. His knees buckle, he drops to kneeling by 0.9, sways, then falls face down toward screen-right by 1.6 with a small bounce. The baton rolls out of his hand. From 2.1 he lies completely still, fully inside the frame.
+
+No sparks, stars, smoke, dust, speed lines, glow, flashes, impact marks or particles of any kind; the game adds effects.
+
+Keep the same face, expression style, costume details, baton length, limb lengths, head size and body scale in every frame. One baton only. No gun, radio or extra objects. No extra limbs or fingers. No turning to face the camera.
+
+Locked orthographic-style camera, identical position, zoom and framing. Full body, cap and baton always inside the frame with margin. No pan, orbit, cuts, crossfades or reframing. Flat uniform dark blue-gray background. Sharp individual frames with crisp chunky pixel edges and stable colors. No motion blur, ghost trails, frame blending, added texture, text or logos.
+
+overall_soundscape:
+Silent. No speech, sound effects or music.
+
+non_diegetic_music:
+N/A

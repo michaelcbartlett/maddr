@@ -39,9 +39,11 @@ static func update(e) -> void:
 		g.merge({"t": t, "px": e.x, "py": e.y, "speed": 0.0, "shoot_cd": e.shoot_cd, "shot_t": 9.0, "blink_cd": e.blink_cd,
 			"blink_t": 9.0, "shard_cd": e.shard_cd, "throw_t": 9.0, "slam_on": false, "land_t": 9.0, "seed": randf() * 10.0})
 	var dt := clampf(t - g.t, 0.0, 0.1); g.t = t
+	g.dt = dt
 	if dt > 0.0:
 		var v := Vector2(e.x - g.px, e.y - g.py).length() / dt
 		g.speed = lerpf(g.speed, minf(v, 600.0), 0.35)
+		g.moving = v > 12.0
 	g.px = e.x; g.py = e.y
 	g.shot_t += dt; g.blink_t += dt; g.throw_t += dt; g.land_t += dt
 	# detect gameplay events by watching cooldowns reset (no gameplay hooks needed)
@@ -62,7 +64,7 @@ static func update(e) -> void:
 
 static func muzzle_local(e, anchor := "muzzle") -> Vector2:
 	var sheet := EnemyArt.sheet(sprite_key(e))
-	var m := Sheets.anchor(sheet, "attack", 1, anchor, Vector2(22, -30))
+	var m := Sheets.anchor(sheet, "attack", aim_frame(e) if native(e) else 1, anchor, Vector2(22, -30))
 	return Vector2(0, sheet.foot) + Vector2(m.x * e.face, m.y)
 
 static func muzzle_world(e, anchor := "muzzle") -> Vector2:
@@ -78,12 +80,92 @@ static func _fire_flash(e, g: Dictionary, shot_direction := Vector2.ZERO, anchor
 	f.rotation = target.angle()
 	f.fire(color)
 
+## Enemies with a complete imported clip set (tools/pixelstudio/import_h3_enemies.py).
+static func native(e) -> bool:
+	return bool(Sheets.EditedArt.clip(e.spr, "idle").get("metadata", {}).get("native", false))
+
+## Frame of the aiming sweep that points at the villain; other attacks return 1.
+static func aim_frame(e) -> int:
+	var aims: Array = Sheets.EditedArt.clip(e.spr, "attack").get("metadata", {}).get("aim_degrees", [])
+	if aims.is_empty() or e.A == null or e.A.P == null: return 1
+	var foot: float = EnemyArt.sheet(sprite_key(e)).foot
+	var to := Vector2(e.A.P.x - e.x, e.A.P.y - e.y - foot + 40.0)
+	var wanted := rad_to_deg(atan2(to.y, absf(to.x)))
+	var best := 0
+	for i in aims.size():
+		if absf(float(aims[i]) - wanted) < absf(float(aims[best]) - wanted): best = i
+	return best
+
+## Plays a state at its own frame rate from the moment it was entered.
+static func _native_frame(e, g: Dictionary, st: String) -> int:
+	if g.get("native_state", "") != st: g.native_state = st; g.native_t = 0.0
+	else: g.native_t = g.get("native_t", 0.0) + g.get("dt", 0.0)
+	var meta: Dictionary = Sheets.EditedArt.clip(e.spr, st).get("metadata", {})
+	var index := int(floor((g.native_t + (g.seed if meta.get("loop", false) else 0.0)) * float(meta.get("fps", 24.0)) + 0.000001))
+	var count := int(meta.get("frame_count", 1))
+	return posmod(index, count) if meta.get("loop", false) else mini(index, count - 1)
+
+static func _pick_native(e, g: Dictionary) -> void:
+	var has := func(state: String) -> bool: return Sheets.EditedArt.has(e.spr, state)
+	var moving: bool = g.speed > 12.0
+	var st := "idle"; var fixed := -1
+	if moving:
+		st = "walk"
+		if has.call("run") and g.speed > 72.0: st = "run"
+	var away := Vector2(e.A.P.x - e.x, e.A.P.y - e.y) if e.A != null and e.A.P != null else Vector2(400, 0)
+	if e.ranged and not e.ally:
+		if e.action_phase == "flee": st = "flee" if moving else "idle"
+		elif e.action_phase == "cornered": st = "cornered"
+		elif g.shot_t < 0.3:
+			fixed = aim_frame(e)
+			st = "attack"
+			var aims: Array = Sheets.EditedArt.clip(e.spr, "attack").metadata.get("aim_degrees", [0.0])
+			if absf(float(aims[fixed])) < 14.0 and has.call("shoot"): st = "shoot"; fixed = -1
+		elif e.action_phase == "aim" or (not moving and away.length() < 400.0): st = "attack"; fixed = aim_frame(e)
+		elif moving and has.call("backpedal") and away.length() < 190.0: st = "backpedal"
+	elif not e.ranged and e.action_phase == "swing":
+		st = "attack"
+		var strike: Dictionary = e.strike_profile()
+		if not strike.is_empty(): fixed = strike_frame(strike, e.action_t)
+	# Only a pose that suits sliding feet may replace movement.
+	var calm: bool = st not in ["attack", "shoot", "cornered"]
+	if calm and e.burn_t > 0.0 and has.call("burning"): st = "burning"
+	elif calm and e.ally and moving and has.call("hypnotized"): st = "hypnotized"
+	elif calm and g.speed < 22.0 and (e.sick_t > 0.0 or e.poison_t > 0.0 or e.ebola_t > 0.0) and has.call("sick"): st = "sick"
+	if e.frozen_t > 0.0: st = "frozen"; fixed = 0
+	elif e.time_lock > 0.0: st = "stunned"
+	else:
+		if e.flash > 0.0 and g.get("hurt_t", 9.0) > 0.35: g.hurt_t = 0.0
+		else: g.hurt_t = g.get("hurt_t", 9.0) + g.get("dt", 0.0)
+		# A swing in progress keeps its wind-up readable; other poses flinch.
+		if g.hurt_t < 0.2 and e.action_phase not in ["swing", "aim", "cornered"]: st = "hurt"; fixed = -1
+	if e.rad_t > 0.0: g.rad_seen = g.get("t", 0.0)
+	g.state = st
+	g.frame = _native_frame(e, g, st) if fixed < 0 else fixed
+	if fixed >= 0: g.native_state = ""
+	var tint := Color(0, 0, 0, 0)
+	if e.flash > 0.0: tint = Color(1, 1, 1, 0.45)
+	elif e.ally: tint = TINT_ALLY
+	elif e.frozen_t > 0.0: tint = Color(TINT_FROZEN, 0.45)
+	elif e.time_lock > 0.0: tint = TINT_FROZEN
+	elif e.ebola_t > 0.0: tint = Color("#c7da3a", 0.3 if st == "sick" else 0.5)
+	elif e.sick_t > 0.0 and st != "sick": tint = TINT_SICK
+	g.lift = 0.0; g.jitter = Vector2.ZERO; g.tint = tint
+
 static func _pick(e, g: Dictionary, t: float) -> void:
-	var idle_fps := Sheets.CopEditedArt.fps("idle") if e.spr == "cop" else 2.4
+	if not e.civ and not e.boss and not e.vehicle and native(e):
+		_pick_native(e, g)
+		return
+	var idle_fps := Sheets.EditedArt.fps(e.spr, "idle", 6.0 if e.spr == "cop" else 2.4)
 	var st := "idle"; var fi := int(t * idle_fps + g.seed)
 	var moving: bool = g.speed > 12.0
 	var walk_i := int(e.walk * 0.9)
 	if moving: st = "walk"; fi = walk_i
+	var gait: String = g.get("move_gait", "walk")
+	if Sheets.EditedArt.has(e.spr, gait + "_start") and Sheets.EditedArt.has(e.spr, gait + "_stop"):
+		moving = g.get("moving", false)
+		var motion := locomotion(e.spr, g, moving, g.get("dt", 0.0), gait)
+		st = motion[0]; fi = motion[1]
 	var lift := 0.0; var jitter := Vector2.ZERO
 	if e.civ:
 		if e.panic: st = "panic"; fi = walk_i
@@ -94,13 +176,19 @@ static func _pick(e, g: Dictionary, t: float) -> void:
 		if g.shot_t < 0.12: st = "attack"; fi = 1
 		elif g.shot_t < 0.3 or (not moving and e.A != null and Vector2(e.A.P.x - e.x, e.A.P.y - e.y).length() < 400): st = "attack"; fi = 0
 	else:
-		var window := 0.25 if e.ally else 0.4
-		var start := 0.5 if e.ally else 1.0
-		var k: float = (start - e.atk_cd) / window
-		var swinger: bool = e.swings() and not e.ally
-		if e.action_phase == "swing": st = "attack"; fi = 0   # wind-up: baton raised / shield drawn back
-		elif e.atk_cd > 0.0 and k >= 0.0 and k < 1.0:
-			st = "attack"; fi = 1 + mini(1, int(k * 2.0)) if swinger else int(k * 3.0)
+		var strike: Dictionary = e.strike_profile()
+		if not strike.is_empty():
+			# The native clip contains its own wind-up, both swings and recovery.
+			if e.action_phase == "swing":
+				st = "attack"; fi = strike_frame(strike, e.action_t)
+		else:
+			var window := 0.25 if e.ally else 0.4
+			var start := 0.5 if e.ally else 1.0
+			var k: float = (start - e.atk_cd) / window
+			var swinger: bool = e.swings() and not e.ally
+			if e.action_phase == "swing": st = "attack"; fi = 0   # wind-up: baton raised / shield drawn back
+			elif e.atk_cd > 0.0 and k >= 0.0 and k < 1.0:
+				st = "attack"; fi = 1 + mini(1, int(k * 2.0)) if swinger else int(k * 3.0)
 	if e.type == "drone": lift = 0.0
 	if e.action_phase == "rush": st = "attack"; fi = int(t * 12.0) % 3
 	# status overrides
@@ -108,12 +196,38 @@ static func _pick(e, g: Dictionary, t: float) -> void:
 	if e.frozen_t > 0.0: st = "frozen"; fi = 0
 	elif e.time_lock > 0.0: st = "stunned"; fi = int(t * 4.0)
 	elif e.flash > 0.0: st = "hurt"; fi = 0
+	if st not in ["idle", "walk", "walk_start", "walk_stop", "run", "run_start", "run_stop"]:
+		g.move_phase = "idle"; g.move_time = 0.0
 	if e.flash > 0.0: tint = TINT_FLASH
 	elif e.ally: tint = TINT_ALLY
 	elif e.frozen_t > 0.0: tint = Color(TINT_FROZEN, 0.3)
 	elif e.time_lock > 0.0: tint = TINT_FROZEN
+	elif e.ebola_t > 0.0: tint = Color("#c7da3a",0.5)
 	elif e.sick_t > 0.0: tint = TINT_SICK
 	g.state = st; g.frame = fi; g.lift = lift; g.jitter = jitter; g.tint = tint
+
+static func strike_frame(profile: Dictionary, remaining: float) -> int:
+	return clampi(int(floor(float(profile.frame_count) - remaining * float(profile.fps) + 0.000001)), 0, int(profile.frame_count) - 1)
+
+## Render-only movement sequencing: the lead-in/out play once; only the middle loops.
+## Playback is elapsed time at the clip's fps, independent of movement speed.
+static func locomotion(kind: String, g: Dictionary, moving: bool, dt: float, gait := "walk") -> Array:
+	var phase: String = g.get("move_phase", "idle")
+	var elapsed: float = g.get("move_time", 0.0) + dt
+	if moving and phase not in [gait, gait + "_start"]:
+		phase = gait + "_start"; elapsed = 0.0
+	elif not moving and phase in ["run_start", "run", "walk_start", "walk"]:
+		phase = phase.trim_suffix("_start") + "_stop"; elapsed = 0.0
+	if phase.ends_with("_start") or phase.ends_with("_stop"):
+		var source := Sheets.EditedArt.clip(kind, phase)
+		var duration := float(source.metadata.frame_count) / float(source.metadata.fps)
+		if elapsed + 0.000001 >= duration:
+			elapsed = maxf(0.0, elapsed - duration)
+			phase = gait if moving else "idle"
+	g.move_phase = phase; g.move_time = elapsed
+	var fps := Sheets.EditedArt.fps(kind, phase, 24.0)
+	var count := int(Sheets.EditedArt.clip(kind, phase).get("metadata", {}).get("frame_count", 1))
+	return [phase, int(floor(elapsed * fps + 0.000001)) % count]
 
 static func _boss_state(e, g: Dictionary, t: float, st: String, fi: int) -> Array:
 	var lift := 0.0; var jitter := Vector2.ZERO
@@ -226,6 +340,7 @@ static func _squash(e) -> Vector2:
 static func _squash_pose(e) -> Vector2:
 	if e.boss or e.vehicle or e.civ or e.frozen_t > 0.0 or e.time_lock > 0.0: return Vector2.ONE
 	if e.flash > 0.0: return Vector2(1.1, 0.9)
+	if not e.strike_profile().is_empty(): return Vector2.ONE
 	if e.action_phase == "swing": return Vector2(0.94, 1.07)
 	if not e.ally and e.atk_cd > 0.9 and e.atk_cd <= 1.0 and (e.swings() or e.type == "k9"): return Vector2(1.12, 0.9)
 	return Vector2.ONE
@@ -234,7 +349,7 @@ static func _squash_pose(e) -> Vector2:
 ## atlas (normal x inverted), so they stay on their shadow and light correctly.
 static func draw_sprite(ci: CanvasItem, sheet: Dictionary, state: String, index: int, at: Vector2, face: int, tint := Color(0, 0, 0, 0), alpha := 1.0) -> void:
 	var src := Sheets.frame(sheet, state, index)
-	var o: Vector2 = sheet.origin
+	var o := Sheets.frame_origin(sheet, state)
 	var tex: Texture2D = sheet.tex; var sil: Texture2D = sheet.sil
 	var dest := Rect2(at.x - o.x, at.y - o.y, src.size.x, src.size.y)
 	if face < 0:   # baked mirror atlas: same cell, mirrored; the foot column lands on `at` again
@@ -245,14 +360,28 @@ static func draw_sprite(ci: CanvasItem, sheet: Dictionary, state: String, index:
 	if tint.a > 0.0:
 		ci.draw_texture_rect_region(sil, dest, src, Color(tint.r, tint.g, tint.b, tint.a * alpha))
 
+## Strongest cause wins. Poison, fire and radiation only differ for kinds that have that art.
+static func corpse_mode(e) -> String:
+	if e.frozen_t > 0.0: return "shatter"
+	if e.disint: return "vaporize"
+	if e.ebola_t > 0.0: return "ebola"
+	if native(e):
+		# A full dose clears rad_t in the same hit that kills.
+		if e.rad_t > 0.0 or e.rad_s > 0 or e.gfx.get("t", 0.0) - e.gfx.get("rad_seen", -9.0) < 0.5: return "melt"
+		if e.burn_t > 0.0: return "burnt"
+		if e.poison_t > 0.0: return "poison"
+	return "sick" if e.sick_t > 0.0 else ""
+
 ## Called when a dead enemy leaves the tree: leaves a short-lived corpse playing the death animation.
 static func leave_corpse(e) -> void:
 	if not e.dead or e.hp > 0.0: return   # escaped civilians / wave clear despawns leave nothing
+	if e.gfx.get("skip_corpse",false): return
 	var parent: Node = e.get_parent()
 	if parent == null or parent.is_queued_for_deletion() or not parent.is_inside_tree(): return
 	if Corpse.live >= Corpse.MAX_LIVE: return
 	var c := Corpse.new()
-	c.setup(EnemyArt.sheet(sprite_key(e)), e.face, Vector2(roundf(e.x), roundf(e.y)),
-		"shatter" if e.frozen_t > 0.0 else ("vaporize" if e.disint else ("sick" if e.sick_t > 0.0 else "")), e.boss, e.gfx.get("lift", 0.0))
+	c.setup(EnemyArt.sheet(sprite_key(e)), e.face, Vector2(roundf(e.x), roundf(e.y)), corpse_mode(e), e.boss, e.gfx.get("lift", 0.0))
+	if c.mode == "ebola":
+		c.arena = e.A; c.infection_dps = e.ebola_dps; c.infection_radius = clampf(e.r+8.0,18.0,32.0)
 	if e.vehicle: c.vehicle_angle = e.aim_dir.angle(); c.vehicle_kind = e.type; c.face = 1
 	parent.add_child.call_deferred(c)

@@ -1,0 +1,162 @@
+{
+  "id": "police-sedan",
+  "name": "1980s Police Cruiser",
+  "sheet": "res://art/vehicles/police-sedan/police-sedan-8way-v1.png",
+  "world_length": 245,
+  "world_width": 100,
+  "police": true,
+  "frames": {
+    "front_left": {
+      "region": [
+        48,
+        73,
+        360,
+        307
+      ],
+      "opaque_pixels": 64234,
+      "bulbs": [
+        [
+          179,
+          40
+        ],
+        [
+          224,
+          66
+        ]
+      ]
+    },
+    "front": {
+      "region": [
+        545,
+        47,
+        236,
+        327
+      ],
+      "opaque_pixels": 61435,
+      "bulbs": [
+        [
+          85,
+          91
+        ],
+        [
+          153,
+          91
+        ]
+      ]
+    },
+    "front_right": {
+      "region": [
+        922,
+        73,
+        356,
+        307
+      ],
+      "opaque_pixels": 63794,
+      "bulbs": [
+        [
+          136,
+          65
+        ],
+        [
+          184,
+          39
+        ]
+      ]
+    },
+    "left": {
+      "region": [
+        1347,
+        109,
+        387,
+        234
+      ],
+      "opaque_pixels": 69000,
+      "bulbs": [
+        [
+          207,
+          32
+        ],
+        [
+          207,
+          69
+        ]
+      ]
+    },
+    "rear_left": {
+      "region": [
+        48,
+        505,
+        359,
+        318
+      ],
+      "opaque_pixels": 66456,
+      "bulbs": [
+        [
+          146,
+          53
+        ],
+        [
+          193,
+          77
+        ]
+      ]
+    },
+    "rear": {
+      "region": [
+        541,
+        492,
+        246,
+        330
+      ],
+      "opaque_pixels": 65804,
+      "bulbs": [
+        [
+          90,
+          91
+        ],
+        [
+          155,
+          92
+        ]
+      ]
+    },
+    "rear_right": {
+      "region": [
+        918,
+        505,
+        352,
+        319
+      ],
+      "opaque_pixels": 65461,
+      "bulbs": [
+        [
+          208,
+          52
+        ],
+        [
+          169,
+          79
+        ]
+      ]
+    },
+    "right": {
+      "region": [
+        1347,
+        553,
+        391,
+        233
+      ],
+      "opaque_pixels": 70107,
+      "bulbs": [
+        [
+          184,
+          23
+        ],
+        [
+          184,
+          66
+        ]
+      ]
+    }
+  }
+}

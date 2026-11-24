@@ -16,6 +16,9 @@ func _initialize() -> void:
 func _run() -> void:
 	seed(731)
 	var started = Time.get_ticks_msec()
+	var skin = Art.body_skin
+	Art.body_skin = ""   # the reference sheets are the procedural villain
+
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(REFERENCE+"cases.json"))
 	var sheets = {}
 	for name in ["body","body-normal","xray","gun","gun-normal","off","off-normal"]:
@@ -56,6 +59,8 @@ func _run() -> void:
 		art.draw_shout(pen,0.37)
 	_test_rig()
 	_test_dense_build()
+	Art.body_skin = skin
+	_test_skin()
 	print("CHARACTER TESTS: %d cases, %d image comparisons, maximum channel delta %d, %d failures, %d ms" % [manifest.cases.size(),comparisons,worst_delta,failures,Time.get_ticks_msec()-started])
 	quit(1 if failures else 0)
 
@@ -124,3 +129,23 @@ func _test_dense_build() -> void:
 	var gun = art.weapon_frame(1)
 	_check(gun.cv.get_width()>232,"dense builds expand the drawing canvas")
 	_check(gun.muz+35<gun.cv.get_width(),"dense build muzzle remains inside its texture")
+
+func _test_skin() -> void:
+	if Art.body_skin == "": return
+	var art = Art.new()
+	art.configure(["tesla_helmet"],"laser","pistol")
+	for index in 19:
+		for armed in [false,true]:
+			var frame = art.body_frame(index,armed)
+			_check(frame.get("skin","") == Art.body_skin,"skin replaces the body pixels (pose %d)" % index)
+			_check(frame.img.get_size() == Vector2i(62,70),"skin frames keep the body frame size")
+			_check(frame.img.get_used_rect().size.y > 30,"skin frame %d has artwork" % index)
+			for name in ["shoulderFar","shoulderNear","handOff","neck","hip","footBack","footFront","head"]:
+				_check(frame.anchors.has(name),"skin anchor "+name)
+			var used = frame.img.get_used_rect()
+			for effect in frame.anims:
+				if effect.has("x"): _check(Rect2(used).grow(16).has_point(Vector2(effect.x,effect.y)),"item effects follow the skin")
+	var free = art.body_frame(6,false).img.get_used_rect()
+	var armed = art.body_frame(6,true).img.get_used_rect()
+	_check(armed.end.x < free.end.x,"armed skin drops the off arm")
+	_check(art.xray_texture(art.body_frame(6,false,true)) != null,"skin x-ray renders")

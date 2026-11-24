@@ -34,9 +34,18 @@ func _run() -> void:
 	for p in run.PARTS:
 		_check(p.has("swap") and p.has("t") and p.has("c") and p.has("name") and p.has("look") and not run.ITEM.has(p.id), "part %s is a shop pseudo-item" % p.id)
 	# ---- gen_offers: parts appear, at most one per shop, never the current or starting part ----
-	run.new_run(); run.wave = 2
+	run.new_run()
 	var chance: float = run.RULES.parts.chance
 	run.RULES.parts.chance = 1.0
+	var min_wave := int(run.RULES.parts.get("min_wave", 1))
+	_check(min_wave > 5, "no part offers until the wave-5 boss is behind you")
+	run.wave = min_wave - 1
+	var early := false
+	for n in 50:
+		run.gen_offers()
+		if run.offers.any(func(o): return o.it.has("swap")): early = true
+	_check(not early, "shops before wave %d never offer ammo/frame swaps" % min_wave)
+	run.wave = min_wave
 	var seen := {}
 	for n in 200:
 		run.gen_offers()
@@ -45,11 +54,16 @@ func _run() -> void:
 		var it: Dictionary = parts[0].it
 		seen[it.id] = true
 		if it.id in ["part_ammo_laser", "part_frame_pistol"]: _check(false, "the starting part is never offered"); break
-	_check(seen.has("part_ammo_bullet") and seen.has("part_frame_blunder") and seen.has("part_frame_rifle"), "common parts show up from the first shop")
+	_check(seen.has("part_ammo_bullet") and seen.has("part_frame_blunder") and seen.has("part_frame_rifle"), "common parts show up from the first eligible shop")
 	run.RULES.parts.chance = 0.0
 	run.gen_offers()
 	_check(not run.offers.any(func(o): return o.it.has("swap")), "chance 0 disables part offers")
 	run.RULES.parts.chance = chance
+	# ---- DPS preview on part cards ----
+	run.new_run(); run.build.items = ["cell"]; run.recompute()
+	var dps0: float = run.main_gun_dps(); var bullet_change: float = run.part_dps_change(run.part_def("ammo", 1))
+	_check(bullet_change > 0.2 and run.ammo_id() == "laser" and is_equal_approx(run.main_gun_dps(), dps0), "Bullets preview a DPS gain without changing the gun")
+	_check(run.part_dps_change(run.part_def("frame", 2)) < 0.0, "the Long Rifle previews a DPS loss on a laser")
 	# ---- buying a swap ----
 	run.new_run(); run.wave = 3; run.scrap = 100
 	run.build.items = ["cell"]; run.recompute()
@@ -161,7 +175,7 @@ func _run() -> void:
 	for k in n:
 		a.pickups.clear()
 		var e = a.make_enemy("cop", a.P.x + 400, a.P.y); a.hit(e, 1.0e6, {})
-		if not a.pickups.is_empty(): dropped += 1
+		if a.pickups.any(func(p): return not p.has("intel")): dropped += 1   # Intel dossiers roll separately
 		for p in a.pickups: value += p.v
 		a.enemies.erase(e); e.queue_free()
 		if k % 50 == 0: await process_frame
@@ -169,7 +183,7 @@ func _run() -> void:
 	_check(absf(rate - base) < 0.07, "observed drop rate matches the chance (%.2f)" % rate)
 	_check(absf(value / n - float(run.ET.cop.scrap)) < 0.25 * float(run.ET.cop.scrap), "average scrap per kill is unchanged at the base chance (%.2f)" % (value / n))
 	var b = a.make_enemy("boss", a.P.x + 400, a.P.y); a.pickups.clear(); a.hit(b, 1.0e9, {})
-	_check(a.pickups.filter(func(p): return not p.has("blueprint")).size() == 24, "bosses always drop scrap independently of blueprints")
+	_check(a.pickups.filter(func(p): return not p.has("blueprint") and not p.has("intel")).size() == 24, "bosses always drop scrap independently of blueprints")
 	print("SWAP TESTS: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
 

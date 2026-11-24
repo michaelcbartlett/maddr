@@ -1,0 +1,25 @@
+{
+  "guides": [
+    {
+      "side": "near",
+      "frames": 120,
+      "fps": 24,
+      "minimum_elbow_degrees": 179.99999914622634,
+      "maximum_elbow_degrees": 180.0,
+      "upper_length": 75.578125,
+      "forearm_length": 86.375
+    },
+    {
+      "side": "far",
+      "frames": 120,
+      "fps": 24,
+      "minimum_elbow_degrees": 179.99999914622634,
+      "maximum_elbow_degrees": 180.0,
+      "upper_length": 75.578125,
+      "forearm_length": 86.375
+    }
+  ],
+  "queue_jobs": 2,
+  "requested_seconds": 10,
+  "steps": 16
+}

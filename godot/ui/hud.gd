@@ -23,6 +23,15 @@ func _txt(p: Vector2, s: String, size: int, col: Color, align := HORIZONTAL_ALIG
 
 func _draw() -> void:
 	if A == null: return
+	if A.character_studio:
+		var id: String = Run.selected_consumable
+		var text := "X / Q: %s ×%d   D-UP / E: switch    B / SHIFT: dash, hold to sprint    1-4 / D-PAD: reactions    5 / BACK: time of day" % [Run.CONSUMABLE_NAMES[id],Run.consumable_charges[id]]
+		_txt(Vector2(16,size.y-14),text,11,Color("#b8cad9"))
+		if A.P.size_t>0.0:
+			_txt(Vector2(16,size.y-32),"%s · %.1fs" % [Run.CONSUMABLE_NAMES[A.P.size_effect],A.P.size_t],12,Color("#c8abff"))
+		elif not A.consumables.coils.is_empty():
+			_txt(Vector2(16,size.y-32),"Tesla coils · %d"%A.consumables.coils.size(),12,Color("#8beaff"))
+		return
 	var W := size.x; var H := size.y; var pad := 14.0
 	var P := A.P; var D := Run.D
 	var f := maxf(0.0, P.hp / D.maxHp)
@@ -42,7 +51,7 @@ func _draw() -> void:
 	var arm_text = "BIONIC FIST" if Run.CNT.get("bionic_arm",0)>0 else ""
 	var arm_color = Color("#7defff")
 	if Run.build.off!=null:
-		var kind: String = Run.build.off.get("kind","gun")
+		var kind: String = Run.arm_off().get("kind","gun")
 		if kind=="gun": arm_text = "REAR GUN"
 		else:
 			var melee := not Run.melee_spec().is_empty()
@@ -51,11 +60,12 @@ func _draw() -> void:
 			arm_color = Color("#78dbff") if kind=="time_freeze" else (Color(A.MELEE_COLORS[kind]) if melee else Color("#ff9670"))
 	_txt(Vector2(pad,pad+92),arm_text,11,arm_color)
 	var id: String = Run.selected_consumable
-	var text := "Y / Q  %s ×%d" % [Run.CONSUMABLE_NAMES[id].to_upper(),Run.consumable_charges[id]]
-	if Run.consumable_charges.values().all(func(n): return n == 0): text = "Y / Q  NO CONSUMABLES"
-	if A.consumables.pads.size() == 1: text = "B / SHIFT  PLACE SECOND PAD"
+	var text := "X / Q  %s ×%d" % [Run.CONSUMABLE_NAMES[id].to_upper(),Run.consumable_charges[id]]
+	if Run.consumable_charges.values().all(func(n): return n == 0): text = "X / Q  NO CONSUMABLES"
+	if A.consumables.pads.size() == 1: text = "Y / F  PLACE SECOND PAD"
 	elif P.disguise_t > 0.0: text = "DISGUISED · %.1fs" % P.disguise_t
 	_txt(Vector2(pad,pad+110),text,11,Color("#a4e8c4"))
+	if P.size_t>0.0: _txt(Vector2(pad+220,pad+110),"%s · %.1fs"%[Run.CONSUMABLE_NAMES[P.size_effect],P.size_t],11,Color("#c8abff"))
 	if A.consumables.pads.size() == 2: _txt(Vector2(pad,pad+126),"STEP ON A PAD · ONE TRIP",10,Color("#bf9aff"))
 	else:
 		var carried := 0
@@ -64,7 +74,7 @@ func _draw() -> void:
 		if carried > 1: _txt(Vector2(pad,pad+126),"D-UP / E  SWITCH",10,Color("#a8bcb2"))
 	var action := Run.equipped_action()
 	if action != "":
-		_txt(Vector2(pad,pad+144),"B / SHIFT  " + Run.ITEM[action].name.to_upper() + (" · READY" if A.action_cooldown <= 0.0 else " · %.1fs" % A.action_cooldown),11,Color("#ffb2d8"))
+		_txt(Vector2(pad,pad+144),"Y / F  " + Run.ITEM[action].name.to_upper() + (" · READY" if A.action_cooldown <= 0.0 else " · %.1fs" % A.action_cooldown),11,Color("#ffb2d8"))
 	# wave / timer
 	_txt(Vector2(W / 2, pad + 10), "WAVE %d / %d" % [Run.wave, int(Run.RULES.waves.last)], 14, UiKit.NEON, HORIZONTAL_ALIGNMENT_CENTER)
 	_txt(Vector2(W / 2, pad + 42), str(ceili(A.wave_t)), 32, BAD_if(A.wave_t <= 5 and A.state == "play"), HORIZONTAL_ALIGNMENT_CENTER)

@@ -1,5 +1,8 @@
 # Enemy, NPC and boss art
 
+For roster roles, progression and behavior references during the rebuild, see the
+[Brotato enemy reference notes](../REFERENCE_NOTES.md#enemy-roster-reference-2026-11-23).
+
 The basic cop's **idle**, **walk**, and **baton attack** use the edited PixelStudio clips in
 `art/enemies/cop/`, through `cop_edited_art.gd`. Their normal maps are rebuilt from each original
 body part's physical height profile after applying the saved artist poses; their joint anchors

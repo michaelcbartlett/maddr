@@ -17,6 +17,8 @@ var RULES: Dictionary = {}
 var PARTS: Array = []            # shop offers that swap the main gun's ammo/frame (pseudo-items, see _build_parts)
 const UnlocksT = preload("res://game/unlocks.gd")
 var unlocks: RefCounted          # persistent starting-part unlocks (game/unlocks.gd)
+const IntelT = preload("res://game/intel.gd")
+var intel: RefCounted            # persistent Intel points assigned to modules to rig offer rolls (game/intel.gd)
 
 # ---- run state ----
 ## ammo/frame = the main gun's current parts (indices into AMMO/FRAMES). start = the parts the run began with;
@@ -26,10 +28,10 @@ var custom_name := false
 var run_serial := 0
 var arm_cooldowns := {"time_freeze":0.0,"proximity_bomb":0.0,"seeker_rack":0.0,"shrink_ray":0.0,"freeze_ray":0.0}
 ## Teleport Pads used to be a supply; they are now a B action (item "teleport", consumables.gd place_pad).
-const CONSUMABLE_IDS := ["disguise", "grenade"]
-const CONSUMABLE_NAMES := {"disguise":"Disguise", "grenade":"Grenade"}
-const CONSUMABLE_PRICES := {"disguise":14, "grenade":10}
-var consumable_charges := {"disguise":0, "grenade":0}
+const CONSUMABLE_IDS := ["disguise", "grenade", "shrink_pill", "enlarge_pill", "tesla_coil"]
+const CONSUMABLE_NAMES := {"disguise":"Disguise", "grenade":"Grenade", "shrink_pill":"Shrinking Pill", "enlarge_pill":"Enlargement Pill", "tesla_coil":"Tesla Coil"}
+const CONSUMABLE_PRICES := {"disguise":14, "grenade":10, "shrink_pill":14, "enlarge_pill":18, "tesla_coil":20}
+var consumable_charges := {"disguise":0, "grenade":0, "shrink_pill":0, "enlarge_pill":0, "tesla_coil":0}
 var selected_consumable := "disguise"
 ## Supplies are unlocked by buying their kit from the depot offers (3 charges); refills are bought after that.
 var consumables_owned := {}
@@ -47,7 +49,7 @@ func buy_consumable(id: String) -> bool:
 
 func cycle_consumable() -> void:
 	var current := CONSUMABLE_IDS.find(selected_consumable)
-	for offset in range(1, 4):
+	for offset in range(1, CONSUMABLE_IDS.size()):
 		var id: String = CONSUMABLE_IDS[(current + offset) % CONSUMABLE_IDS.size()]
 		if int(consumable_charges[id]) > 0: selected_consumable = id; return
 
@@ -87,6 +89,7 @@ func _ready() -> void:
 	_build_parts()
 	unlocks = UnlocksT.new(RULES.get("unlocks", []), is_test_process())
 	unlocks.difficulty_names = DIFFICULTY
+	intel = IntelT.new(RULES.get("intel", {}), is_test_process())
 	recompute()
 
 ## Headless test scripts and the --autoplay/--wave hooks must not write the player's unlock save.
@@ -107,7 +110,7 @@ static func base_stats() -> Dictionary:
 		"burn": 0.0, "acid": 0.0, "poison": 0.0, "bleed": 0.0, "sick": 0.0, "freeze": 0.0, "mind": 0.0, "mindDur": 6.0, "minionMul": 1.0,
 		"chain": 0, "chainMul": 1.0, "execute": 0.0, "explode": 0.0, "bomb": 0.0, "remote": 0.0, "boomMul": 1.0, "lifesuck": 0.0, "frozenMul": 1.0,
 		"sustain": 0, "maxHp": 30.0, "regen": 0.0, "armor": 0.0, "speed": 210.0, "speedPct": 0.0, "pickup": 70.0, "pickupPct": 0.0,
-		"scrapPct": 0.0, "dropPct": 0.0, "burnSpread": 0.0, "poisonSpread": 0.0, "orbs": 0, "moon": 0, "crit": 0.05, "meleeSpd": 0.0, "meleeReach": 0.0, "meleeDmg": 0.0, "burnMul": 1.0, "poisonMul": 1.0, "lightningMul": 1.0, "rad": 0.0, "radMul": 1.0, "aimGuide": 0, "beam": 0, "guns": []}
+		"scrapPct": 0.0, "dropPct": 0.0, "burnSpread": 0.0, "poisonSpread": 0.0, "orbs": 0, "moon": 0, "crit": 0.05, "meleeSpd": 0.0, "meleeReach": 0.0, "meleeDmg": 0.0, "burnMul": 1.0, "poisonMul": 1.0, "lightningMul": 1.0, "rad": 0.0, "radMul": 1.0, "ebola":0.0, "aimGuide": 0, "beam": 0, "guns": []}
 
 static func apply_def(s: Dictionary, def: Dictionary) -> void:
 	if def.has("set"):
@@ -126,20 +129,81 @@ func ammo_id(i: int = -1) -> String:
 ## True when the main gun fires the Shock Grapple (game/grapple.gd) instead of shots.
 func has_hook() -> bool: return ammo_id() == "hook"
 
+func has_primary_melee() -> bool: return AMMO[build.ammo].has("melee")
+
+## ---- hand loadout ----
+## A melee primary and a melee weapon on the Bionic Arm can trade hands (main hand = manual sweep, arm = auto swing).
+## build.hands_swapped only flips which hand holds which owned weapon; ownership, selling and trade-ins are unchanged.
+func _arm_melee_kind() -> String:
+	if build.off == null: return ""
+	var kind: String = build.off.get("kind", "gun")
+	return kind if ITEM.has(kind) and ITEM[kind].get("arm", "") == kind and ITEM[kind].has("melee") else ""
+
+func can_swap_hands() -> bool:
+	return has_primary_melee() and _arm_melee_kind() != "" and _arm_melee_kind() != String(AMMO[build.ammo].melee)
+
+func hands_swapped() -> bool: return bool(build.get("hands_swapped", false)) and can_swap_hands()
+
+func swap_hands() -> bool:
+	if not can_swap_hands(): return false
+	build.hands_swapped = not hands_swapped()
+	if not custom_name: build.name = weapon_name()
+	recompute()
+	return true
+
+## Melee kind in the main hand ("" for a ranged primary).
+func primary_kind() -> String:
+	if not has_primary_melee(): return ""
+	return _arm_melee_kind() if hands_swapped() else String(AMMO[build.ammo].melee)
+
+## Id the main hand draws/fires with: the primary melee kind, or the gun's ammo id.
+func primary_weapon_id() -> String: return primary_kind() if has_primary_melee() else ammo_id()
+
+## build.off as actually mounted on the arm (with the hands swap applied).
+func arm_off() -> Variant:
+	return {"kind": String(AMMO[build.ammo].melee)} if hands_swapped() else build.off
+
+## Owned things that can go in the Bionic Arm slot, newest first, one entry per id.
+func arm_options() -> Array:
+	var out: Array = []
+	if CNT.get("bionic_arm", 0) == 0: return out
+	for i in range(build.items.size() - 1, -1, -1):
+		var id: String = build.items[i]
+		if (id == "offhand" or ITEM[id].has("arm")) and not out.has(id): out.append(id)
+	return out
+
+## Mount an owned arm item (makes it the newest so _rebuild_off() and later sales keep it).
+func mount_arm(id: String) -> bool:
+	if not arm_options().has(id): return false
+	build.items.remove_at(build.items.rfind(id)); build.items.append(id)
+	_rebuild_off(); recompute()
+	return true
+
+## The arm item currently mounted ("" for none / bare fist).
+func mounted_arm_id() -> String:
+	if build.off == null: return ""
+	var kind: String = build.off.get("kind", "gun")
+	if kind == "gun": return "offhand"
+	for it in ITEMS:
+		if it.get("arm", "") == kind: return it.id
+	return ""
+
 ## The rear (off-hand) gun shoots the next ammo after the main gun's. The grapple is main-gun only.
 func off_ammo() -> int:
 	var i: int = build.ammo
 	for step in AMMO.size():
 		i = (i + 1) % AMMO.size()
-		if AMMO[i].id != "hook": return i
+		if AMMO[i].id != "hook" and not AMMO[i].has("melee"): return i
 	return 0
 
-func recompute() -> void:
+func recompute(emit := true) -> void:
 	S = base_stats(); CNT = {}
-	apply_def(S, AMMO[build.ammo]); apply_def(S, FRAMES[build.frame])
+	apply_def(S, AMMO[build.ammo])
+	if not has_primary_melee(): apply_def(S, FRAMES[build.frame])
 	(S.guns as Array).push_front(ammo_id())
 	for id in build.items:
 		apply_def(S, ITEM[id]); CNT[id] = CNT.get(id, 0) + 1
+	if has_primary_melee(): S.guns = [primary_weapon_id()]
 	var is_laser := ammo_id() == "laser"
 	D = {
 		"dmg": maxf(1.0, S.dmg * S.dmgMul * (1.0 + S.dmgPct) * (1.0 + 0.1 * S.drill if is_laser else 1.0)),
@@ -152,9 +216,27 @@ func recompute() -> void:
 		"maxHp": maxi(10, roundi(S.maxHp)),
 	}
 	D.pf = clampf(D.cd / 0.6, 0.3, 1.5) / sqrt(D.shots)   # proc scaling for fast / multi-shot weapons
-	build_changed.emit()
+	if emit: build_changed.emit()
+
+## Main gun's direct damage per second (every pellet hits, crits averaged in; no DOTs or procs).
+func main_gun_dps() -> float:
+	return D.dmg * D.shots * (1.0 + S.crit) / D.cd
+
+## Fractional change in main_gun_dps() if this ammo/frame part offer were bought (0.25 = +25%).
+func part_dps_change(it: Dictionary) -> float:
+	var before := main_gun_dps(); var keep: int = build[it.swap]
+	var s0 := S; var d0 := D; var c0 := CNT
+	build[it.swap] = int(it.idx); recompute(false)
+	var after := main_gun_dps()
+	build[it.swap] = keep; S = s0; D = d0; CNT = c0
+	return after / maxf(0.001, before) - 1.0
 
 func weapon_name() -> String:
+	if has_primary_melee():
+		var noun: String = AMMO[build.ammo].noun
+		for d in AMMO:
+			if d.get("melee", "") == primary_kind(): noun = d.noun
+		return "The Diabolical " + noun
 	return "The Diabolical %s %s" % [AMMO[build.ammo].noun, FRAMES[build.frame].noun]
 
 func display_name() -> String:
@@ -167,7 +249,8 @@ func worn_core() -> String:
 	return ""
 
 func wave_len(w: int) -> float:
-	return float(RULES.waves.len.get(str(w), RULES.waves.len_default))
+	var duration := float(RULES.waves.len.get(str(w), RULES.waves.len_default))
+	return float(RULES.heist.get("duration", duration)) if is_heist_wave(w) else duration
 
 func boss_for(w: int) -> Variant:
 	return BOSSES.get(w, null)
@@ -177,18 +260,20 @@ func boss_for(w: int) -> Variant:
 func new_run() -> void:
 	run_serial += 1
 	build = {"ammo": 0, "frame": 0, "items": [], "name": "", "off": null, "start": {"ammo": 0, "frame": 0}, "swapped": {"ammo": false, "frame": false}}
-	unlocks.begin_run()
+	unlocks.begin_run(); intel.begin_run()
 	custom_name = false; scrap = 0; scrap_f = 0.0; kills = 0; total_scrap = 0; wave = 1
 	arm_cooldowns = {"time_freeze":0.0,"proximity_bomb":0.0,"seeker_rack":0.0,"shrink_ray":0.0,"freeze_ray":0.0}
-	consumable_charges = {"disguise":0, "grenade":0}; selected_consumable = "disguise"; consumables_owned = {}
+	consumable_charges = {"disguise":0, "grenade":0, "shrink_pill":0, "enlarge_pill":0, "tesla_coil":0}; selected_consumable = "disguise"; consumables_owned = {}
 	set_difficulty(1); theme_order = []
 	heist_wave = pick_heist_wave(); bank_cracked = false
 	recompute()
 
 ## Design screen: choose an unlocked starting part (part = "ammo" | "frame"). Locked parts are refused.
 func set_start(part: String, i: int) -> bool:
+	if part == "frame" and has_primary_melee(): return false
 	var table: Array = AMMO if part == "ammo" else FRAMES
 	if i < 0 or i >= table.size() or not unlocks.is_unlocked(part, table[i].id): return false
+	if table[i].get("no_start", false): return false   # shop-only (the Shock Whip is a rare shop find, never a starting weapon)
 	build[part] = i; build.start[part] = i; build.swapped[part] = false
 	recompute()
 	return true
@@ -230,6 +315,14 @@ func drop_chance() -> float:
 func drop_value_mult() -> float:
 	return 1.0 / maxf(0.05, float(RULES.economy.get("drop_chance", 1.0)))
 
+## Intel dossiers dropped by a kill (rules.json "intel"): bosses drop boss_drop; cops drop one with drop_chance
+## from min_wave on. `roll` is a uniform 0..1 random number (passed in so tests can be deterministic).
+func intel_drops(is_boss: bool, roll: float, w: int = -1) -> int:
+	var r: Dictionary = RULES.get("intel", {})
+	if (wave if w < 0 else w) < int(r.get("min_wave", 1)): return 0
+	if is_boss: return int(r.get("boss_drop", 0))
+	return 1 if roll < float(r.get("drop_chance", 0.0)) else 0
+
 ## Scrap per cop kill falls off with the wave: kill counts grow ~15x over a run while prices only
 ## double, so without this the bank snowballs. Crates, cash and boss drops are not affected.
 func kill_scrap_mult(w: int = -1) -> float:
@@ -248,7 +341,7 @@ func _build_parts() -> void:
 			if not prices.has(d.id): continue
 			PARTS.append({"id": "part_%s_%s" % [part, d.id], "swap": part, "idx": i, "t": int(prices[d.id].t), "c": int(prices[d.id].c),
 				"ic": "💥" if part == "ammo" else "🔧", "name": d.name,
-				"desc": ("NEW AMMO · " if part == "ammo" else "NEW FRAME · ") + d.desc,
+				"desc": ("NEW PRIMARY · " if d.has("melee") else ("NEW AMMO · " if part == "ammo" else "NEW FRAME · ")) + d.desc,
 				"look": "Replaces your main gun's %s" % part})
 
 func part_def(part: String, i: int) -> Dictionary:
@@ -262,6 +355,7 @@ func _start_part(part: String) -> int: return int(build.get("start", {}).get(par
 ## A part is offered only if it isn't already on the gun and isn't the run's starting part
 ## (selling a bought part puts the starting part back, so buying it would be pointless).
 func part_available(it: Dictionary) -> bool:
+	if it.swap == "frame" and has_primary_melee(): return false
 	return int(build[it.swap]) != int(it.idx) and _start_part(it.swap) != int(it.idx)
 
 func wave_price(c: float, w: int = -1) -> int:
@@ -284,7 +378,8 @@ func item_available(it: Dictionary) -> bool:
 	var unlock_rule: Dictionary = unlocks.rule_for("item", it.id)
 	if wave < int(unlock_rule.get("min_wave", 1)): return false
 	if it.id=="bionic_arm" and CNT.get("bionic_arm",0)>0: return false
-	if (it.id=="offhand" or it.has("arm") or it.has("needs_arm")) and CNT.get("bionic_arm",0)==0: return false
+	if (it.id=="offhand" or it.has("arm")) and CNT.get("bionic_arm",0)==0: return false
+	if it.has("needs_arm") and CNT.get("bionic_arm",0)==0 and not has_primary_melee(): return false
 	if it.id == "offhand" and build.off != null and build.off.get("kind","gun")=="gun": return false
 	if it.has("arm") and build.off!=null and build.off.get("kind","gun")==it.arm: return false
 	if it.id == "sustain" and (not (S.guns as Array).has("laser") or S.sustain >= 2 or not S.beam): return false
@@ -299,7 +394,8 @@ func item_available(it: Dictionary) -> bool:
 	if it.id == "windings" and not (S.chain or CNT.get("tesla_helmet",0) > 0 or has_hook()): return false
 	# Focusing Lens: laser bolts -> piercing beam. Meta-unlocked (reach wave 5), one copy, only with a laser equipped.
 	if it.id == "lens" and (not unlocks.is_unlocked("item", "lens") or S.beam or not has_laser()): return false
-	if it.id == "split" and (D.shots >= 9 or has_hook()): return false
+	if it.id == "split" and (D.shots >= 9 or has_hook() or has_primary_melee()): return false
+	if it.id in ["gLaser", "gBullet", "gRazor"] and has_primary_melee(): return false
 	if it.id in ["gLaser", "gBullet", "gRazor"] and (S.guns as Array).size() >= 4: return false
 	return true
 
@@ -328,14 +424,32 @@ func gen_offers() -> void:
 			if r <= 0.0: tier = t; break
 		var pool: Array = []
 		# at most one ammo/frame swap per shop; a rolled tier also offers cheaper-tier parts
-		if not offers.any(func(o): return o.it.has("swap")) and randf() < float(RULES.get("parts", {}).get("chance", 0.0)):
+		if w >= int(RULES.get("parts", {}).get("min_wave", 1)) and not offers.any(func(o): return o.it.has("swap")) and randf() < float(RULES.get("parts", {}).get("chance", 0.0)):
 			pool = PARTS.filter(func(it): return int(it.t) <= tier and part_available(it))
 		if pool.is_empty():
 			pool = ITEMS.filter(func(it): return int(it.t) == tier and item_available(it) and not offers.any(func(o): return o.it.id == it.id))
 		if pool.is_empty(): pool = ITEMS.filter(func(x): return int(x.t) == 1 and item_available(x) and not offers.any(func(o): return o.it.id == x.id))
 		if pool.is_empty(): break
-		var it: Dictionary = pool.pick_random()
+		var it: Dictionary = weighted_pick(pool)
 		offers.append({"it": it, "price": wave_price(it.c, w), "sold": false})
+
+## Picks one entry from an offer pool, weighted by the Intel points assigned to each module (game/intel.gd).
+## With no points assigned this is a uniform pick. Use it anywhere modules are rolled.
+func weighted_pick(pool: Array) -> Dictionary:
+	if pool.is_empty(): return {}
+	var tot := 0.0
+	for it in pool: tot += intel.weight(String(it.get("id", "")))
+	var r := randf() * tot
+	for it in pool:
+		r -= intel.weight(String(it.get("id", "")))
+		if r < 0.0: return it
+	return pool[-1]
+
+## Chance that an item is among the very next pick from `pool` (for the Intel screen's odds readout).
+func pick_share(pool: Array, id: String) -> float:
+	var tot := 0.0
+	for it in pool: tot += intel.weight(String(it.get("id", "")))
+	return intel.weight(id) / tot if tot > 0.0 and pool.any(func(it): return it.get("id", "") == id) else 0.0
 
 func open_shop_for_next_wave() -> void:
 	wave += 1
@@ -356,6 +470,7 @@ func buy(i: int) -> bool:
 	if o.it.id == "offhand":
 		build.off = {"kind":"gun","ammo": off_ammo(), "frame": 0, "items": []}
 	elif o.it.has("arm"): build.off = {"kind":o.it.arm}
+	if o.it.id == "offhand" or o.it.has("arm"): build.hands_swapped = false   # a new weapon goes on the arm (the shop then offers the swap)
 	recompute()
 	return true
 
@@ -369,6 +484,7 @@ func _buy_part(o: Dictionary) -> bool:
 	build[part] = int(o.it.idx)
 	if not build.has("swapped"): build.swapped = {"ammo": false, "frame": false}
 	build.swapped[part] = true
+	if part == "ammo": build.hands_swapped = false
 	if not custom_name: build.name = weapon_name()
 	recompute()
 	return true
@@ -403,7 +519,7 @@ func sell(id: String) -> int:
 	if id.begins_with("part:"):
 		# selling a bought part puts the run's starting part back on the gun
 		var part := id.substr(5); var got := part_trade_in(part)
-		build[part] = _start_part(part); build.swapped[part] = false
+		build[part] = _start_part(part); build.swapped[part] = false; build.hands_swapped = false
 		if not custom_name: build.name = weapon_name()
 		scrap += got
 		recompute()
@@ -415,9 +531,18 @@ func sell(id: String) -> int:
 	recompute()
 	return refund
 
+## Kind the arm will hold after _rebuild_off(): the newest owned slot item.
+func _rebuilt_kind() -> String:
+	for i in range(build.items.size() - 1, -1, -1):
+		var id: String = build.items[i]
+		if id == "offhand": return "gun"
+		if ITEM[id].has("arm"): return ITEM[id].arm
+	return ""
+
 ## The arm slot holds the most recently bought slot item that is still owned (same rule as buy()).
 func _rebuild_off() -> void:
 	var prev = build.off
+	if prev == null or prev.get("kind", "gun") != _rebuilt_kind(): build.hands_swapped = false
 	build.off = null
 	for i in range(build.items.size() - 1, -1, -1):
 		var id: String = build.items[i]
@@ -450,11 +575,20 @@ func arm_name(kind: String) -> String:
 ## Bare bionic fist: what the arm swings when no melee weapon is mounted.
 const FIST_MELEE := {"reach":58.0,"arc":0.4,"swing":0.26,"cd":0.72,"dmg":10.0,"scale":0.35,"knock":130.0,"targets":1,"proc":false}
 
+## Manual main-hand melee is independent of the automatic bionic arm.
+func primary_melee_spec() -> Dictionary:
+	if not has_primary_melee(): return {}
+	var kind: String = primary_kind()
+	var spec: Dictionary = ITEM[kind].melee.duplicate()
+	spec.kind = kind; spec.proc = true
+	spec.dmg *= 2.5; spec.scale = 1.75; spec.cd *= 0.6
+	return _scaled_melee(spec)
+
 ## Auto-swing stats for the arm slot: the mounted melee weapon, the bare fist, or {} when the arm is busy or absent.
 func melee_spec() -> Dictionary:
 	if CNT.get("bionic_arm",0) == 0: return {}
 	if build.off == null: return _scaled_melee(FIST_MELEE.duplicate())
-	var kind: String = build.off.get("kind","gun")
+	var kind: String = arm_off().get("kind","gun")
 	for it in ITEMS:
 		if it.get("arm","") == kind and it.has("melee"):
 			var spec: Dictionary = it.melee.duplicate(); spec.kind = kind; spec.proc = true
@@ -473,8 +607,14 @@ func stats_rows() -> Array:
 	## [label, value, is_effect]
 	var r: Array = []
 	var pct := func(v): return str(roundi(v * 100)) + "%"
-	r.append(["Damage", "%.1f" % D.dmg, false]); r.append(["Fire rate", "%.2f/s" % (1.0 / D.cd), false])
-	r.append(["Range", str(roundi(D.range)), false]); r.append(["Shot width", str(roundi(D.width)), false])
+	if has_primary_melee():
+		var main := primary_melee_spec()
+		r.append(["Swing damage", "%.1f" % (main.dmg + D.dmg * main.scale), false])
+		r.append(["Blade reach", str(roundi(main.reach)), false])
+		r.append(["Control", "Sweep stick / mouse", false])
+	else:
+		r.append(["Damage", "%.1f" % D.dmg, false]); r.append(["Fire rate", "%.2f/s" % (1.0 / D.cd), false])
+		r.append(["Range", str(roundi(D.range)), false]); r.append(["Shot width", str(roundi(D.width)), false])
 	if D.shots > 1: r.append(["Shots per fire", str(D.shots), false])
 	if S.guns.size() > 1: r.append(["Guns", " + ".join(S.guns), false])
 	if has_laser(): r.append(["Laser", "beam" if S.beam else "bolt", false])
@@ -482,7 +622,7 @@ func stats_rows() -> Array:
 	r.append(["Pierce", "∞" if ammo_id() == "laser" and S.beam else str(S.pierce), false])
 	r.append(["Loot drop", pct.call(drop_chance()), false])
 	if build.off != null:
-		var kind: String = build.off.get("kind","gun")
+		var kind: String = arm_off().get("kind","gun")
 		var label: String = AMMO[build.off.ammo].name+" · rear fire" if kind=="gun" else arm_name(kind)
 		var spec := melee_spec()
 		if not spec.is_empty(): label += " · auto melee %.2fs" % float(spec.cd)
@@ -496,6 +636,7 @@ func stats_rows() -> Array:
 	if S.poisonSpread: r.append(["☠ Poison spread", pct.call(S.poisonSpread) + "/s", true])
 	if S.bleed: r.append(["🩸 Bleed", "%.1f/s·stack" % S.bleed, true])
 	if S.sick: r.append(["🦠 Sickness", pct.call(S.sick), true])
+	if S.ebola: r.append(["🦠 Ebola Ammo", "%.0f/s · infectious bodies" % (4.0*S.ebola), true])
 	if S.freeze: r.append(["🧊 Chill", pct.call(S.freeze), true])
 	if S.mind: r.append(["🌀 Mind control", pct.call(S.mind), true])
 	if S.chain: r.append(["⚡ Chain jumps", str(S.chain), true])

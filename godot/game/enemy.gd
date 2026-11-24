@@ -15,6 +15,7 @@ var dmg := 5.0
 var scrap := 1.0
 var spr := "cop"
 var heavy := false
+var size_class := "small"
 var boss := false
 var ranged := false
 var fly := false
@@ -53,6 +54,8 @@ var poison_gen := 0
 var bleed_s := 0
 var bleed_t := 0.0
 var sick_t := 0.0
+var ebola_t := 0.0
+var ebola_dps := 0.0
 var rad_s := 0
 var shrink_meter := 0.0   # Shrink Ray build-up; at 1.0 the cop shrinks (shrunk_t)
 var shrunk_t := 0.0
@@ -121,6 +124,7 @@ static var _feel_rng := RandomNumberGenerator.new()
 
 func setup(arena: Node, t: String, px: float, py: float) -> void:
 	A = arena; type = t; x = px; y = py; position = Vector2(x, y)
+	self.px = px; self.py = py
 	var T: Dictionary = Run.ET[t]
 	var w := Run.wave - 1
 	var sc: Dictionary = Run.SCALING
@@ -138,6 +142,7 @@ func setup(arena: Node, t: String, px: float, py: float) -> void:
 	scrap = T.scrap; spr = T.spr
 	heavy = T.get("heavy", 0) == 1; boss = T.get("boss", 0) == 1; ranged = T.get("ranged", 0) == 1; fly = T.get("fly", 0) == 1
 	behavior = T.get("behavior", ""); vehicle = T.get("vehicle", 0) == 1
+	size_class = str(T.get("size_class","large" if boss or vehicle else ("medium" if heavy else "small")))
 	aim_dir = Vector2(A.P.x - x, A.P.y - y).normalized(); action_dir = aim_dir
 	action_cd = randf_range(1.3, 2.4)
 	flank = _feel_rng.randf_range(-0.6, 0.6)
@@ -203,6 +208,9 @@ func tick(dt: float) -> void:
 			for o in A.enemies:
 				if not o.dead and not o.ally and o != self and o.sick_t <= 0.0 and _d2(o) < 60 * 60:
 					o.sick_t = 5.0; break
+	if ebola_t > 0.0:
+		# Damage continues after leaving a body; only corpse contact spreads this infection.
+		ebola_t = maxf(0.0,ebola_t-dt); dps += ebola_dps; dcol = Color("#c7da3a")
 	if dps > 0.0 and not ally:
 		dot += dps * dt
 		if dot >= maxf(1.0, dps * 0.5):
@@ -231,7 +239,7 @@ func tick(dt: float) -> void:
 	if behavior in ["vex_sentry","vex_mine"]:
 		preload("res://game/rival_scientist.gd").gadget_tick(self,dt)
 		return
-	var sp := spd * (0.55 if slow_t > 0.0 else 1.0) * (0.7 if sick_t > 0.0 else 1.0) * (0.6 if shrunk_t > 0.0 else 1.0)
+	var sp := spd * (0.55 if slow_t > 0.0 else 1.0) * (0.7 if sick_t > 0.0 or ebola_t > 0.0 else 1.0) * (0.6 if shrunk_t > 0.0 else 1.0)
 	var P = A.P
 	var tx: float = P.x; var ty: float = P.y; var tgt_ally: Enemy = null
 	tgt_t -= dt
@@ -293,7 +301,46 @@ const SWING := {"cop": [0.26, 12.0, 0.0], "riot": [0.42, 16.0, 150.0]}
 const SWING_SLOW := 0.35
 ## Called by EnemyView (dynamically, so the view never compiles this script ahead of the Run autoload).
 func swings() -> bool: return SWING.has(type)
+
+func strike_profile() -> Dictionary:
+	if type != "cop": return {}
+	var clip := EnemyView.Sheets.EditedArt.clip(spr, "attack")
+	if clip.is_empty() or not clip.metadata.has("hit_frames"): return {}
+	return clip.metadata
+
+## One clock drives the complete authored combo and its two contact events.
+func _strike(dt: float, pd: float, profile: Dictionary, victim = null) -> void:
+	var duration := float(profile.frame_count) / float(profile.fps)
+	var hits: Array = profile.hit_frames
+	var radius: float = victim.r if victim != null else A.P.r
+	var reach := r + radius + float(SWING.cop[1])
+	if action_phase != "swing":
+		if pd < reach and atk_cd <= 0.0:
+			action_phase = "swing"; action_t = duration
+		return
+	var before := duration - action_t
+	action_t = maxf(0.0, action_t - dt)
+	var after := duration - action_t
+	for frame in hits:
+		var contact := float(frame) / float(profile.fps)
+		if before + 0.000001 < contact and after + 0.000001 >= contact:
+			var target := Vector2(victim.x, victim.y) if victim != null else Vector2(A.P.x, A.P.y)
+			if Vector2(x, y).distance_to(target) < reach + 4.0:
+				if victim != null:
+					A.hit(victim, (dmg * 2.0 + Run.D.dmg * 0.5) * Run.S.minionMul / hits.size(), {"col": Color("#d07bff")})
+					hp -= victim.dmg * (1.0 if victim.boss else 0.6) / hits.size()
+				else:
+					A.hurt_player(dmg / hits.size())
+					var away := (Vector2(x, y) - target).normalized()
+					_move(away.x * BITE_KNOCKBACK * 0.6 / hits.size(), away.y * BITE_KNOCKBACK * 0.6 / hits.size())
+	if action_t <= 0.0:
+		action_phase = ""; atk_cd = 0.5 if ally else 1.0
+
 func _swing(dt: float, pd: float) -> void:
+	var profile := strike_profile()
+	if not profile.is_empty():
+		_strike(dt, pd, profile)
+		return
 	var P = A.P
 	var spec: Array = SWING[type]
 	var reach: float = r + P.r + spec[1]
@@ -371,18 +418,24 @@ func _civ_ai(dt: float) -> void:
 func _ally_ai(dt: float) -> void:
 	var S: Dictionary = Run.S
 	ally_t -= dt; tgt_t -= dt
-	if action_phase == "swing": action_phase = ""
+	var profile := strike_profile()
+	if action_phase == "swing" and profile.is_empty(): action_phase = ""
 	if tgt_t <= 0.0 or tgt == null or tgt.dead or tgt.ally: tgt_t = 0.3; tgt = A.nearest_foe(x, y)
 	var t := tgt
 	if t != null:
 		var dx := t.x - x; var dy := t.y - y; var d := maxf(0.0001, sqrt(dx * dx + dy * dy)); face = 1 if dx >= 0 else -1
-		if d > r+t.r:
+		if action_phase == "swing" and not profile.is_empty():
+			_strike(dt, d, profile, t)
+		elif d > r+t.r:
 			var waypoint = A.nav.waypoint(self,Vector2(t.x,t.y),dt) if not fly else Vector2(t.x,t.y)
 			var direction = (waypoint-Vector2(x,y)).normalized()
 			_move(direction.x*spd*1.25*dt,direction.y*spd*1.25*dt)
 		elif atk_cd <= 0.0:
-			atk_cd = 0.5; A.hit(t, (dmg * 2.0 + Run.D.dmg * 0.5) * S.minionMul, {"col": Color("#d07bff")})
-			hp -= t.dmg * (1.0 if t.boss else 0.6)
+			if not profile.is_empty(): _strike(dt, d, profile, t)
+			else:
+				atk_cd = 0.5; A.hit(t, (dmg * 2.0 + Run.D.dmg * 0.5) * S.minionMul, {"col": Color("#d07bff")})
+				hp -= t.dmg * (1.0 if t.boss else 0.6)
+	elif action_phase == "swing": action_phase = ""; action_t = 0.0
 	if ally_t <= 0.0 or hp <= 0.0:   # brain overload
 		dead = true; A.explode(x, y, (10.0 + Run.D.dmg) * S.minionMul, 70, Color("#d07bff"))
 		var n := maxi(1, int(scrap))
@@ -416,17 +469,17 @@ func _boss_ai(dt: float, dx: float, dy: float, d: float, sp: float) -> void:
 				if charge_t < -charge_windup:
 					charge_t = randf_range(1.35, 1.9) if rage else randf_range(2.0, 2.8)
 					charging = 0.75 if rage else 0.65
-					var direction := Vector2(P.x - x, P.y - y).normalized()
+					var direction := action_dir   # aimed when the windup began, so a sidestep during the telegraph dodges it
 					var speed := sp * (3.8 if rage else 3.6)
 					cvx = direction.x * speed; cvy = direction.y * speed; A.snd("charge")
 			else:
 				_move(dx / d * sp * dt, dy / d * sp * dt); charge_t -= dt
-				if charge_t <= 0.0: charge_t = -0.001
+				if charge_t <= 0.0: charge_t = -0.001; action_dir = Vector2(P.x - x, P.y - y).normalized()
 				slam_cd -= dt
 				if slam_cd <= 0.0 and Vector2(P.x - x, P.y - y).length() < 450:
 					slam_cd = randf_range(2.5, 3.2) if rage else randf_range(3.2, 4.0)
-					var duration := 0.65 if rage else 0.8
-					slam = {"sx": x, "sy": y, "x": P.x, "y": P.y, "t": duration, "T": duration, "radius":130.0 if rage else 115.0}; A.snd("leap")
+					var duration := 0.85 if rage else 1.0   # leap airtime: long enough to run out of the circle after seeing it
+					slam = {"sx": x, "sy": y, "x": P.x, "y": P.y, "t": duration, "T": duration, "radius":115.0 if rage else 100.0}; A.snd("leap")
 		"viper":
 			preload("res://game/viper_boss.gd").tick(self, dt, sp)
 		"surge":   # speedster: blink + lightning volleys

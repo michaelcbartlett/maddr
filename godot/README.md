@@ -3,6 +3,93 @@
 Open `project.godot` in **Godot 4.7** and press **F5**. The main scene is `game/main.tscn`.
 The game runs entirely in Godot: no browser, JavaScript runtime, sprite exporter, or local server is needed.
 
+Current default: a **rainy street with parked vehicles** for rebuilding the art, entered directly at startup.
+The 3200×2200 map doubles the old width and height (four times the area), with asphalt, pavement,
+crosswalks, puddles, rain and 20 streetlights scaled for the 128px scientist. Enemies (including
+bosses and civilians), loot/crates, objectives, wave timers, the combat HUD and
+scratch music are disabled. Movement, independent aiming, equipped weapons, recoil and their
+effects remain live; testing cannot kill the character or advance the run. **Esc / Start → Weapon
+Lab** changes the loadout and returns directly to the studio without a difficulty screen.
+The previous combat content is retained for rebuilding it one piece at a time. Explicit
+`-- --combat` runs it; `art/character_studio` in project settings controls the default. Existing
+combat test scripts use combat mode, while `game/tests/character_studio_test.gd` is run with
+`-- --character-studio` and checks the default empty-arena flow. `-- --blank-studio` opens the
+neutral grid instead. **5 / controller Back** cycles night, dusk and daylight.
+
+Streetlights have dark hoods and cast light downward. One cached 800×550 water field supplies
+the floor, lamp streaks, live laser/bolt reflections and character reflections. Reflections mirror
+the current Sprite2D textures and transforms, including the scientist's arm and gun layers; no
+extra animation rig, per-actor viewport or texture readback is involved. The same system accepts
+future Sprite2D actors and the existing enemy sheet renderer. Off-screen actors and dry regions
+are culled; rays are capped at 16. The opening remains enemy-free.
+`game/tests/wet_reflections_test.gd -- --character-studio` checks moving beams, bolt trails,
+reflection expiry/budget, shared textures, grounded transforms, actor cleanup and enemy sheets.
+Streetlight collision follows the small metal base at its actual rendered scale. It blocks
+walking, navigation and dashing in the opening, blank studio and other outdoor themes; the
+overhead light fixture does not create a tall invisible wall. Bases are permanent fixtures.
+
+Seven vehicle sheets in `art/vehicles` provide 56 elevated views: DeLorean DMC-12, wood-paneled
+Grand Wagoneer, burgundy sedan, mustard hatchback, cream cargo van, blue pickup and an '80s police
+sedan. `tools/vehicles/package_sheets.py` copies the generated masters and records view bounds
+without editing their pixels. Curb parking chooses 16–20 vehicles using a seed retained through
+Weapon Lab visits; a fresh game gets a new arrangement. Cars have solid, destructible footprints,
+stay clear of crossings, lamps and the starting area, and use the shared puddle reflection pass.
+Collision widths come from each view's rendered sprite bounds, with a small bumper clearance
+for the scientist's head beyond his hit circle. The ground depth excludes the elevated body
+height, and wheels remain anchored to the same collision/sorting edge. Parking slots account
+for these complete footprints, rather than the old undersized nominal car dimensions.
+The gameplay character's origin is now at his feet, matching the vehicle tire/contact line.
+The complete rig is raised out of its former 16.5-pixel shin-origin offset, so collision, y-sort,
+weapons and puddle reflections use the same ground plane. Pill scaling stays grounded; airborne
+poses lift only the rig while retaining their ground sort position. A character in front draws
+over the car's lower body; a character behind can be occluded normally. The graphical
+`game/tests/character_ground_test.gd -- --character-studio --render-check` checks both cases
+using rendered overlapping pixels, as well as feet, scaling and muzzle alignment.
+At least two cruisers alternate double red/blue roof flashes, with staggered phases and real
+light/glow anchored to the lenses. The cars remain parked and contain no enemy spawns.
+Roof lights use 235-unit PointLight2D falloff at a 60-unit light height, so nearby normal-mapped
+faces, coat folds, arm layers and weapons respond to red/blue flashes. Up to eight active roof
+reflections use the same mirrored foot plane as the vehicle and share the puddle mask, ripple
+and flash clock. They disappear during the dark interval and when a cruiser is destroyed.
+`game/tests/parked_vehicle_test.gd -- --character-studio` checks the assets, 48 layout seeds,
+collision corridors, persistent seeds and the live lightbar timing/anchors.
+`game/tests/streetlight_collision_test.gd -- --character-studio` checks normal/shrunk/enlarged
+walking contacts, walking around the base and dash blocking. The graphical
+`game/tests/police_lighting_test.gd -- --character-studio` verifies red/blue illumination on
+actual normal-mapped body pixels without a sprite tint.
+
+The pause menu also provides **Test Shrinking Pill**, **Test Enlargement Pill**, and **Test Tesla
+Coil**, granting preview charges without enabling enemy spawns. Pills last 10 seconds: shrinking
+uses 55% size and collision radius; enlargement uses 160% and allows walking over enemies explicitly
+classified `small` in `data/enemies.json` to stomp them. Flying enemies, civilians, vehicles and
+ordinary medium/large targets are excluded. Pills replace the opposite effect and refresh rather
+than multiply. Expiry restores the original size, hitbox and ground contact.
+The Tesla Coil stays planted for 15 seconds. Its random 0.25–0.65-second pulses damage enemies
+between it and the player only while the player is within **240 world units** and the connection
+is clear of walls. Leaving range stops the link; re-entering reconnects while its lifetime remains.
+All three supplies also have normal depot kits and paid refills in combat mode.
+
+The player uses the new scientist art from `character/art/scientist_h3`: native 128px layers,
+32 idle frames and a 34-frame walk at 24fps. Completed studies 37/38 supply the straight-arm aim
+banks, and study 39 supplies a front-facing bridge for the three-frame (125ms) body turn. The
+primary weapon keeps the same physical hand: near-arm view facing right, far-arm view facing left,
+with shoulder and draw-order changes during the turn. Near/far view changes do not swap loadouts.
+Aiming stays extended, including fast flicks; the incorrect apex fold and static shoulder cap
+overlays have been removed. Sleeve roots are normalized, and recoil moves the grip while keeping
+the shoulder pinned. The replacement forearm-first raise is prepared in
+`export/comfyui/scientist-modular/natural-arm-raise`: elbow bends while upper arm stays horizontal,
+then opens during the shoulder lift, arriving straight overhead. Run `Queue Natural Arm Raise.bat`
+for two five-second near/far references; review and import those before enabling the new gesture.
+Native sheets are 128px; world scale is 0.75.
+Hands cover live procedural gun grips; weapon modules, muzzles, beams, hit flashes and melee
+continue through the existing rig. New matched straight-arm recoil commissions are prepared in
+`export/comfyui/scientist-modular/straight-arm-recoil`; the game currently uses its shoulder-pinned
+recoil warp. Cutout masks and silhouette-derived normals remain an initial art pass.
+Rebuild the assets with `tools/pixelstudio/import_h3_scientist.py` in ComfyUI's Python environment.
+`character/tests/scientist_sprite_test.gd` checks the rig; pass `-- --render-check` with a graphical
+renderer to verify actual frame pixels, including the lit texture path. CanvasTexture frames use
+individual image textures because a nested AtlasTexture loses its region when rendered.
+
 Scratch level music: `audio/doctor_diabolical_scratch.mp3` loops during every wave, including the train heist,
 at −14 dB beneath the effects, continuing through the supply depot without restarting between waves.
 It pauses with the game and stops when the run ends. **M** mutes all audio.
@@ -39,7 +126,7 @@ tyres and metal hubs. Cars and tanks spawn only in City Streets and Harbour, nev
 
 The depot has a dedicated consumable shelf: **Disguise** (14 scrap), **Grenade** (10), and **Teleport Pair**
 (18), with the normal wave price scaling. Carry up to three of each, independently of weapons and arm
-equipment. **Y / Q** uses the selected supply; **D-pad Up / E** switches supplies. Y still rerolls in the shop.
+equipment. **X / Q** uses the selected supply; **D-pad Up / E** switches supplies. Y rerolls in the shop.
 Disguise replaces the scientist with an overcoat, hat and sunglasses for four seconds, breaking enemy and
 boss pursuit and cancelling their committed attacks. Firing or throwing a grenade reveals you; shots
 already in flight remain dangerous. Grenades fly along your aim and burst after 0.85 seconds. One teleport
@@ -48,6 +135,9 @@ vanish after that trip. An unused deployed kit is returned at wave end. Carried 
 a fresh run clears them. Interaction checks and optional captures: `game/tests/reinforcements_test.gd`.
 
 **Flow:** title, then the Lab (name the weapon; pick a starting ammo/frame once unlocked), then difficulty, then wave 1, then the shop, then the next wave, and so on.
+
+The scientist moves 10% faster while neither the main gun nor an equipped off-hand gun is firing.
+Releasing the triggers restores the boost immediately; speed upgrades and slows still apply.
 
 **Difficulty progression:** Petty Crook is available on a fresh profile. Reaching wave 20 on an unlocked
 difficulty permanently opens the next difficulty; beating the final boss is not required. Locked cards use
@@ -65,10 +155,13 @@ Collecting it permanently opens that module's shop pool from wave 5 onward; disc
 
 **Train heist.** One wave per run, picked at random from waves 7, 8 or 9 (`data/rules.json` `heist.waves`; never a
 boss wave), swaps the arena for a long armoured train (`levels/train_level.gd`). The villain boards at the caboose
-and fights east through seven connected cars (caboose, passenger, dining, mail, freight, first class, vault car).
+and fights east through 28 connected cars: a caboose, repeating passenger/dining/mail/freight/first-class cars,
+and a final vault car. This is four times the original car count.
 Each car is a room with destructible seats, mail racks, freight containers or safes, joined by narrow gangway
 doors. Cops board the villain's car and the two cars ahead (`game/train_heist.gd`), and the camera follows along
-the train. The normal wave timer runs. Stepping onto the striped vault strongroom at the front of the vault car
+the train. The heist lasts 180 seconds (`heist.duration` in `data/rules.json`), three times the normal 60-second cap, for the longer
+route. The floor uses 2,048-pixel texture tiles so the full train can render in a browser.
+Stepping onto the striped vault strongroom at the front of the vault car
 before the timer ends cracks the vault: the wave ends at once ("VAULT CRACKED!"). The HUD shows a car-by-car
 progress bar, the current car and the reward. If the timer runs out first, the train gets away: the wave still
 counts as survived, but there is no reward.
@@ -99,7 +192,7 @@ spreading targets when possible and reacquiring if one dies. Rockets collide wit
 
 Viper also has a **20%** chance to drop the **Viper Zigzag** blueprint; Ironclad has the same chance to
 drop **Ironclad Leap**, alongside his usual Rocket Boots blueprint. Collected rare blueprints add Epic
-shop abilities (62 / 68 base scrap). These use a separate **B / Shift action slot**, leaving the secondary
+shop abilities (62 / 68 base scrap). These use a separate **Y / F action slot**, leaving the secondary
 weapon equipped: zigzag makes three damaging dashes on a seven-second cooldown; leap travels up to
 245 units and lands in a 115-unit ground slam on a ten-second cooldown. Movement input sets their
 direction, otherwise aim does. Props stop both. The newest bought action equips B; selling it restores
@@ -269,6 +362,27 @@ foes. Its one weapon slot can instead hold a gun firing opposite your main aim, 
 15-second cooldown), or Proximity Bomb (radial blast, 12-second cooldown). Utility weapons replace the
 arm's punch/rear gun. Hold main fire for both guns; LT/right mouse fires the rear gun or activates a utility.
 
+**Manual melee and dual wielding.** The Lab's primary weapon list includes Switchblade, Mad Sword and
+Shock Whip from the start. Sweep the right stick (or move the mouse around the scientist) to swing;
+no trigger is needed. A fast sweep deals heavy damage, while holding the blade still deals none.
+Gun frames apply to ranged primaries. The bionic arm's Switchblade, Mad Katana and Shock Whip remain
+independent automatic secondary weapons, so a manual sword plus an auto sword is a supported build.
+Melee upgrades improve both hands. Blade trails use the rendered blade's actual path and length,
+stay at the location of the swing, then fade over 0.28 seconds. Walls block melee damage.
+Controller menus use the left stick or D-pad to highlight a control; **A activates the highlighted box**.
+**B** goes back from difficulty to weapon design (keeping the loadout), then from weapon design to the title.
+
+Quick dual-sword tryout (does not save unlocks):
+`Godot_console --path . -- --wave 1 --ammo katana --items bionic_arm,katana`.
+`game/tests/melee_test.gd -- --screenshots` captures the dual-sword trails in `test-results/`.
+
+**Ebola Ammo** is a Rare shop coating (32 base scrap). Weapon hits infect biological enemies for eight
+seconds, dealing 4 damage/second per copy and slowing them. An enemy killed while infected leaves a
+yellow-green infectious corpse: walking across the body infects another enemy, which can continue the
+chain when it dies. The actual corpse owns the contact effect, so it ends with the body's fade and never
+carries into the next wave. Normal, vaporized and shattered bodies are not infectious; robots, vehicles,
+civilians and allies are immune. This works with primary and secondary melee as well as guns.
+
 Lasers use a continuous capsule-masked shader with rounded ends. Chain upgrades add electric filaments,
 burning adds a warm red-orange halo and local lighting, with frost/toxic/mind-control accents as equipped.
 Defeat headlines rotate between BUSTED!, FOILED AGAIN!, CURSES!, and MEDDLING COPPERS!
@@ -352,7 +466,10 @@ above). `data/ammo.json`, `frames.json` and `items.json` are unchanged, so `char
 | Move | WASD / arrows | Left stick |
 | Aim | Mouse | Right stick |
 | Main / off-hand fire | Left / right mouse | RT / LT |
-| Detonate mines | Space | X / LB / RB |
+| Phase dash (hold to sprint) | Shift | B |
+| Use consumable | Q | X |
+| Equipped ability | F | Y |
+| Detonate mines | Space | LB / RB |
 | Pause | Esc / P | Start |
 | Select | Enter | A |
 | Reroll in shop | R | Y |

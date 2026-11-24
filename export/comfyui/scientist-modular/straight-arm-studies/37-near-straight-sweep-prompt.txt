@@ -1,0 +1,32 @@
+subject_definitions:
+<Subject 1> is the mad scientist in <Picture 1>.
+<Picture 1> defines the scientist appearance and pixel-art style.
+<Picture 2> defines only the rigid matte green calibration pistol.
+<Video 1> is a colored mannequin motion guide; transfer its motion only.
+
+summary:
+[reference generation] Fixed-camera, straight-elbow near-arm aim sweep from straight down to straight up. This is a modular arm pose study, not a firing animation.
+
+retention_analysis:
+<Picture 1> (appearance): fully_preserved - identical scientist identity, face, hair, glasses, coat, burgundy shirt, trousers, shoes, colors and pixel style.
+<Picture 2> (item): fully_preserved - identical rigid matte green proxy, scale and grip.
+<Video 1> (motion): partially_preserved - copy shoulder rotation, fully extended elbow, aligned wrist, timing and fixed camera. Ignore mannequin appearance and colors.
+
+detailed_description:
+Use the same three-quarter SCREEN-RIGHT-facing scientist throughout. Only the FOREGROUND NEAR arm moves: the arm attached to the shoulder on the SCREEN-LEFT side of the scientist torso in this fixed right-facing view. This is the arm that crosses in front of the chest when aiming right. Keep the background far arm relaxed and completely still.
+
+The moving arm is fully extended for the ENTIRE clip. The upper arm, elbow center and wrist stay on ONE STRAIGHT LINE: elbow internal angle 180 degrees. The motion comes ONLY from the shoulder socket. Maintain exactly the same upper-arm and forearm lengths. Do not fold the forearm back toward the face, tuck the elbow, salute, scratch the head or make a biceps curl. Keep the wrist aligned with the forearm. The proxy barrel points along the extended arm direction, not at the face. Fingers keep the same grip and correctly cover the handle.
+
+0.00-0.50 seconds: arm fully extended straight DOWN toward the ground, proxy pointing south. Hold.
+0.50-4.25 seconds: rotate that STRAIGHT arm in one continuous smooth arc through the SCREEN-RIGHT half-circle: down-right, horizontally right, up-right, then vertically up. The elbow remains extended at EVERY intermediate angle. Hand and proxy travel together along the same circular arc. Follow <Video 1>.
+4.25-5.00 seconds: hold the arm fully extended STRAIGHT UP above the shoulder, proxy pointing north. The shoulder stays fixed. No bent-elbow overhead pose. Do not sweep back down in this take.
+
+Keep head, torso, pelvis, both legs, feet, expression and the non-moving arm completely still. Respect head/hair occlusion where the rising arm passes behind them. No duplicated limbs, detached hands or extra props. No firing, recoil, flashes, smoke, projectiles, light effects, speech or text.
+
+Camera locked: no cuts, orbit, tracking, zoom, pan, roll, perspective changes or automatic reframing. Same body size and same right-facing view in every frame. Full body around 70 percent of the square canvas height; feet anchored at 90 percent from the top. Leave clear space above the fully raised hand AND the proxy muzzle, and below the downward-pointing proxy. Nothing may touch or clip any frame edge. Flat dark blue-gray background. Crisp individual pixel-art frames: no motion blur, interpolation ghosts, crosshatching or texture overlays.
+
+overall_soundscape:
+Silent. No dialogue, music or sound effects.
+
+non_diegetic_music:
+N/A

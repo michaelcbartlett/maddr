@@ -1,6 +1,6 @@
 extends RefCounted
 ## Train heist wave (Run.heist_wave, levels/train_level.gd): the villain boards the caboose and fights east through
-## the cars while the normal wave timer runs. Stepping into the vault strongroom at the front of the last car before
+## the 4-minute heist timer runs. Stepping into the vault strongroom at the front of the last car before
 ## the timer ends cracks the vault: the wave ends at once and Run.claim_heist() unlocks this difficulty's reward
 ## (once per difficulty, saved) and bolts a free copy onto the gun. If the timer runs out first the train gets away:
 ## the wave still counts as survived, but there is no reward.
@@ -28,7 +28,7 @@ func reset(a) -> void:
 func goal() -> Rect2: return TrainLevel.goal_rect()
 func progress(x: float) -> float: return TrainLevel.progress(x)
 func car_at(x: float) -> int: return TrainLevel.car_at(x)
-func car_name(i: int) -> String: return TrainLevel.CARS[clampi(i, 0, TrainLevel.CARS.size() - 1)].name
+func car_name(i: int) -> String: return TrainLevel.car_def(i).name
 func car_count() -> int: return TrainLevel.car_count()
 
 ## Called from Arena._update_play every frame. Returns true when the heist ended the wave.

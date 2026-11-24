@@ -42,7 +42,8 @@ func update(A, dt: float, firing: bool, muzzle: Vector2, aim: float, D: Dictiona
 	match state:
 		"idle":
 			if firing and cd <= 0.0:
-				state = "fly"; head = muzzle; dir = Vector2.from_angle(aim); travelled = 0.0; flown = {}
+				# A long gun can poke past the arena edge; launch from inside so the edge still catches the hook.
+				state = "fly"; head = muzzle.clamp(Vector2(12,12),Vector2(A.AW-12.0,A.AH-12.0)); dir = Vector2.from_angle(aim); travelled = 0.0; flown = {}
 				A.snd("raz"); A.blaster_fx.muzzle(muzzle, dir, COLOR)
 				return "launch"
 		"fly":

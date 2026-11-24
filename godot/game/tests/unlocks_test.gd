@@ -24,7 +24,8 @@ func _run() -> void:
 	# ---- rules ----
 	var ids: Array = rules.map(func(r): return r.part + ":" + r.id)
 	var start_rules := rules.filter(func(r): return r.part != "item").size()
-	_check(start_rules == run.AMMO.size() + run.FRAMES.size() - 2, "every starting part except Laser / Ray Pistol has an unlock rule")
+	var ranged_count: int = run.AMMO.filter(func(def): return not def.has("melee")).size()
+	_check(start_rules == ranged_count + run.FRAMES.size() - 2, "alternative ranged starting parts have unlock rules; melee starts are available immediately")
 	for k in ["ammo:bullet", "ammo:razor", "frame:blunder", "frame:rifle", "frame:repeater", "item:lens"]:
 		_check(ids.has(k), "unlock rule exists for " + k)
 	_check(not ids.has("ammo:laser") and not ids.has("frame:pistol"), "Laser and Ray Pistol are always available")
