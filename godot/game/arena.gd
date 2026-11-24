@@ -158,6 +158,7 @@ var beam_layer: Node2D
 var _beam_views: Array[Node2D] = []
 var lights: LightPool
 var ambient: CanvasModulate
+var gore: Node2D   # fx/gore.gd
 var cam: Camera2D
 var font: Font
 
@@ -167,11 +168,13 @@ func _ready() -> void:
 	ambient = CanvasModulate.new(); add_child(ambient)
 	bg = Sprite2D.new(); bg.centered = false; add_child(bg)
 	arena_level = ArenaLevel.new(); add_child(arena_level); nav = arena_level.navigation
+	gore = preload("res://fx/gore.gd").new(); gore.setup(self); add_child(gore)
 	ground = Node2D.new(); ground.draw.connect(_draw_ground.bind(ground)); add_child(ground)
 	actors = Node2D.new(); actors.y_sort_enabled = true; add_child(actors)
 	water_reflections=preload("res://fx/water_reflections.gd").new(); water_reflections.z_index=-5; add_child(water_reflections)
 	villain = VillainView.new(); actors.add_child(villain)
 	arena_level.prop_parent = actors
+	add_child(gore.air)
 	lights = LightPool.new(); add_child(lights)
 	# emissive FX: its own canvas layer (follows the camera) so the CanvasModulate darkness doesn't dim it
 	fx_layer = CanvasLayer.new(); fx_layer.follow_viewport_enabled = true; fx_layer.layer = 1; add_child(fx_layer)
@@ -249,7 +252,7 @@ func _setup_level() -> void:
 	ambient.color = arena_level.STUDIO_TIMES[studio_time] if character_studio else arena_level.theme.ambient
 	ambient_fx.visible = not character_studio or studio_outdoors
 	if ambient_fx.visible: ambient_fx.reset(self, arena_level)
-	decals.clear()
+	decals.clear(); gore.reset()
 	walls = arena_level.walls
 	AW = int(arena_level.size.x); AH = int(arena_level.size.y)
 	cam.limit_right = AW; cam.limit_bottom = AH
@@ -401,6 +404,7 @@ func hurt_player(a: float) -> bool:
 		return false
 	var d := maxi(1, roundi(a * 15.0 / (15.0 + maxf(0.0, Run.S.armor))))
 	P.hp -= d; P.inv = Run.hit_protection_duration(d); P.flinch_t = FLINCH; P.cackle_t = 0.0; shake = maxf(shake, 6); Controls.rumble(0.3, 0.7, 160)
+	gore.player_hurt(d, P.hp <= 0)
 	add_num(P.x, P.y - 24, "-" + str(d), Color("#ff4a4a"), true); snd("hurt")
 	if P.hp <= 0: P.hp = 0; state = "over"; died.emit()
 	return true
@@ -473,6 +477,7 @@ func hit(e: Enemy, amt: float, o := {}) -> void:
 	var crit := false
 	if proc and randf() < S.crit: amt *= 2.0; crit = true
 	e.hp -= amt; e.flash = 0.07
+	gore.wound(e, amt, o, crit)
 	if not o.get("silent", false): add_num(e.x, EnemyView.head_y(e) - 10, roundi(amt), Color("#ffe14a") if crit else o.get("col", Color.WHITE), crit)
 	if S.lifesuck > 0 and heal_budget > 0:
 		var hg := minf(heal_budget, amt * S.lifesuck); heal_budget -= hg; P.hp = minf(D.maxHp, P.hp + hg)
@@ -498,7 +503,7 @@ func hit(e: Enemy, amt: float, o := {}) -> void:
 		if S.execute and not e.boss and e.hp > 0 and e.hp < e.max_hp * S.execute: e.hp = 0; e.disint = true
 		if S.mind and not e.boss and not e.civ and e.hp > 0 and randf() < S.mind * pf: make_minion(e); return
 		if S.chain and o.get("chainable", true): chain_from(e, D.dmg * 0.6 * S.chainMul * o.get("mul", 1.0))
-	if e.hp <= 0: kill(e)
+	if e.hp <= 0: kill(e, o)
 
 ## Ebola Ammo is a weapon coating. Robots, vehicles, civilians and allies cannot catch it.
 func infect_ebola(e: Enemy, damage: float) -> void:
@@ -637,7 +642,7 @@ func explode(x: float, y: float, dmg: float, rad: float, col: Color) -> void:
 			if b.get("seeker",false) and Vector2(x,y).distance_to(Vector2(b.x,b.y)) < rad + b.r: Viper.destroy(self,b)
 	for e in enemies.duplicate():
 		if e.dead or e.ally: continue
-		if (e.x - x) * (e.x - x) + (e.y - y) * (e.y - y) < (rad + e.r) * (rad + e.r): hit(e, dmg, {"col": Color("#ffa030")})
+		if (e.x - x) * (e.x - x) + (e.y - y) * (e.y - y) < (rad + e.r) * (rad + e.r): hit(e, dmg, {"col": Color("#ffa030"), "gib": true, "kx": (e.x - x) / maxf(rad, 1.0), "ky": (e.y - y) / maxf(rad, 1.0)})
 
 func detonate() -> void:
 	if mines.is_empty(): return
@@ -651,7 +656,7 @@ func make_minion(e: Enemy) -> void:
 	e.hp = maxf(e.hp, e.max_hp * 0.6); e.atk_cd = 0
 	add_num(e.x, e.y - 26, "MINION!", Color("#d07bff"), true); poof(e.x, e.y, Color("#d07bff"), 10, 80); snd("mind")
 
-func kill(e: Enemy) -> void:
+func kill(e: Enemy, hit_options := {}) -> void:
 	if e.dead: return
 	e.dead = true; Run.kills += 1
 	var S := Run.S
@@ -659,7 +664,9 @@ func kill(e: Enemy) -> void:
 	if e.disint:
 		poof(e.x, e.y, Color("#ff4a2a"), 16, 120, 4); poof(e.x, e.y, Color("#555555"), 12, 60, 5); add_num(e.x, e.y - 20, "VAPORIZED", Color("#ff6a4a"), false)
 	elif e.frozen_t > 0: poof(e.x, e.y, Color("#bff4ff"), 14, 140, 4)
-	else: poof(e.x, e.y, Color("#9acd32") if e.sick_t > 0 else Color("#cc3333"), 8, 100, 3)
+	elif e.sick_t > 0: poof(e.x, e.y, Color("#9acd32"), 8, 100, 3)
+	elif e.vehicle: poof(e.x, e.y, Color("#cc3333"), 8, 100, 3)
+	if gore.death(e, hit_options): e.gfx.skip_corpse = true
 	if e.sick_t > 0:
 		for o in enemies:
 			if not o.dead and not o.ally and o != e and (o.x - e.x) * (o.x - e.x) + (o.y - e.y) * (o.y - e.y) < 70 * 70: o.sick_t = maxf(o.sick_t, 4)
@@ -1526,7 +1533,7 @@ func _projectile_wall_hit(start: Vector2, finish: Vector2, radius: float) -> Dic
 	return closest
 
 func _update_fx(dt: float) -> void:
-	blaster_fx.update(dt)
+	blaster_fx.update(dt); gore.update(dt)
 	for field in utility_fields: field.time -= dt
 	utility_fields = utility_fields.filter(func(field): return field.time>0.0)
 	for p in parts: p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.92; p.vy *= 0.92; p.t -= dt
